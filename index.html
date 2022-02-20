@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title><%= htmlWebpackPlugin.options.title %></title>
+</head>
+<body>
+<style>
+.tab{
+    cursor: pointer;
+}
+.tab.active{
+    background: #ddd;
+}
+
+</style>
+<ez-tab-list id="qwe" closeable="true" active-index="0" active-class="active">
+    <div class="tab">John Smith 111111 </div>
+    <div class="tab">John Smith 222222 </div>
+</ez-tab-list>
+
+<script>
+    const qwe = document.querySelector('#qwe')
+
+    qwe.addEventListener("close-tab", (e) => {
+        console.log('close', e.detail)
+        qwe.children[e.detail].remove()
+    })
+    qwe.addEventListener("active-tab", (e) => {
+        console.log('active', e.detail)
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,1409 @@
+{
+  "hash": "1ef677ffa96057792861",
+  "version": "5.62.1",
+  "time": 9324,
+  "builtAt": 1645443070545,
+  "publicPath": "auto",
+  "outputPath": "F:\\node_workspace\\EzWebComponents\\dist",
+  "assetsByChunkName": {
+    "tabs-list": [
+      "tabs-list.js"
+    ]
+  },
+  "assets": [
+    {
+      "type": "asset",
+      "name": "tabs-list.js",
+      "size": 12712,
+      "emitted": true,
+      "comparedForEmit": false,
+      "cached": false,
+      "info": {
+        "javascriptModule": false,
+        "minimized": true,
+        "related": {
+          "sourceMap": "tabs-list.js.map"
+        },
+        "size": 12712
+      },
+      "chunkNames": [
+        "tabs-list"
+      ],
+      "chunkIdHints": [],
+      "auxiliaryChunkNames": [],
+      "auxiliaryChunkIdHints": [],
+      "filteredRelated": 0,
+      "related": [
+        {
+          "type": "sourceMap",
+          "name": "tabs-list.js.map",
+          "size": 36989,
+          "emitted": true,
+          "comparedForEmit": false,
+          "cached": false,
+          "info": {
+            "development": true,
+            "size": 36989
+          },
+          "chunkNames": [],
+          "chunkIdHints": [],
+          "auxiliaryChunkNames": [
+            "tabs-list"
+          ],
+          "auxiliaryChunkIdHints": [],
+          "related": {},
+          "chunks": [],
+          "auxiliaryChunks": [
+            769
+          ],
+          "isOverSizeLimit": false
+        }
+      ],
+      "chunks": [
+        769
+      ],
+      "auxiliaryChunks": [],
+      "isOverSizeLimit": false
+    },
+    {
+      "type": "asset",
+      "name": "index.html",
+      "size": 1782,
+      "emitted": true,
+      "comparedForEmit": false,
+      "cached": false,
+      "info": {
+        "size": 1782
+      },
+      "chunkNames": [],
+      "chunkIdHints": [],
+      "auxiliaryChunkNames": [],
+      "auxiliaryChunkIdHints": [],
+      "related": {},
+      "chunks": [],
+      "auxiliaryChunks": [],
+      "isOverSizeLimit": false
+    }
+  ],
+  "chunks": [
+    {
+      "rendered": true,
+      "initial": true,
+      "entry": true,
+      "recorded": false,
+      "size": 24599,
+      "sizes": {
+        "javascript": 24599
+      },
+      "names": [
+        "tabs-list"
+      ],
+      "idHints": [],
+      "runtime": [
+        "tabs-list"
+      ],
+      "files": [
+        "tabs-list.js"
+      ],
+      "auxiliaryFiles": [
+        "tabs-list.js.map"
+      ],
+      "hash": "33720b4f566d6f5b6fff",
+      "childrenByOrder": {},
+      "id": 769,
+      "siblings": [],
+      "parents": [],
+      "children": [],
+      "modules": [
+        {
+          "type": "module",
+          "moduleType": "javascript/auto",
+          "layer": null,
+          "size": 2318,
+          "sizes": {
+            "javascript": 2318
+          },
+          "built": true,
+          "codeGenerated": true,
+          "buildTimeExecuted": false,
+          "cached": false,
+          "identifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\runtime\\api.js",
+          "name": "./node_modules/css-loader/dist/runtime/api.js",
+          "nameForCondition": "F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\runtime\\api.js",
+          "index": 3,
+          "preOrderIndex": 3,
+          "index2": 1,
+          "postOrderIndex": 1,
+          "cacheable": true,
+          "optional": false,
+          "orphan": false,
+          "dependent": true,
+          "issuer": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+          "issuerName": "./src/components/ez-tabs-list/ez-tabs-list.less",
+          "issuerPath": [
+            {
+              "identifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\ts-loader\\index.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.ts",
+              "name": "./src/components/ez-tabs-list/ez-tabs-list.ts",
+              "id": 605
+            },
+            {
+              "identifier": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+              "name": "./src/components/ez-tabs-list/ez-tabs-list.less",
+              "id": 229
+            }
+          ],
+          "failed": false,
+          "errors": 0,
+          "warnings": 0,
+          "id": 645,
+          "issuerId": 229,
+          "chunks": [
+            769
+          ],
+          "assets": [],
+          "reasons": [
+            {
+              "moduleIdentifier": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+              "module": "./src/components/ez-tabs-list/ez-tabs-list.less",
+              "moduleName": "./src/components/ez-tabs-list/ez-tabs-list.less",
+              "resolvedModuleIdentifier": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+              "resolvedModule": "./src/components/ez-tabs-list/ez-tabs-list.less",
+              "type": "cjs require",
+              "active": true,
+              "explanation": "",
+              "userRequest": "../../../node_modules/css-loader/dist/runtime/api.js",
+              "loc": "3:34-97",
+              "moduleId": 229,
+              "resolvedModuleId": 229
+            },
+            {
+              "moduleIdentifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\runtime\\api.js",
+              "module": "./node_modules/css-loader/dist/runtime/api.js",
+              "moduleName": "./node_modules/css-loader/dist/runtime/api.js",
+              "resolvedModuleIdentifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\runtime\\api.js",
+              "resolvedModule": "./node_modules/css-loader/dist/runtime/api.js",
+              "type": "cjs self exports reference",
+              "active": true,
+              "explanation": "",
+              "userRequest": null,
+              "loc": "7:0-14",
+              "moduleId": 645,
+              "resolvedModuleId": 645
+            }
+          ],
+          "usedExports": null,
+          "providedExports": null,
+          "optimizationBailout": [
+            "CommonJS bailout: module.exports is used directly at 7:0-14",
+            "Statement (ExpressionStatement) with side effects in source code at 7:0-102:2",
+            "ModuleConcatenation bailout: Module is not an ECMAScript module"
+          ],
+          "depth": 2
+        },
+        {
+          "type": "module",
+          "moduleType": "javascript/auto",
+          "layer": null,
+          "size": 688,
+          "sizes": {
+            "javascript": 688
+          },
+          "built": true,
+          "codeGenerated": true,
+          "buildTimeExecuted": false,
+          "cached": false,
+          "identifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\runtime\\sourceMaps.js",
+          "name": "./node_modules/css-loader/dist/runtime/sourceMaps.js",
+          "nameForCondition": "F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\runtime\\sourceMaps.js",
+          "index": 2,
+          "preOrderIndex": 2,
+          "index2": 0,
+          "postOrderIndex": 0,
+          "cacheable": true,
+          "optional": false,
+          "orphan": false,
+          "dependent": true,
+          "issuer": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+          "issuerName": "./src/components/ez-tabs-list/ez-tabs-list.less",
+          "issuerPath": [
+            {
+              "identifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\ts-loader\\index.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.ts",
+              "name": "./src/components/ez-tabs-list/ez-tabs-list.ts",
+              "id": 605
+            },
+            {
+              "identifier": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+              "name": "./src/components/ez-tabs-list/ez-tabs-list.less",
+              "id": 229
+            }
+          ],
+          "failed": false,
+          "errors": 0,
+          "warnings": 0,
+          "id": 537,
+          "issuerId": 229,
+          "chunks": [
+            769
+          ],
+          "assets": [],
+          "reasons": [
+            {
+              "moduleIdentifier": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+              "module": "./src/components/ez-tabs-list/ez-tabs-list.less",
+              "moduleName": "./src/components/ez-tabs-list/ez-tabs-list.less",
+              "resolvedModuleIdentifier": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+              "resolvedModule": "./src/components/ez-tabs-list/ez-tabs-list.less",
+              "type": "cjs require",
+              "active": true,
+              "explanation": "",
+              "userRequest": "../../../node_modules/css-loader/dist/runtime/sourceMaps.js",
+              "loc": "2:44-114",
+              "moduleId": 229,
+              "resolvedModuleId": 229
+            },
+            {
+              "moduleIdentifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\runtime\\sourceMaps.js",
+              "module": "./node_modules/css-loader/dist/runtime/sourceMaps.js",
+              "moduleName": "./node_modules/css-loader/dist/runtime/sourceMaps.js",
+              "resolvedModuleIdentifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\runtime\\sourceMaps.js",
+              "resolvedModule": "./node_modules/css-loader/dist/runtime/sourceMaps.js",
+              "type": "cjs self exports reference",
+              "active": true,
+              "explanation": "",
+              "userRequest": null,
+              "loc": "3:0-14",
+              "moduleId": 537,
+              "resolvedModuleId": 537
+            }
+          ],
+          "usedExports": null,
+          "providedExports": null,
+          "optimizationBailout": [
+            "CommonJS bailout: module.exports is used directly at 3:0-14",
+            "Statement (ExpressionStatement) with side effects in source code at 3:0-22:2",
+            "ModuleConcatenation bailout: Module is not an ECMAScript module"
+          ],
+          "depth": 2
+        },
+        {
+          "type": "module",
+          "moduleType": "javascript/auto",
+          "layer": null,
+          "size": 5781,
+          "sizes": {
+            "javascript": 5781
+          },
+          "built": true,
+          "codeGenerated": true,
+          "buildTimeExecuted": false,
+          "cached": false,
+          "identifier": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+          "name": "./src/components/ez-tabs-list/ez-tabs-list.less",
+          "nameForCondition": "F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+          "index": 1,
+          "preOrderIndex": 1,
+          "index2": 2,
+          "postOrderIndex": 2,
+          "cacheable": true,
+          "optional": false,
+          "orphan": false,
+          "dependent": true,
+          "issuer": "F:\\node_workspace\\EzWebComponents\\node_modules\\ts-loader\\index.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.ts",
+          "issuerName": "./src/components/ez-tabs-list/ez-tabs-list.ts",
+          "issuerPath": [
+            {
+              "identifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\ts-loader\\index.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.ts",
+              "name": "./src/components/ez-tabs-list/ez-tabs-list.ts",
+              "id": 605
+            }
+          ],
+          "failed": false,
+          "errors": 0,
+          "warnings": 0,
+          "id": 229,
+          "issuerId": 605,
+          "chunks": [
+            769
+          ],
+          "assets": [],
+          "reasons": [
+            {
+              "moduleIdentifier": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+              "module": "./src/components/ez-tabs-list/ez-tabs-list.less",
+              "moduleName": "./src/components/ez-tabs-list/ez-tabs-list.less",
+              "resolvedModuleIdentifier": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+              "resolvedModule": "./src/components/ez-tabs-list/ez-tabs-list.less",
+              "type": "cjs self exports reference",
+              "active": true,
+              "explanation": "",
+              "userRequest": null,
+              "loc": "35:3-17",
+              "moduleId": 229,
+              "resolvedModuleId": 229
+            },
+            {
+              "moduleIdentifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\ts-loader\\index.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.ts",
+              "module": "./src/components/ez-tabs-list/ez-tabs-list.ts",
+              "moduleName": "./src/components/ez-tabs-list/ez-tabs-list.ts",
+              "resolvedModuleIdentifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\ts-loader\\index.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.ts",
+              "resolvedModule": "./src/components/ez-tabs-list/ez-tabs-list.ts",
+              "type": "cjs require",
+              "active": true,
+              "explanation": "",
+              "userRequest": "./ez-tabs-list.less",
+              "loc": "3:14-44",
+              "moduleId": 605,
+              "resolvedModuleId": 605
+            }
+          ],
+          "usedExports": null,
+          "providedExports": null,
+          "optimizationBailout": [
+            "CommonJS bailout: module.exports is used directly at 35:3-17",
+            "Statement (VariableDeclaration) with side effects in source code at 2:0-115",
+            "ModuleConcatenation bailout: Module is not an ECMAScript module"
+          ],
+          "depth": 1
+        },
+        {
+          "type": "module",
+          "moduleType": "javascript/auto",
+          "layer": null,
+          "size": 15812,
+          "sizes": {
+            "javascript": 15812
+          },
+          "built": true,
+          "codeGenerated": true,
+          "buildTimeExecuted": false,
+          "cached": false,
+          "identifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\ts-loader\\index.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.ts",
+          "name": "./src/components/ez-tabs-list/ez-tabs-list.ts",
+          "nameForCondition": "F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.ts",
+          "index": 0,
+          "preOrderIndex": 0,
+          "index2": 3,
+          "postOrderIndex": 3,
+          "cacheable": true,
+          "optional": false,
+          "orphan": false,
+          "dependent": false,
+          "issuer": null,
+          "issuerName": null,
+          "issuerPath": null,
+          "failed": false,
+          "errors": 0,
+          "warnings": 0,
+          "id": 605,
+          "issuerId": null,
+          "chunks": [
+            769
+          ],
+          "assets": [],
+          "reasons": [
+            {
+              "moduleIdentifier": null,
+              "module": null,
+              "moduleName": null,
+              "resolvedModuleIdentifier": null,
+              "resolvedModule": null,
+              "type": "entry",
+              "active": true,
+              "explanation": "",
+              "userRequest": "./src/components/ez-tabs-list/ez-tabs-list.ts",
+              "loc": "tabs-list",
+              "moduleId": null,
+              "resolvedModuleId": null
+            }
+          ],
+          "usedExports": [],
+          "providedExports": [
+            "__esModule"
+          ],
+          "optimizationBailout": [
+            "Statement (ExpressionStatement) with side effects in source code at 2:0-62",
+            "ModuleConcatenation bailout: Module is not an ECMAScript module"
+          ],
+          "depth": 0
+        }
+      ],
+      "origins": [
+        {
+          "module": "",
+          "moduleIdentifier": "",
+          "moduleName": "",
+          "loc": "tabs-list",
+          "request": "./src/components/ez-tabs-list/ez-tabs-list.ts"
+        }
+      ]
+    }
+  ],
+  "modules": [
+    {
+      "type": "module",
+      "moduleType": "javascript/auto",
+      "layer": null,
+      "size": 15812,
+      "sizes": {
+        "javascript": 15812
+      },
+      "built": true,
+      "codeGenerated": true,
+      "buildTimeExecuted": false,
+      "cached": false,
+      "identifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\ts-loader\\index.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.ts",
+      "name": "./src/components/ez-tabs-list/ez-tabs-list.ts",
+      "nameForCondition": "F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.ts",
+      "index": 0,
+      "preOrderIndex": 0,
+      "index2": 3,
+      "postOrderIndex": 3,
+      "cacheable": true,
+      "optional": false,
+      "orphan": false,
+      "issuer": null,
+      "issuerName": null,
+      "issuerPath": null,
+      "failed": false,
+      "errors": 0,
+      "warnings": 0,
+      "id": 605,
+      "issuerId": null,
+      "chunks": [
+        769
+      ],
+      "assets": [],
+      "reasons": [
+        {
+          "moduleIdentifier": null,
+          "module": null,
+          "moduleName": null,
+          "resolvedModuleIdentifier": null,
+          "resolvedModule": null,
+          "type": "entry",
+          "active": true,
+          "explanation": "",
+          "userRequest": "./src/components/ez-tabs-list/ez-tabs-list.ts",
+          "loc": "tabs-list",
+          "moduleId": null,
+          "resolvedModuleId": null
+        }
+      ],
+      "usedExports": [],
+      "providedExports": [
+        "__esModule"
+      ],
+      "optimizationBailout": [
+        "Statement (ExpressionStatement) with side effects in source code at 2:0-62",
+        "ModuleConcatenation bailout: Module is not an ECMAScript module"
+      ],
+      "depth": 0
+    },
+    {
+      "type": "module",
+      "moduleType": "javascript/auto",
+      "layer": null,
+      "size": 5781,
+      "sizes": {
+        "javascript": 5781
+      },
+      "built": true,
+      "codeGenerated": true,
+      "buildTimeExecuted": false,
+      "cached": false,
+      "identifier": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+      "name": "./src/components/ez-tabs-list/ez-tabs-list.less",
+      "nameForCondition": "F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+      "index": 1,
+      "preOrderIndex": 1,
+      "index2": 2,
+      "postOrderIndex": 2,
+      "cacheable": true,
+      "optional": false,
+      "orphan": false,
+      "issuer": "F:\\node_workspace\\EzWebComponents\\node_modules\\ts-loader\\index.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.ts",
+      "issuerName": "./src/components/ez-tabs-list/ez-tabs-list.ts",
+      "issuerPath": [
+        {
+          "identifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\ts-loader\\index.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.ts",
+          "name": "./src/components/ez-tabs-list/ez-tabs-list.ts",
+          "id": 605
+        }
+      ],
+      "failed": false,
+      "errors": 0,
+      "warnings": 0,
+      "id": 229,
+      "issuerId": 605,
+      "chunks": [
+        769
+      ],
+      "assets": [],
+      "reasons": [
+        {
+          "moduleIdentifier": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+          "module": "./src/components/ez-tabs-list/ez-tabs-list.less",
+          "moduleName": "./src/components/ez-tabs-list/ez-tabs-list.less",
+          "resolvedModuleIdentifier": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+          "resolvedModule": "./src/components/ez-tabs-list/ez-tabs-list.less",
+          "type": "cjs self exports reference",
+          "active": true,
+          "explanation": "",
+          "userRequest": null,
+          "loc": "35:3-17",
+          "moduleId": 229,
+          "resolvedModuleId": 229
+        },
+        {
+          "moduleIdentifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\ts-loader\\index.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.ts",
+          "module": "./src/components/ez-tabs-list/ez-tabs-list.ts",
+          "moduleName": "./src/components/ez-tabs-list/ez-tabs-list.ts",
+          "resolvedModuleIdentifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\ts-loader\\index.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.ts",
+          "resolvedModule": "./src/components/ez-tabs-list/ez-tabs-list.ts",
+          "type": "cjs require",
+          "active": true,
+          "explanation": "",
+          "userRequest": "./ez-tabs-list.less",
+          "loc": "3:14-44",
+          "moduleId": 605,
+          "resolvedModuleId": 605
+        }
+      ],
+      "usedExports": null,
+      "providedExports": null,
+      "optimizationBailout": [
+        "CommonJS bailout: module.exports is used directly at 35:3-17",
+        "Statement (VariableDeclaration) with side effects in source code at 2:0-115",
+        "ModuleConcatenation bailout: Module is not an ECMAScript module"
+      ],
+      "depth": 1
+    },
+    {
+      "type": "module",
+      "moduleType": "javascript/auto",
+      "layer": null,
+      "size": 688,
+      "sizes": {
+        "javascript": 688
+      },
+      "built": true,
+      "codeGenerated": true,
+      "buildTimeExecuted": false,
+      "cached": false,
+      "identifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\runtime\\sourceMaps.js",
+      "name": "./node_modules/css-loader/dist/runtime/sourceMaps.js",
+      "nameForCondition": "F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\runtime\\sourceMaps.js",
+      "index": 2,
+      "preOrderIndex": 2,
+      "index2": 0,
+      "postOrderIndex": 0,
+      "cacheable": true,
+      "optional": false,
+      "orphan": false,
+      "issuer": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+      "issuerName": "./src/components/ez-tabs-list/ez-tabs-list.less",
+      "issuerPath": [
+        {
+          "identifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\ts-loader\\index.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.ts",
+          "name": "./src/components/ez-tabs-list/ez-tabs-list.ts",
+          "id": 605
+        },
+        {
+          "identifier": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+          "name": "./src/components/ez-tabs-list/ez-tabs-list.less",
+          "id": 229
+        }
+      ],
+      "failed": false,
+      "errors": 0,
+      "warnings": 0,
+      "id": 537,
+      "issuerId": 229,
+      "chunks": [
+        769
+      ],
+      "assets": [],
+      "reasons": [
+        {
+          "moduleIdentifier": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+          "module": "./src/components/ez-tabs-list/ez-tabs-list.less",
+          "moduleName": "./src/components/ez-tabs-list/ez-tabs-list.less",
+          "resolvedModuleIdentifier": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+          "resolvedModule": "./src/components/ez-tabs-list/ez-tabs-list.less",
+          "type": "cjs require",
+          "active": true,
+          "explanation": "",
+          "userRequest": "../../../node_modules/css-loader/dist/runtime/sourceMaps.js",
+          "loc": "2:44-114",
+          "moduleId": 229,
+          "resolvedModuleId": 229
+        },
+        {
+          "moduleIdentifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\runtime\\sourceMaps.js",
+          "module": "./node_modules/css-loader/dist/runtime/sourceMaps.js",
+          "moduleName": "./node_modules/css-loader/dist/runtime/sourceMaps.js",
+          "resolvedModuleIdentifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\runtime\\sourceMaps.js",
+          "resolvedModule": "./node_modules/css-loader/dist/runtime/sourceMaps.js",
+          "type": "cjs self exports reference",
+          "active": true,
+          "explanation": "",
+          "userRequest": null,
+          "loc": "3:0-14",
+          "moduleId": 537,
+          "resolvedModuleId": 537
+        }
+      ],
+      "usedExports": null,
+      "providedExports": null,
+      "optimizationBailout": [
+        "CommonJS bailout: module.exports is used directly at 3:0-14",
+        "Statement (ExpressionStatement) with side effects in source code at 3:0-22:2",
+        "ModuleConcatenation bailout: Module is not an ECMAScript module"
+      ],
+      "depth": 2
+    },
+    {
+      "type": "module",
+      "moduleType": "javascript/auto",
+      "layer": null,
+      "size": 2318,
+      "sizes": {
+        "javascript": 2318
+      },
+      "built": true,
+      "codeGenerated": true,
+      "buildTimeExecuted": false,
+      "cached": false,
+      "identifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\runtime\\api.js",
+      "name": "./node_modules/css-loader/dist/runtime/api.js",
+      "nameForCondition": "F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\runtime\\api.js",
+      "index": 3,
+      "preOrderIndex": 3,
+      "index2": 1,
+      "postOrderIndex": 1,
+      "cacheable": true,
+      "optional": false,
+      "orphan": false,
+      "issuer": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+      "issuerName": "./src/components/ez-tabs-list/ez-tabs-list.less",
+      "issuerPath": [
+        {
+          "identifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\ts-loader\\index.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.ts",
+          "name": "./src/components/ez-tabs-list/ez-tabs-list.ts",
+          "id": 605
+        },
+        {
+          "identifier": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+          "name": "./src/components/ez-tabs-list/ez-tabs-list.less",
+          "id": 229
+        }
+      ],
+      "failed": false,
+      "errors": 0,
+      "warnings": 0,
+      "id": 645,
+      "issuerId": 229,
+      "chunks": [
+        769
+      ],
+      "assets": [],
+      "reasons": [
+        {
+          "moduleIdentifier": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+          "module": "./src/components/ez-tabs-list/ez-tabs-list.less",
+          "moduleName": "./src/components/ez-tabs-list/ez-tabs-list.less",
+          "resolvedModuleIdentifier": "F:\\node_workspace\\EzWebComponents\\build\\style_file_loader.js??ruleSet[1].rules[3].use[0]!F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\cjs.js??ruleSet[1].rules[3].use[1]!F:\\node_workspace\\EzWebComponents\\node_modules\\less-loader\\dist\\cjs.js!F:\\node_workspace\\EzWebComponents\\src\\components\\ez-tabs-list\\ez-tabs-list.less",
+          "resolvedModule": "./src/components/ez-tabs-list/ez-tabs-list.less",
+          "type": "cjs require",
+          "active": true,
+          "explanation": "",
+          "userRequest": "../../../node_modules/css-loader/dist/runtime/api.js",
+          "loc": "3:34-97",
+          "moduleId": 229,
+          "resolvedModuleId": 229
+        },
+        {
+          "moduleIdentifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\runtime\\api.js",
+          "module": "./node_modules/css-loader/dist/runtime/api.js",
+          "moduleName": "./node_modules/css-loader/dist/runtime/api.js",
+          "resolvedModuleIdentifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\css-loader\\dist\\runtime\\api.js",
+          "resolvedModule": "./node_modules/css-loader/dist/runtime/api.js",
+          "type": "cjs self exports reference",
+          "active": true,
+          "explanation": "",
+          "userRequest": null,
+          "loc": "7:0-14",
+          "moduleId": 645,
+          "resolvedModuleId": 645
+        }
+      ],
+      "usedExports": null,
+      "providedExports": null,
+      "optimizationBailout": [
+        "CommonJS bailout: module.exports is used directly at 7:0-14",
+        "Statement (ExpressionStatement) with side effects in source code at 7:0-102:2",
+        "ModuleConcatenation bailout: Module is not an ECMAScript module"
+      ],
+      "depth": 2
+    }
+  ],
+  "entrypoints": {
+    "tabs-list": {
+      "name": "tabs-list",
+      "chunks": [
+        769
+      ],
+      "assets": [
+        {
+          "name": "tabs-list.js",
+          "size": 12712
+        }
+      ],
+      "filteredAssets": 0,
+      "assetsSize": 12712,
+      "auxiliaryAssets": [
+        {
+          "name": "tabs-list.js.map",
+          "size": 36989
+        }
+      ],
+      "filteredAuxiliaryAssets": 0,
+      "auxiliaryAssetsSize": 36989,
+      "children": {},
+      "childAssets": {},
+      "isOverSizeLimit": false
+    }
+  },
+  "namedChunkGroups": {
+    "tabs-list": {
+      "name": "tabs-list",
+      "chunks": [
+        769
+      ],
+      "assets": [
+        {
+          "name": "tabs-list.js",
+          "size": 12712
+        }
+      ],
+      "filteredAssets": 0,
+      "assetsSize": 12712,
+      "auxiliaryAssets": [
+        {
+          "name": "tabs-list.js.map",
+          "size": 36989
+        }
+      ],
+      "filteredAuxiliaryAssets": 0,
+      "auxiliaryAssetsSize": 36989,
+      "children": {},
+      "childAssets": {},
+      "isOverSizeLimit": false
+    }
+  },
+  "errors": [],
+  "errorsCount": 0,
+  "warnings": [],
+  "warningsCount": 0,
+  "children": [
+    {
+      "name": "HtmlWebpackCompiler",
+      "hash": "987aab2dfe80282b8fbd",
+      "version": "5.62.1",
+      "time": 233,
+      "builtAt": 1645443061616,
+      "publicPath": "",
+      "outputPath": "F:\\node_workspace\\EzWebComponents\\dist",
+      "assetsByChunkName": {},
+      "assets": [],
+      "chunks": [
+        {
+          "rendered": true,
+          "initial": true,
+          "entry": true,
+          "recorded": false,
+          "size": 2910,
+          "sizes": {
+            "javascript": 2470,
+            "runtime": 440
+          },
+          "names": [
+            "HtmlWebpackPlugin_0-0"
+          ],
+          "idHints": [],
+          "runtime": [
+            "HtmlWebpackPlugin_0-0"
+          ],
+          "files": [],
+          "auxiliaryFiles": [],
+          "hash": "687664ce0ead8e4b6e66",
+          "childrenByOrder": {},
+          "id": 563,
+          "siblings": [],
+          "parents": [],
+          "children": [],
+          "modules": [
+            {
+              "type": "module",
+              "moduleType": "javascript/auto",
+              "layer": null,
+              "size": 2393,
+              "sizes": {
+                "javascript": 2393
+              },
+              "built": true,
+              "codeGenerated": true,
+              "buildTimeExecuted": false,
+              "cached": false,
+              "identifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\html-webpack-plugin\\lib\\loader.js!F:\\node_workspace\\EzWebComponents\\index.html",
+              "name": "./node_modules/html-webpack-plugin/lib/loader.js!./index.html",
+              "nameForCondition": "F:\\node_workspace\\EzWebComponents\\index.html",
+              "index": 1,
+              "preOrderIndex": 1,
+              "index2": 1,
+              "postOrderIndex": 1,
+              "cacheable": true,
+              "optional": false,
+              "orphan": false,
+              "dependent": false,
+              "issuer": null,
+              "issuerName": null,
+              "issuerPath": null,
+              "failed": false,
+              "errors": 0,
+              "warnings": 0,
+              "id": 614,
+              "issuerId": null,
+              "chunks": [
+                563
+              ],
+              "assets": [],
+              "reasons": [
+                {
+                  "moduleIdentifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\html-webpack-plugin\\lib\\loader.js!F:\\node_workspace\\EzWebComponents\\index.html",
+                  "module": "./node_modules/html-webpack-plugin/lib/loader.js!./index.html",
+                  "moduleName": "./node_modules/html-webpack-plugin/lib/loader.js!./index.html",
+                  "resolvedModuleIdentifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\html-webpack-plugin\\lib\\loader.js!F:\\node_workspace\\EzWebComponents\\index.html",
+                  "resolvedModule": "./node_modules/html-webpack-plugin/lib/loader.js!./index.html",
+                  "type": "cjs self exports reference",
+                  "active": true,
+                  "explanation": "",
+                  "userRequest": null,
+                  "loc": "1:104-118",
+                  "moduleId": 614,
+                  "resolvedModuleId": 614
+                },
+                {
+                  "moduleIdentifier": null,
+                  "module": null,
+                  "moduleName": null,
+                  "resolvedModuleIdentifier": null,
+                  "resolvedModule": null,
+                  "type": "entry",
+                  "active": true,
+                  "explanation": "",
+                  "userRequest": "F:\\node_workspace\\EzWebComponents\\node_modules\\html-webpack-plugin\\lib\\loader.js!F:\\node_workspace\\EzWebComponents\\index.html",
+                  "loc": "HtmlWebpackPlugin_0-0",
+                  "moduleId": null,
+                  "resolvedModuleId": null
+                },
+                {
+                  "moduleIdentifier": null,
+                  "module": null,
+                  "moduleName": null,
+                  "resolvedModuleIdentifier": null,
+                  "resolvedModule": null,
+                  "type": null,
+                  "active": true,
+                  "explanation": "used as library export",
+                  "userRequest": null,
+                  "moduleId": null,
+                  "resolvedModuleId": null
+                }
+              ],
+              "usedExports": null,
+              "providedExports": null,
+              "optimizationBailout": [
+                "CommonJS bailout: module.exports is used directly at 1:104-118",
+                "Statement (VariableDeclaration) with side effects in source code at 1:0-104",
+                "ModuleConcatenation bailout: Module is not an ECMAScript module"
+              ],
+              "depth": 0
+            },
+            {
+              "type": "module",
+              "moduleType": "javascript/esm",
+              "layer": null,
+              "size": 77,
+              "sizes": {
+                "javascript": 77
+              },
+              "built": true,
+              "codeGenerated": true,
+              "buildTimeExecuted": false,
+              "cached": false,
+              "identifier": "javascript/esm|data:text/javascript,__webpack_public_path__ = __webpack_base_uri__ = htmlWebpackPluginPublicPath;",
+              "name": "data:text/javascript,__webpack_public_path__ = __webpack_base_uri__ = htmlWebpackPluginPublicPath;",
+              "nameForCondition": "data:text/javascript,__webpack_public_path__ = __webpack_base_uri__ = htmlWebpackPluginPublicPath;",
+              "index": 0,
+              "preOrderIndex": 0,
+              "index2": 0,
+              "postOrderIndex": 0,
+              "cacheable": true,
+              "optional": false,
+              "orphan": false,
+              "dependent": false,
+              "issuer": null,
+              "issuerName": null,
+              "issuerPath": null,
+              "failed": false,
+              "errors": 0,
+              "warnings": 0,
+              "id": 163,
+              "issuerId": null,
+              "chunks": [
+                563
+              ],
+              "assets": [],
+              "reasons": [
+                {
+                  "moduleIdentifier": null,
+                  "module": null,
+                  "moduleName": null,
+                  "resolvedModuleIdentifier": null,
+                  "resolvedModule": null,
+                  "type": "entry",
+                  "active": true,
+                  "explanation": "",
+                  "userRequest": "data:text/javascript,__webpack_public_path__ = __webpack_base_uri__ = htmlWebpackPluginPublicPath;",
+                  "loc": "HtmlWebpackPlugin_0-0",
+                  "moduleId": null,
+                  "resolvedModuleId": null
+                }
+              ],
+              "usedExports": [],
+              "providedExports": [],
+              "optimizationBailout": [
+                "Statement (ExpressionStatement) with side effects in source code at 1:0-77"
+              ],
+              "depth": 0
+            },
+            {
+              "type": "module",
+              "moduleType": "runtime",
+              "layer": null,
+              "size": 88,
+              "sizes": {
+                "runtime": 88
+              },
+              "built": false,
+              "codeGenerated": true,
+              "buildTimeExecuted": false,
+              "cached": false,
+              "identifier": "webpack/runtime/hasOwnProperty shorthand",
+              "name": "webpack/runtime/hasOwnProperty shorthand",
+              "nameForCondition": null,
+              "index": null,
+              "preOrderIndex": null,
+              "index2": null,
+              "postOrderIndex": null,
+              "optional": false,
+              "orphan": false,
+              "dependent": false,
+              "failed": false,
+              "errors": 0,
+              "warnings": 0,
+              "id": "",
+              "chunks": [
+                563
+              ],
+              "assets": [],
+              "reasons": [],
+              "usedExports": null,
+              "providedExports": [],
+              "optimizationBailout": [],
+              "depth": null
+            },
+            {
+              "type": "module",
+              "moduleType": "runtime",
+              "layer": null,
+              "size": 27,
+              "sizes": {
+                "runtime": 27
+              },
+              "built": false,
+              "codeGenerated": true,
+              "buildTimeExecuted": false,
+              "cached": false,
+              "identifier": "webpack/runtime/publicPath",
+              "name": "webpack/runtime/publicPath",
+              "nameForCondition": null,
+              "index": null,
+              "preOrderIndex": null,
+              "index2": null,
+              "postOrderIndex": null,
+              "optional": false,
+              "orphan": false,
+              "dependent": false,
+              "failed": false,
+              "errors": 0,
+              "warnings": 0,
+              "id": "",
+              "chunks": [
+                563
+              ],
+              "assets": [],
+              "reasons": [],
+              "usedExports": null,
+              "providedExports": [],
+              "optimizationBailout": [],
+              "depth": null
+            },
+            {
+              "type": "module",
+              "moduleType": "runtime",
+              "layer": null,
+              "size": 325,
+              "sizes": {
+                "runtime": 325
+              },
+              "built": false,
+              "codeGenerated": true,
+              "buildTimeExecuted": false,
+              "cached": false,
+              "identifier": "webpack/runtime/require chunk loading",
+              "name": "webpack/runtime/require chunk loading",
+              "nameForCondition": null,
+              "index": null,
+              "preOrderIndex": null,
+              "index2": null,
+              "postOrderIndex": null,
+              "optional": false,
+              "orphan": false,
+              "dependent": false,
+              "failed": false,
+              "errors": 0,
+              "warnings": 0,
+              "id": "",
+              "chunks": [
+                563
+              ],
+              "assets": [],
+              "reasons": [],
+              "usedExports": null,
+              "providedExports": [],
+              "optimizationBailout": [],
+              "depth": null
+            }
+          ],
+          "origins": [
+            {
+              "module": "",
+              "moduleIdentifier": "",
+              "moduleName": "",
+              "loc": "HtmlWebpackPlugin_0-0",
+              "request": "F:\\node_workspace\\EzWebComponents\\node_modules\\html-webpack-plugin\\lib\\loader.js!F:\\node_workspace\\EzWebComponents\\index.html"
+            },
+            {
+              "module": "",
+              "moduleIdentifier": "",
+              "moduleName": "",
+              "loc": "HtmlWebpackPlugin_0-0",
+              "request": "data:text/javascript,__webpack_public_path__ = __webpack_base_uri__ = htmlWebpackPluginPublicPath;"
+            }
+          ]
+        }
+      ],
+      "modules": [
+        {
+          "type": "module",
+          "moduleType": "javascript/esm",
+          "layer": null,
+          "size": 77,
+          "sizes": {
+            "javascript": 77
+          },
+          "built": true,
+          "codeGenerated": true,
+          "buildTimeExecuted": false,
+          "cached": false,
+          "identifier": "javascript/esm|data:text/javascript,__webpack_public_path__ = __webpack_base_uri__ = htmlWebpackPluginPublicPath;",
+          "name": "data:text/javascript,__webpack_public_path__ = __webpack_base_uri__ = htmlWebpackPluginPublicPath;",
+          "nameForCondition": "data:text/javascript,__webpack_public_path__ = __webpack_base_uri__ = htmlWebpackPluginPublicPath;",
+          "index": 0,
+          "preOrderIndex": 0,
+          "index2": 0,
+          "postOrderIndex": 0,
+          "cacheable": true,
+          "optional": false,
+          "orphan": false,
+          "issuer": null,
+          "issuerName": null,
+          "issuerPath": null,
+          "failed": false,
+          "errors": 0,
+          "warnings": 0,
+          "id": 163,
+          "issuerId": null,
+          "chunks": [
+            563
+          ],
+          "assets": [],
+          "reasons": [
+            {
+              "moduleIdentifier": null,
+              "module": null,
+              "moduleName": null,
+              "resolvedModuleIdentifier": null,
+              "resolvedModule": null,
+              "type": "entry",
+              "active": true,
+              "explanation": "",
+              "userRequest": "data:text/javascript,__webpack_public_path__ = __webpack_base_uri__ = htmlWebpackPluginPublicPath;",
+              "loc": "HtmlWebpackPlugin_0-0",
+              "moduleId": null,
+              "resolvedModuleId": null
+            }
+          ],
+          "usedExports": [],
+          "providedExports": [],
+          "optimizationBailout": [
+            "Statement (ExpressionStatement) with side effects in source code at 1:0-77"
+          ],
+          "depth": 0
+        },
+        {
+          "type": "module",
+          "moduleType": "javascript/auto",
+          "layer": null,
+          "size": 2393,
+          "sizes": {
+            "javascript": 2393
+          },
+          "built": true,
+          "codeGenerated": true,
+          "buildTimeExecuted": false,
+          "cached": false,
+          "identifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\html-webpack-plugin\\lib\\loader.js!F:\\node_workspace\\EzWebComponents\\index.html",
+          "name": "./node_modules/html-webpack-plugin/lib/loader.js!./index.html",
+          "nameForCondition": "F:\\node_workspace\\EzWebComponents\\index.html",
+          "index": 1,
+          "preOrderIndex": 1,
+          "index2": 1,
+          "postOrderIndex": 1,
+          "cacheable": true,
+          "optional": false,
+          "orphan": false,
+          "issuer": null,
+          "issuerName": null,
+          "issuerPath": null,
+          "failed": false,
+          "errors": 0,
+          "warnings": 0,
+          "id": 614,
+          "issuerId": null,
+          "chunks": [
+            563
+          ],
+          "assets": [],
+          "reasons": [
+            {
+              "moduleIdentifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\html-webpack-plugin\\lib\\loader.js!F:\\node_workspace\\EzWebComponents\\index.html",
+              "module": "./node_modules/html-webpack-plugin/lib/loader.js!./index.html",
+              "moduleName": "./node_modules/html-webpack-plugin/lib/loader.js!./index.html",
+              "resolvedModuleIdentifier": "F:\\node_workspace\\EzWebComponents\\node_modules\\html-webpack-plugin\\lib\\loader.js!F:\\node_workspace\\EzWebComponents\\index.html",
+              "resolvedModule": "./node_modules/html-webpack-plugin/lib/loader.js!./index.html",
+              "type": "cjs self exports reference",
+              "active": true,
+              "explanation": "",
+              "userRequest": null,
+              "loc": "1:104-118",
+              "moduleId": 614,
+              "resolvedModuleId": 614
+            },
+            {
+              "moduleIdentifier": null,
+              "module": null,
+              "moduleName": null,
+              "resolvedModuleIdentifier": null,
+              "resolvedModule": null,
+              "type": "entry",
+              "active": true,
+              "explanation": "",
+              "userRequest": "F:\\node_workspace\\EzWebComponents\\node_modules\\html-webpack-plugin\\lib\\loader.js!F:\\node_workspace\\EzWebComponents\\index.html",
+              "loc": "HtmlWebpackPlugin_0-0",
+              "moduleId": null,
+              "resolvedModuleId": null
+            },
+            {
+              "moduleIdentifier": null,
+              "module": null,
+              "moduleName": null,
+              "resolvedModuleIdentifier": null,
+              "resolvedModule": null,
+              "type": null,
+              "active": true,
+              "explanation": "used as library export",
+              "userRequest": null,
+              "moduleId": null,
+              "resolvedModuleId": null
+            }
+          ],
+          "usedExports": null,
+          "providedExports": null,
+          "optimizationBailout": [
+            "CommonJS bailout: module.exports is used directly at 1:104-118",
+            "Statement (VariableDeclaration) with side effects in source code at 1:0-104",
+            "ModuleConcatenation bailout: Module is not an ECMAScript module"
+          ],
+          "depth": 0
+        },
+        {
+          "type": "module",
+          "moduleType": "runtime",
+          "layer": null,
+          "size": 88,
+          "sizes": {
+            "runtime": 88
+          },
+          "built": false,
+          "codeGenerated": true,
+          "buildTimeExecuted": false,
+          "cached": false,
+          "identifier": "webpack/runtime/hasOwnProperty shorthand",
+          "name": "webpack/runtime/hasOwnProperty shorthand",
+          "nameForCondition": null,
+          "index": null,
+          "preOrderIndex": null,
+          "index2": null,
+          "postOrderIndex": null,
+          "optional": false,
+          "orphan": false,
+          "failed": false,
+          "errors": 0,
+          "warnings": 0,
+          "id": "",
+          "chunks": [
+            563
+          ],
+          "assets": [],
+          "reasons": [],
+          "usedExports": null,
+          "providedExports": [],
+          "optimizationBailout": [],
+          "depth": null
+        },
+        {
+          "type": "module",
+          "moduleType": "runtime",
+          "layer": null,
+          "size": 27,
+          "sizes": {
+            "runtime": 27
+          },
+          "built": false,
+          "codeGenerated": true,
+          "buildTimeExecuted": false,
+          "cached": false,
+          "identifier": "webpack/runtime/publicPath",
+          "name": "webpack/runtime/publicPath",
+          "nameForCondition": null,
+          "index": null,
+          "preOrderIndex": null,
+          "index2": null,
+          "postOrderIndex": null,
+          "optional": false,
+          "orphan": false,
+          "failed": false,
+          "errors": 0,
+          "warnings": 0,
+          "id": "",
+          "chunks": [
+            563
+          ],
+          "assets": [],
+          "reasons": [],
+          "usedExports": null,
+          "providedExports": [],
+          "optimizationBailout": [],
+          "depth": null
+        },
+        {
+          "type": "module",
+          "moduleType": "runtime",
+          "layer": null,
+          "size": 325,
+          "sizes": {
+            "runtime": 325
+          },
+          "built": false,
+          "codeGenerated": true,
+          "buildTimeExecuted": false,
+          "cached": false,
+          "identifier": "webpack/runtime/require chunk loading",
+          "name": "webpack/runtime/require chunk loading",
+          "nameForCondition": null,
+          "index": null,
+          "preOrderIndex": null,
+          "index2": null,
+          "postOrderIndex": null,
+          "optional": false,
+          "orphan": false,
+          "failed": false,
+          "errors": 0,
+          "warnings": 0,
+          "id": "",
+          "chunks": [
+            563
+          ],
+          "assets": [],
+          "reasons": [],
+          "usedExports": null,
+          "providedExports": [],
+          "optimizationBailout": [],
+          "depth": null
+        }
+      ],
+      "entrypoints": {
+        "HtmlWebpackPlugin_0-0": {
+          "name": "HtmlWebpackPlugin_0-0",
+          "chunks": [
+            563
+          ],
+          "assets": [],
+          "filteredAssets": 0,
+          "assetsSize": 0,
+          "auxiliaryAssets": [],
+          "filteredAuxiliaryAssets": 0,
+          "auxiliaryAssetsSize": 0,
+          "children": {},
+          "childAssets": {},
+          "isOverSizeLimit": false
+        }
+      },
+      "namedChunkGroups": {
+        "HtmlWebpackPlugin_0-0": {
+          "name": "HtmlWebpackPlugin_0-0",
+          "chunks": [
+            563
+          ],
+          "assets": [],
+          "filteredAssets": 0,
+          "assetsSize": 0,
+          "auxiliaryAssets": [],
+          "filteredAuxiliaryAssets": 0,
+          "auxiliaryAssetsSize": 0,
+          "children": {},
+          "childAssets": {},
+          "isOverSizeLimit": false
+        }
+      },
+      "errors": [],
+      "errorsCount": 0,
+      "warnings": [],
+      "warningsCount": 0,
+      "children": []
+    }
+  ]
+}

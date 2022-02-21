@@ -7,7 +7,7 @@ module.exports = {
   watch: true,
   target: "web",
   entry: {
-    'pipe-flow': './src/ez-tabs-list.ts',
+    'tabs-list': './src/components/ez-tabs-list/ez-tabs-list.ts',
   },
   module: {
     rules: [

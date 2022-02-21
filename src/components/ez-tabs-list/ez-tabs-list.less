@@ -8,6 +8,7 @@
   display: -ms-flexbox;
   display: flex;
   overflow-x: scroll;
+  scroll-behavior: smooth;
 }
 
 .scroll-content{
@@ -24,14 +25,26 @@
 
 
 
+
+
 .scroll-area::-webkit-scrollbar {
   display: none;
 }
 
 .close-tab{
-
+  vertical-align: baseline;
+  text-align: center;
+  display: inline-block;
+  font-size: 24px;
+  cursor: pointer;
+  width:24px;
+  height:24px;
+  line-height: 24px;
+  margin-top: 4px;
 }
-
+.close-tab:hover{
+  opacity: .7;
+}
 
 
 
@@ -46,7 +59,7 @@
   letter-spacing: .0892857143em;
   text-decoration: none;
   text-transform: uppercase;
-  padding: 0 24px;
+  padding: 0 12px;
   position: relative;
   display: -ms-flexbox;
   display: flex;
@@ -65,4 +78,7 @@
   cursor: pointer;
   -webkit-appearance: none;
   z-index: 1;
+}
+.scroll-content > .active{
+  background: #ddd;
 }

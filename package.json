@@ -1,8 +1,8 @@
 {
-  "name": "blackhole",
+  "name": "ez-web-components",
   "version": "1.0.0",
   "description": "**Edit a file, create a new file, and clone from Bitbucket in under 2 minutes**",
-  "main": "index.js",
+  "main": "src/main.ts",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha --require @babel/register test/*",
     "build": "webpack --config build/webpack.prod.js",

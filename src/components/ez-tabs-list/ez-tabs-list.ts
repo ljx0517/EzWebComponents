@@ -1,4 +1,13 @@
 import * as style from "./ez-tabs-list.less"
+
+// TODO support column mode
+export interface IClientRect {
+  rootLeft: number;
+  rootRight: number;
+  contentLeft: number;
+  contentRight: number;
+}
+
 class EzTabList extends HTMLElement {
   private closeable: boolean;
   private activeIndex: number;
@@ -6,6 +15,10 @@ class EzTabList extends HTMLElement {
   private scrollArea: HTMLElement;
   private scrollContent: HTMLElement;
   private EXTRA_SCROLL_AMOUNT = 20;
+  private custom: boolean;
+  private beforeCloseHooks:(() => boolean)[] = [];
+  private afterCloseHooks: (() => void)[] = [];
+
   constructor() {
     super();
     // element created
@@ -25,12 +38,32 @@ class EzTabList extends HTMLElement {
         </slot>
       </div>
     </div>`;
+    this.custom = false;
     this.closeable = false;
     this.activeIndex = 0
-    this.activeClass = 'active';
+    this.activeClass = 'ez-tabs-list__active';
     this.scrollArea = this.shadowRoot.querySelector(`.${style.scrollArea}`)
-    this.scrollContent = this.shadowRoot.querySelector(`.${style.scrollContent}`)
-    if(this.shadowRoot.host.hasAttribute('active-class')){
+
+
+
+    if(this.shadowRoot.host.hasAttribute('custom') &&
+      this.shadowRoot.host.getAttribute('custom').trim().toLocaleLowerCase() === 'true'){
+      this.custom = true
+    }
+
+    if (!this.custom) {
+      this.scrollContent =document.createElement('div')
+      this.scrollContent.className = style.scrollContent;
+      this.scrollArea.appendChild(this.scrollContent)
+      this.shadowRoot.querySelector(`.${style.scrollContent}`).remove()
+    } else {
+      // this.scrollContent = this.shadowRoot.querySelector(`.${style.scrollContent}`)
+      this.scrollContent = this.shadowRoot.host as HTMLElement; //this.shadowRoot.querySelector(`.${style.scrollContent}`)
+    }
+
+
+
+    if(this.custom && this.shadowRoot.host.hasAttribute('active-class')){
       const ai = this.shadowRoot.host.getAttribute('active-class').trim()
       if (ai) {
         this.activeClass = ai
@@ -46,43 +79,62 @@ class EzTabList extends HTMLElement {
     && this.shadowRoot.host.getAttribute('closeable').toLocaleLowerCase() === 'true') {
       this.closeable = true
     }
-    for (let i = 0; i < this.shadowRoot.host.children.length; i++) {
-      const tab = this.shadowRoot.host.children[i] as HTMLElement;
+    if (!this.custom) {
+      Array.from(this.shadowRoot.host.children).forEach(el => {
+        this.scrollContent.appendChild(el)
+      })
+    }
+    this.initInternalEvent();
+  }
+  initInternalEvent() {
+    for (let i = 0; i < this.scrollContent.children.length; i++) {
+      const tab = this.scrollContent.children[i] as HTMLElement;
       if (this.activeIndex == i) {
         tab.classList.add(this.activeClass)
       }
       if (this.closeable) {
         const close = document.createElement('span')
-        close.innerHTML = '🗙';
+        close.innerHTML = '&times;';
+        // close.setAttribute('attr', 'value');
         close.className = style.closeTab;
-        close.style.cssText = `cursor: pointer;
-  text-align: center;
-  vertical-align: baseline;
-  display: inline-block;
-  width:20px;
-      height:20px;
-      line-height: 20px;`
+        //       close.style.cssText = `cursor: pointer;
+        // width:24px;
+        //     height:24px;
+        //     line-height: 24px;`
         tab.appendChild(close);
         close.addEventListener("click", (e) => {
           e.stopPropagation();
           e.preventDefault();
+          const b4event = new CustomEvent('before-close-tab', { detail: i });
+          this.dispatchEvent(b4event);
+          const result = this.beforeCloseHooks.map((fn: () => boolean) => {
+            return fn();
+          }).every(r => r);
+          if (!result) {
+            return;
+          }
+          (e.target as HTMLElement).parentElement.remove();
           const event = new CustomEvent('close-tab', { detail: i });
           this.dispatchEvent(event);
+          this.afterCloseHooks.map(fn => {
+            return fn();
+          })
         })
       }
 
       tab.addEventListener("click", (e) => {
         (e.target as HTMLElement).classList.add(this.activeClass);
-        for (let j = 0; j < this.shadowRoot.host.children.length; j++) {
-          const el = this.shadowRoot.host.children[j] as HTMLElement;
+        for (let j = 0; j < this.scrollContent.children.length; j++) {
+          const el = this.scrollContent.children[j] as HTMLElement;
           if (e.target === el) {
             continue
           }
           el.classList.remove(this.activeClass)
         }
-        const idx = Array.from(this.shadowRoot.host.children).indexOf(e.target as HTMLElement)
+        const idx = Array.from(this.scrollContent.children).indexOf(e.target as HTMLElement)
         const event = new CustomEvent('active-tab', { detail:idx});
-        this.dispatchEvent(event);
+        const r1 =  this.dispatchEvent(event);
+        console.log(r1)
       })
     }
   }
@@ -111,13 +163,16 @@ class EzTabList extends HTMLElement {
    * @param index
    */
   scrollTabIntoView(index: number): void {
+    if (!this.indexIsInRange_(index)) {
+      return;
+    }
     if (index === 0) {
-      this.scrollContent.scrollTo({left: 0});
+      this.scrollArea.scrollTo({left: 0});
       return;
     }
 
     if (index === this.getTabListLength() - 1) {
-      this.scrollContent.scrollTo({left: this.getScrollContentWidth()});
+      this.scrollArea.scrollTo({left: this.getScrollContentWidth()});
       return;
     }
     this.scrollIntoViewImpl(index);
@@ -128,11 +183,14 @@ class EzTabList extends HTMLElement {
    */
   private scrollIntoViewImpl(index: number) {
     const scrollPosition = this.getScrollPosition();
+    // const barWidth = this.getTabOffsetWidth(index);
     const barWidth = this.getOffsetWidth();
     const tabDimensions = this.getTabDimensionsAtIndex(index);
     const nextIndex = this.findAdjacentTabIndexClosestToEdge(
         index, tabDimensions, scrollPosition, barWidth);
-
+    if (!this.indexIsInRange_(nextIndex)) {
+      return;
+    }
 
 
     const scrollIncrement = this.calculateScrollIncrement(
@@ -153,28 +211,55 @@ class EzTabList extends HTMLElement {
       barWidth: number,
   ): number {
     const nextTabDimensions = this.getTabDimensionsAtIndex(nextIndex);
-    const relativeContentLeft = nextTabDimensions.left - scrollPosition - barWidth;
-    const relativeContentRight = nextTabDimensions.right - scrollPosition;
+    const relativeContentLeft = nextTabDimensions.contentLeft - scrollPosition - barWidth;
+    const relativeContentRight = nextTabDimensions.contentRight - scrollPosition;
     const leftIncrement = relativeContentRight - this.EXTRA_SCROLL_AMOUNT;
     const rightIncrement = relativeContentLeft + this.EXTRA_SCROLL_AMOUNT;
-
+    console.log(leftIncrement,rightIncrement );
     if (nextIndex < index) {
       return Math.min(leftIncrement, 0);
     }
 
     return Math.max(rightIncrement, 0);
   }
-  private getTabDimensionsAtIndex(index: number) : DOMRect {
-      return this.scrollContent.children[index].getBoundingClientRect();
+  private getTabDimensionsAtIndex(index: number) : IClientRect {
+      // return this.scrollContent.children[index].getBoundingClientRect();
+    // const rootWidth = this.adapter.getOffsetWidth();
+    // const rootLeft = this.adapter.getOffsetLeft();
+    // const contentWidth = this.adapter.getContentOffsetWidth();
+    // const contentLeft = this.adapter.getContentOffsetLeft();
+
+
+    // const rootWidth = this.scrollArea.offsetWidth;
+    // const rootLeft = this.scrollArea.offsetLeft;
+    // const contentWidth = this.scrollContent.offsetWidth;
+    // const contentLeft = this.scrollContent.offsetLeft;
+    const tab = this.scrollContent.children[index] as HTMLElement
+    // const contentWidth = this.scrollContent.offsetWidth;
+    // const contentLeft = this.scrollContent.offsetLeft;
+    // const rootWidth = tab.offsetWidth;
+    // const rootLeft = tab.offsetLeft;
+
+    // const rootWidth = this.scrollArea.offsetWidth;
+    // const rootLeft = this.scrollArea.scrollLeft;
+    const rootWidth = tab.offsetWidth;
+    const rootLeft = tab.offsetLeft
+
+    return {
+      contentLeft: rootLeft ,
+      contentRight: rootLeft + rootWidth,
+      rootLeft,
+      rootRight: rootLeft + rootWidth,
+    };
   }
   private findAdjacentTabIndexClosestToEdge(
       index: number,
-      tabDimensions: DOMRect,
+      tabDimensions: IClientRect,
       scrollPosition: number,
       barWidth: number,
   ): number {
-    const relativeRootLeft = tabDimensions.left - scrollPosition;
-    const relativeRootRight = tabDimensions.right - scrollPosition - barWidth;
+    const relativeRootLeft = tabDimensions.rootLeft - scrollPosition;
+    const relativeRootRight = tabDimensions.rootRight - scrollPosition - barWidth;
     const relativeRootDelta = relativeRootLeft + relativeRootRight;
     const leftEdgeIsCloser = relativeRootLeft < 0 || relativeRootDelta < 0;
     const rightEdgeIsCloser = relativeRootRight > 0 || relativeRootDelta > 0;
@@ -202,14 +287,15 @@ class EzTabList extends HTMLElement {
    * @param scrollXIncrement
    */
   incrementScroll(scrollXIncrement: number): void {
-    //
+    // console.log('scrollXIncrement', scrollXIncrement)
+    this.scrollArea.scrollLeft += scrollXIncrement;
   }
 
   /**
    * Returns the scroll position of the Tab Scroller.
    */
   getScrollPosition(): number {
-    return 0;
+    return this.scrollArea.scrollLeft;
   }
 
   /**
@@ -223,7 +309,11 @@ class EzTabList extends HTMLElement {
    * Returns the offsetWidth of the root element.
    */
   getOffsetWidth():number {
-    return 0;
+    return this.scrollArea.offsetWidth;
+  }
+
+  getTabOffsetWidth(index: number): number {
+    return (this.scrollContent.children[index] as HTMLElement).offsetWidth
   }
 
   /**
@@ -231,14 +321,29 @@ class EzTabList extends HTMLElement {
    * @param index
    */
   setActiveTab(index: number) :void {
-    //
+    const previousActiveIndex = this.getPreviousActiveTabIndex();
+    if (!this.indexIsInRange_(index) || index === previousActiveIndex) {
+      return;
+    }
+    if (previousActiveIndex !== -1) {
+      this.deactivateTabAtIndex(previousActiveIndex);
+    }
+    this.activateTabAtIndex(index);
+    this.scrollTabIntoView(index);
+    this.notifyTabActivated(index);
   }
 
+  /**
+   * TODO shoule I send custom event in here ??
+   */
+  notifyTabActivated(index: number) {
+    //
+  }
   /**
    * Returns the client rect of the Tab at the given index.
    * @param index
    */
-  getTabIndicatorClientRectAtIndex(index: number): DOMRect{
+  getTabIndicatorClientRectAtIndex(index: number): IClientRect{
     return null
   }
 
@@ -246,7 +351,27 @@ class EzTabList extends HTMLElement {
    *Returns the number of child Tab components.
    */
   getTabListLength(): number{
-    return this.shadowRoot.host.children.length;
+    return this.scrollContent.children.length;
+  }
+  activateTabAtIndex(index: number) {
+    const tab = this.getTabElementAtIndex(index);
+    tab.classList.add(this.activeClass);
+    tab.setAttribute("aria-selected", 'true');
+    tab.setAttribute('tabIndex', '0');
+    tab.focus();
+  }
+  deactivateTabAtIndex(index: number) {
+    const tab = this.getTabElementAtIndex(index);
+    if (!tab) {
+      return;
+    }
+
+    if (!tab.classList.contains(this.activeClass)) {
+      return;
+    }
+    tab.classList.remove(this.activeClass)
+    tab.setAttribute('aria-selected', 'false');
+    tab.setAttribute('tabIndex', '-1');
   }
   // /**
   //  * Returns whether a given index is inclusively between the ends
@@ -255,13 +380,23 @@ class EzTabList extends HTMLElement {
   // private indexIsInRange(index: number) {
   //   return index >= 0 && index < this.getTabListLength();
   // }
+  getTabElementAtIndex(index: number): HTMLElement {
+    return this.scrollContent.children[index] as HTMLElement
+  }
   /**
    * Returns the index of the previously active Tab.
    */
   getPreviousActiveTabIndex(): number{
-    return 0;
+    return Array.from(this.scrollContent.children).findIndex(el => el.classList.contains(this.activeClass))
   }
 
+  /**
+   * TODO
+   * @param index
+   */
+  indexIsInRange_(index: number) : boolean{
+    return index >= 0 && index < this.getTabListLength();
+  }
   /**
    * Returns the index of the focused Tab.
    */

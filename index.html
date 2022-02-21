@@ -15,20 +15,31 @@
 }
 
 </style>
-<ez-tab-list id="qwe" closeable="true" active-index="0" active-class="active">
+<ez-tab-list id="qwe" custom="true" closeable="true" active-index="0" active-class="active">
     <div class="tab">John Smith 111111 </div>
     <div class="tab">John Smith 222222 </div>
-</ez-tab-list>
+    <div class="tab">John Smith 33333 </div>
+    <div class="tab">John Smith 444 </div>
+    <div class="tab">John Smith 5 </div>
+    <div class="tab">John Smith 6 </div>
+    <div class="tab">John Smith 7 </div>
+    <div class="tab">John Smith 8 </div>
+
+    <div class="tab">John Smith 9 </div>
+    <div class="tab">John Smith 10 </div>
+    <div class="tab">John Smith 000 </div>
+  </ez-tab-list>
 
 <script>
     const qwe = document.querySelector('#qwe')
 
     qwe.addEventListener("close-tab", (e) => {
         console.log('close', e.detail)
-        qwe.children[e.detail].remove()
     })
     qwe.addEventListener("active-tab", (e) => {
         console.log('active', e.detail)
+      e.stopPropagation();
+      e.preventDefault();
     })
 </script>
 </body>

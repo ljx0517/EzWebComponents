@@ -45,10 +45,10 @@ attrs:
 </ez-tab-list>
 <script>
   const tabs = document.querySelector('#abc');
-  qwe.addEventListener("close-tab", (e) => {
+  tabs.addEventListener("close-tab", (e) => {
       console.log('close-tab', e.detail)
   })
-  qwe.addEventListener("active-tab", (e) => {
+  tabs.addEventListener("active-tab", (e) => {
     console.log('active-tab', e.detail)
     e.stopPropagation();
     e.preventDefault();

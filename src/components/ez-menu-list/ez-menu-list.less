@@ -1,0 +1,42 @@
+
+:host ul{
+  color: green;
+}
+.ul {
+  min-width: 112px;
+  transform: scale(1);
+}
+.ul {
+  display: none;
+  position: absolute;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 32px);
+  margin: 0;
+  padding: 0;
+  -webkit-transform: scale(1);
+  -ms-transform: scale(1);
+  transform: scale(1);
+  -webkit-transform-origin: top left;
+  -ms-transform-origin: top left;
+  transform-origin: top left;
+  opacity: 0;
+  overflow: auto;
+  will-change: transform,opacity;
+  z-index: 8;
+  -webkit-transition: opacity .03s linear,-webkit-transform .12s cubic-bezier(0,0,.2,1);
+  transition: opacity .03s linear,-webkit-transform .12s cubic-bezier(0,0,.2,1);
+  -o-transition: opacity .03s linear,transform .12s cubic-bezier(0,0,.2,1);
+  transition: opacity .03s linear,transform .12s cubic-bezier(0,0,.2,1);
+  transition: opacity .03s linear,transform .12s cubic-bezier(0,0,.2,1),-webkit-transform .12s cubic-bezier(0,0,.2,1);
+  -webkit-box-shadow: 0 5px 5px -3px rgba(0,0,0,.2),0 8px 10px 1px rgba(0,0,0,.14),0 3px 14px 2px rgba(0,0,0,.12);
+  box-shadow: 0 5px 5px -3px rgba(0,0,0,.2),0 8px 10px 1px rgba(0,0,0,.14),0 3px 14px 2px rgba(0,0,0,.12);
+  background-color: #fff;
+  background-color: var(--mdc-theme-surface,#fff);
+  color: #000;
+  color: var(--mdc-theme-on-surface,#000);
+  border-radius: 4px;
+  transform-origin-left: top left;
+  transform-origin-right: top right;
+}

@@ -18,7 +18,8 @@ class EzTabList extends HTMLElement {
   private custom: boolean;
   private beforeCloseHooks:(() => boolean)[] = [];
   private afterCloseHooks: (() => void)[] = [];
-
+  private beforeActiveTabHooks:(() => boolean)[] = [];
+  private afterActiveTabHooks: (() => void)[] = [];
   constructor() {
     super();
     // element created
@@ -132,9 +133,17 @@ class EzTabList extends HTMLElement {
           el.classList.remove(this.activeClass)
         }
         const idx = Array.from(this.scrollContent.children).indexOf(e.target as HTMLElement)
+        const result = this.beforeActiveTabHooks.map((fn: () => boolean) => {
+          return fn();
+        }).every(r => r)
+        if (!result) {
+          return
+        }
         const event = new CustomEvent('active-tab', { detail:idx});
-        const r1 =  this.dispatchEvent(event);
-        console.log(r1)
+        this.dispatchEvent(event)
+        this.afterActiveTabHooks.map((fn: () => void) => {
+          return fn();
+        })
       })
     }
   }

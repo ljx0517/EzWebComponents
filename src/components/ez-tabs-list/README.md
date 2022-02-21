@@ -1,5 +1,7 @@
 ## Stand webcomponents
 
+this component do not contain tab panel, you can use event build you own tan panel
+
 ### tab
 attrs:
 
@@ -47,7 +49,7 @@ the tab element will slot in shadowRoot, use default style css
       console.log('close-tab', e.detail)
   })
   qwe.addEventListener("active-tab", (e) => {
-    console.log('active-tab', e.detail);
+    console.log('active-tab', e.detail)
     e.stopPropagation();
     e.preventDefault();
   })
@@ -55,6 +57,7 @@ the tab element will slot in shadowRoot, use default style css
 ```
 
 ## hooks
+can add many hook function in hook point
 ```javascript
 const tabs = document.querySelector('#abc');
 // run hook function before close tab

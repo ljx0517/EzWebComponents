@@ -113,7 +113,7 @@ class EzTabList extends HTMLElement {
   }
 
 
-  initInternalEvent() {
+  private initInternalEvent() {
     for (let i = 0; i < this.scrollContent.children.length; i++) {
       const tab = this.scrollContent.children[i] as HTMLElement;
       if (this.activeIndex == i) {
@@ -198,7 +198,7 @@ class EzTabList extends HTMLElement {
    * Scrolls the tab at the given index into view.
    * @param index
    */
-  scrollTabIntoView(index: number): void {
+  private scrollTabIntoView(index: number): void {
     if (!this.indexIsInRange_(index)) {
       return;
     }
@@ -322,7 +322,7 @@ class EzTabList extends HTMLElement {
    * Increments the Tab Scroller by the given value.
    * @param offsetIncrement
    */
-  incrementScroll(offsetIncrement: number): void {
+  private incrementScroll(offsetIncrement: number): void {
 
     const key = `scroll${this.scrollKey}`;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -337,7 +337,7 @@ class EzTabList extends HTMLElement {
   /**
    * Returns the scroll position of the Tab Scroller.
    */
-  getScrollPosition(): number {
+  private getScrollPosition(): number {
     const key = `scroll${this.scrollKey}`
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -347,7 +347,7 @@ class EzTabList extends HTMLElement {
   /**
    * Returns the width of the Tab Scroller's scroll content element.
    */
-  getScrollContentWidth(): number {
+  private getScrollContentWidth(): number {
     if (this.mode === Mode.col) {
       return this.scrollContent.offsetHeight;
     }
@@ -357,7 +357,7 @@ class EzTabList extends HTMLElement {
   /**
    * Returns the offsetWidth of the root element.
    */
-  getScrollSize():number {
+  private getScrollSize():number {
     if (this.mode === Mode.col) {
       return this.scrollArea.offsetHeight;
     }

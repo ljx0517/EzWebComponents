@@ -89,13 +89,15 @@ tabs.addAfteActiveTabHooks(() => {
 ## style
 `--tab-width: auto;`
 
-`--tab-padding: 0 16px;`
+`--tab-padding: 0 24px 0 12px;`
 
-`--label-font-size: 16px;`
+`--label-font-size: .875rem;`
 
 `--tab-bg-color:#666;`
 
 `--active-tab-bg-color: #ccc;`
+
+`--close-font-size: 1.3125rem`
 
 ```html
 <ez-tab-list id="qwe"

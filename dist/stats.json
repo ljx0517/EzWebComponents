@@ -1,8 +1,8 @@
 {
-  "hash": "29ca11d6022685351fcf",
+  "hash": "8db3328d3a515777d7d5",
   "version": "5.62.1",
-  "time": 3710,
-  "builtAt": 1645448919851,
+  "time": 4842,
+  "builtAt": 1645450368339,
   "publicPath": "auto",
   "outputPath": "F:\\node_workspace\\EzWebComponents\\dist",
   "assetsByChunkName": {
@@ -14,7 +14,7 @@
     {
       "type": "asset",
       "name": "ez-tabs-list.js",
-      "size": 13101,
+      "size": 13503,
       "emitted": true,
       "comparedForEmit": false,
       "cached": false,
@@ -24,7 +24,7 @@
         "related": {
           "sourceMap": "ez-tabs-list.js.map"
         },
-        "size": 13101
+        "size": 13503
       },
       "chunkNames": [
         "ez-tabs-list"
@@ -37,13 +37,13 @@
         {
           "type": "sourceMap",
           "name": "ez-tabs-list.js.map",
-          "size": 38302,
+          "size": 38709,
           "emitted": true,
           "comparedForEmit": false,
           "cached": false,
           "info": {
             "development": true,
-            "size": 38302
+            "size": 38709
           },
           "chunkNames": [],
           "chunkIdHints": [],
@@ -68,12 +68,12 @@
     {
       "type": "asset",
       "name": "index.html",
-      "size": 1833,
+      "size": 1961,
       "emitted": true,
       "comparedForEmit": false,
       "cached": false,
       "info": {
-        "size": 1833
+        "size": 1961
       },
       "chunkNames": [],
       "chunkIdHints": [],
@@ -91,9 +91,9 @@
       "initial": true,
       "entry": true,
       "recorded": false,
-      "size": 25704,
+      "size": 26106,
       "sizes": {
-        "javascript": 25704
+        "javascript": 26106
       },
       "names": [
         "ez-tabs-list"
@@ -108,7 +108,7 @@
       "auxiliaryFiles": [
         "ez-tabs-list.js.map"
       ],
-      "hash": "b3c68d0bb45768751718",
+      "hash": "785f94364c7a4878c002",
       "childrenByOrder": {},
       "id": 900,
       "siblings": [],
@@ -289,9 +289,9 @@
           "type": "module",
           "moduleType": "javascript/auto",
           "layer": null,
-          "size": 6072,
+          "size": 6474,
           "sizes": {
-            "javascript": 6072
+            "javascript": 6474
           },
           "built": true,
           "codeGenerated": true,
@@ -503,9 +503,9 @@
       "type": "module",
       "moduleType": "javascript/auto",
       "layer": null,
-      "size": 6072,
+      "size": 6474,
       "sizes": {
-        "javascript": 6072
+        "javascript": 6474
       },
       "built": true,
       "codeGenerated": true,
@@ -756,19 +756,19 @@
       "assets": [
         {
           "name": "ez-tabs-list.js",
-          "size": 13101
+          "size": 13503
         }
       ],
       "filteredAssets": 0,
-      "assetsSize": 13101,
+      "assetsSize": 13503,
       "auxiliaryAssets": [
         {
           "name": "ez-tabs-list.js.map",
-          "size": 38302
+          "size": 38709
         }
       ],
       "filteredAuxiliaryAssets": 0,
-      "auxiliaryAssetsSize": 38302,
+      "auxiliaryAssetsSize": 38709,
       "children": {},
       "childAssets": {},
       "isOverSizeLimit": false
@@ -783,19 +783,19 @@
       "assets": [
         {
           "name": "ez-tabs-list.js",
-          "size": 13101
+          "size": 13503
         }
       ],
       "filteredAssets": 0,
-      "assetsSize": 13101,
+      "assetsSize": 13503,
       "auxiliaryAssets": [
         {
           "name": "ez-tabs-list.js.map",
-          "size": 38302
+          "size": 38709
         }
       ],
       "filteredAuxiliaryAssets": 0,
-      "auxiliaryAssetsSize": 38302,
+      "auxiliaryAssetsSize": 38709,
       "children": {},
       "childAssets": {},
       "isOverSizeLimit": false
@@ -808,10 +808,10 @@
   "children": [
     {
       "name": "HtmlWebpackCompiler",
-      "hash": "9aa1d52e7570984ba5f3",
+      "hash": "e8fb9c9a6b1963eec715",
       "version": "5.62.1",
-      "time": 116,
-      "builtAt": 1645448916321,
+      "time": 142,
+      "builtAt": 1645450363677,
       "publicPath": "",
       "outputPath": "F:\\node_workspace\\EzWebComponents\\dist",
       "assetsByChunkName": {},
@@ -822,9 +822,9 @@
           "initial": true,
           "entry": true,
           "recorded": false,
-          "size": 2970,
+          "size": 3130,
           "sizes": {
-            "javascript": 2530,
+            "javascript": 2690,
             "runtime": 440
           },
           "names": [
@@ -836,7 +836,7 @@
           ],
           "files": [],
           "auxiliaryFiles": [],
-          "hash": "21becedcea8c9153a0f5",
+          "hash": "1ac5d5ad5c397d11fc41",
           "childrenByOrder": {},
           "id": 563,
           "siblings": [],
@@ -847,9 +847,9 @@
               "type": "module",
               "moduleType": "javascript/auto",
               "layer": null,
-              "size": 2453,
+              "size": 2613,
               "sizes": {
-                "javascript": 2453
+                "javascript": 2613
               },
               "built": true,
               "codeGenerated": true,
@@ -1177,9 +1177,9 @@
           "type": "module",
           "moduleType": "javascript/auto",
           "layer": null,
-          "size": 2453,
+          "size": 2613,
           "sizes": {
-            "javascript": 2453
+            "javascript": 2613
           },
           "built": true,
           "codeGenerated": true,

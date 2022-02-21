@@ -1,20 +1,20 @@
 {
-  "hash": "1ef677ffa96057792861",
+  "hash": "29ca11d6022685351fcf",
   "version": "5.62.1",
-  "time": 9324,
-  "builtAt": 1645443070545,
+  "time": 3710,
+  "builtAt": 1645448919851,
   "publicPath": "auto",
   "outputPath": "F:\\node_workspace\\EzWebComponents\\dist",
   "assetsByChunkName": {
-    "tabs-list": [
-      "tabs-list.js"
+    "ez-tabs-list": [
+      "ez-tabs-list.js"
     ]
   },
   "assets": [
     {
       "type": "asset",
-      "name": "tabs-list.js",
-      "size": 12712,
+      "name": "ez-tabs-list.js",
+      "size": 13101,
       "emitted": true,
       "comparedForEmit": false,
       "cached": false,
@@ -22,12 +22,12 @@
         "javascriptModule": false,
         "minimized": true,
         "related": {
-          "sourceMap": "tabs-list.js.map"
+          "sourceMap": "ez-tabs-list.js.map"
         },
-        "size": 12712
+        "size": 13101
       },
       "chunkNames": [
-        "tabs-list"
+        "ez-tabs-list"
       ],
       "chunkIdHints": [],
       "auxiliaryChunkNames": [],
@@ -36,31 +36,31 @@
       "related": [
         {
           "type": "sourceMap",
-          "name": "tabs-list.js.map",
-          "size": 36989,
+          "name": "ez-tabs-list.js.map",
+          "size": 38302,
           "emitted": true,
           "comparedForEmit": false,
           "cached": false,
           "info": {
             "development": true,
-            "size": 36989
+            "size": 38302
           },
           "chunkNames": [],
           "chunkIdHints": [],
           "auxiliaryChunkNames": [
-            "tabs-list"
+            "ez-tabs-list"
           ],
           "auxiliaryChunkIdHints": [],
           "related": {},
           "chunks": [],
           "auxiliaryChunks": [
-            769
+            900
           ],
           "isOverSizeLimit": false
         }
       ],
       "chunks": [
-        769
+        900
       ],
       "auxiliaryChunks": [],
       "isOverSizeLimit": false
@@ -68,12 +68,12 @@
     {
       "type": "asset",
       "name": "index.html",
-      "size": 1782,
+      "size": 1833,
       "emitted": true,
       "comparedForEmit": false,
       "cached": false,
       "info": {
-        "size": 1782
+        "size": 1833
       },
       "chunkNames": [],
       "chunkIdHints": [],
@@ -91,26 +91,26 @@
       "initial": true,
       "entry": true,
       "recorded": false,
-      "size": 24599,
+      "size": 25704,
       "sizes": {
-        "javascript": 24599
+        "javascript": 25704
       },
       "names": [
-        "tabs-list"
+        "ez-tabs-list"
       ],
       "idHints": [],
       "runtime": [
-        "tabs-list"
+        "ez-tabs-list"
       ],
       "files": [
-        "tabs-list.js"
+        "ez-tabs-list.js"
       ],
       "auxiliaryFiles": [
-        "tabs-list.js.map"
+        "ez-tabs-list.js.map"
       ],
-      "hash": "33720b4f566d6f5b6fff",
+      "hash": "b3c68d0bb45768751718",
       "childrenByOrder": {},
-      "id": 769,
+      "id": 900,
       "siblings": [],
       "parents": [],
       "children": [],
@@ -158,7 +158,7 @@
           "id": 645,
           "issuerId": 229,
           "chunks": [
-            769
+            900
           ],
           "assets": [],
           "reasons": [
@@ -243,7 +243,7 @@
           "id": 537,
           "issuerId": 229,
           "chunks": [
-            769
+            900
           ],
           "assets": [],
           "reasons": [
@@ -289,9 +289,9 @@
           "type": "module",
           "moduleType": "javascript/auto",
           "layer": null,
-          "size": 5781,
+          "size": 6072,
           "sizes": {
-            "javascript": 5781
+            "javascript": 6072
           },
           "built": true,
           "codeGenerated": true,
@@ -323,7 +323,7 @@
           "id": 229,
           "issuerId": 605,
           "chunks": [
-            769
+            900
           ],
           "assets": [],
           "reasons": [
@@ -369,9 +369,9 @@
           "type": "module",
           "moduleType": "javascript/auto",
           "layer": null,
-          "size": 15812,
+          "size": 16626,
           "sizes": {
-            "javascript": 15812
+            "javascript": 16626
           },
           "built": true,
           "codeGenerated": true,
@@ -397,7 +397,7 @@
           "id": 605,
           "issuerId": null,
           "chunks": [
-            769
+            900
           ],
           "assets": [],
           "reasons": [
@@ -411,7 +411,7 @@
               "active": true,
               "explanation": "",
               "userRequest": "./src/components/ez-tabs-list/ez-tabs-list.ts",
-              "loc": "tabs-list",
+              "loc": "ez-tabs-list",
               "moduleId": null,
               "resolvedModuleId": null
             }
@@ -432,7 +432,7 @@
           "module": "",
           "moduleIdentifier": "",
           "moduleName": "",
-          "loc": "tabs-list",
+          "loc": "ez-tabs-list",
           "request": "./src/components/ez-tabs-list/ez-tabs-list.ts"
         }
       ]
@@ -443,9 +443,9 @@
       "type": "module",
       "moduleType": "javascript/auto",
       "layer": null,
-      "size": 15812,
+      "size": 16626,
       "sizes": {
-        "javascript": 15812
+        "javascript": 16626
       },
       "built": true,
       "codeGenerated": true,
@@ -470,7 +470,7 @@
       "id": 605,
       "issuerId": null,
       "chunks": [
-        769
+        900
       ],
       "assets": [],
       "reasons": [
@@ -484,7 +484,7 @@
           "active": true,
           "explanation": "",
           "userRequest": "./src/components/ez-tabs-list/ez-tabs-list.ts",
-          "loc": "tabs-list",
+          "loc": "ez-tabs-list",
           "moduleId": null,
           "resolvedModuleId": null
         }
@@ -503,9 +503,9 @@
       "type": "module",
       "moduleType": "javascript/auto",
       "layer": null,
-      "size": 5781,
+      "size": 6072,
       "sizes": {
-        "javascript": 5781
+        "javascript": 6072
       },
       "built": true,
       "codeGenerated": true,
@@ -536,7 +536,7 @@
       "id": 229,
       "issuerId": 605,
       "chunks": [
-        769
+        900
       ],
       "assets": [],
       "reasons": [
@@ -620,7 +620,7 @@
       "id": 537,
       "issuerId": 229,
       "chunks": [
-        769
+        900
       ],
       "assets": [],
       "reasons": [
@@ -704,7 +704,7 @@
       "id": 645,
       "issuerId": 229,
       "chunks": [
-        769
+        900
       ],
       "assets": [],
       "reasons": [
@@ -748,54 +748,54 @@
     }
   ],
   "entrypoints": {
-    "tabs-list": {
-      "name": "tabs-list",
+    "ez-tabs-list": {
+      "name": "ez-tabs-list",
       "chunks": [
-        769
+        900
       ],
       "assets": [
         {
-          "name": "tabs-list.js",
-          "size": 12712
+          "name": "ez-tabs-list.js",
+          "size": 13101
         }
       ],
       "filteredAssets": 0,
-      "assetsSize": 12712,
+      "assetsSize": 13101,
       "auxiliaryAssets": [
         {
-          "name": "tabs-list.js.map",
-          "size": 36989
+          "name": "ez-tabs-list.js.map",
+          "size": 38302
         }
       ],
       "filteredAuxiliaryAssets": 0,
-      "auxiliaryAssetsSize": 36989,
+      "auxiliaryAssetsSize": 38302,
       "children": {},
       "childAssets": {},
       "isOverSizeLimit": false
     }
   },
   "namedChunkGroups": {
-    "tabs-list": {
-      "name": "tabs-list",
+    "ez-tabs-list": {
+      "name": "ez-tabs-list",
       "chunks": [
-        769
+        900
       ],
       "assets": [
         {
-          "name": "tabs-list.js",
-          "size": 12712
+          "name": "ez-tabs-list.js",
+          "size": 13101
         }
       ],
       "filteredAssets": 0,
-      "assetsSize": 12712,
+      "assetsSize": 13101,
       "auxiliaryAssets": [
         {
-          "name": "tabs-list.js.map",
-          "size": 36989
+          "name": "ez-tabs-list.js.map",
+          "size": 38302
         }
       ],
       "filteredAuxiliaryAssets": 0,
-      "auxiliaryAssetsSize": 36989,
+      "auxiliaryAssetsSize": 38302,
       "children": {},
       "childAssets": {},
       "isOverSizeLimit": false
@@ -808,10 +808,10 @@
   "children": [
     {
       "name": "HtmlWebpackCompiler",
-      "hash": "987aab2dfe80282b8fbd",
+      "hash": "9aa1d52e7570984ba5f3",
       "version": "5.62.1",
-      "time": 233,
-      "builtAt": 1645443061616,
+      "time": 116,
+      "builtAt": 1645448916321,
       "publicPath": "",
       "outputPath": "F:\\node_workspace\\EzWebComponents\\dist",
       "assetsByChunkName": {},
@@ -822,9 +822,9 @@
           "initial": true,
           "entry": true,
           "recorded": false,
-          "size": 2910,
+          "size": 2970,
           "sizes": {
-            "javascript": 2470,
+            "javascript": 2530,
             "runtime": 440
           },
           "names": [
@@ -836,7 +836,7 @@
           ],
           "files": [],
           "auxiliaryFiles": [],
-          "hash": "687664ce0ead8e4b6e66",
+          "hash": "21becedcea8c9153a0f5",
           "childrenByOrder": {},
           "id": 563,
           "siblings": [],
@@ -847,9 +847,9 @@
               "type": "module",
               "moduleType": "javascript/auto",
               "layer": null,
-              "size": 2393,
+              "size": 2453,
               "sizes": {
-                "javascript": 2393
+                "javascript": 2453
               },
               "built": true,
               "codeGenerated": true,
@@ -1177,9 +1177,9 @@
           "type": "module",
           "moduleType": "javascript/auto",
           "layer": null,
-          "size": 2393,
+          "size": 2453,
           "sizes": {
-            "javascript": 2393
+            "javascript": 2453
           },
           "built": true,
           "codeGenerated": true,

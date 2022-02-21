@@ -7,7 +7,7 @@ module.exports = {
   watch: true,
   target: "web",
   entry: {
-    'tabs-list': './src/components/ez-tabs-list/ez-tabs-list.ts',
+    'ez-tabs-list': './src/components/ez-tabs-list/ez-tabs-list.ts',
   },
   module: {
     rules: [

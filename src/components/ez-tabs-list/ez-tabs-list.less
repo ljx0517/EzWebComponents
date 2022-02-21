@@ -47,15 +47,16 @@
 }
 
 .close-tab{
-  vertical-align: baseline;
+  vertical-align: middle;
   text-align: center;
   display: inline-block;
   font-size: 24px;
+  height: 100%;
   cursor: pointer;
-  width:24px;
-  height:24px;
-  line-height: 24px;
-  margin-top: 4px;
+  //width:24px;
+  //height:24px;
+  //line-height: 24px;
+  //margin-top: 4px;
 }
 .close-tab:hover{
   opacity: .7;
@@ -63,7 +64,7 @@
 
 
 
-
+.scroll-content > *:before , .close-tab:before { content:''; display:inline-block; height:100%; vertical-align:middle; }
 .scroll-content > *{
   font-family: Roboto,sans-serif;
   -moz-osx-font-smoothing: grayscale;
@@ -77,7 +78,7 @@
   padding: 0 12px;
   position: relative;
   display: -ms-flexbox;
-  display: flex;
+  display: inline-block;
   -ms-flex: 1 0 auto;
   flex: 1 0 auto;
   -ms-flex-pack: center;

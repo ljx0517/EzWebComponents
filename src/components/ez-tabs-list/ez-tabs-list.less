@@ -50,13 +50,9 @@
   vertical-align: middle;
   text-align: center;
   display: inline-block;
-  font-size: 24px;
+  font-size: var(--close-font-size, 1.3125rem);
   height: 100%;
   cursor: pointer;
-  //width:24px;
-  //height:24px;
-  //line-height: 24px;
-  //margin-top: 4px;
 }
 .close-tab:hover{
   opacity: .7;
@@ -66,18 +62,21 @@
 
 .scroll-content > *:before , .close-tab:before { content:''; display:inline-block; height:100%; vertical-align:middle; }
 .scroll-content > *{
+  width: var(--tab-width, auto);
+  padding: var(--tab-padding, 0 12px);
   font-family: Roboto,sans-serif;
   -moz-osx-font-smoothing: grayscale;
   -webkit-font-smoothing: antialiased;
-  font-size: .875rem;
-  line-height: 2.25rem;
+  font-size: var(--label-font-size, .875rem);
+  vertical-align: middle;
+  text-align: center;
+  //line-height: 2.25rem;
   font-weight: 500;
   letter-spacing: .0892857143em;
   text-decoration: none;
   text-transform: uppercase;
-  padding: 0 12px;
+
   position: relative;
-  display: -ms-flexbox;
   display: inline-block;
   -ms-flex: 1 0 auto;
   flex: 1 0 auto;
@@ -88,13 +87,14 @@
   margin: 0;
   border: none;
   outline: none;
-  background: none;
+  background: var(--tab-bg-color, none);;
   text-align: center;
   white-space: nowrap;
   cursor: pointer;
   -webkit-appearance: none;
   z-index: 1;
+  overflow: hidden;
 }
 .scroll-content > .active{
-  background: #ddd;
+  background: var(--active-tab-bg-color, #ddd);
 }

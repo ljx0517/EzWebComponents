@@ -85,3 +85,22 @@ tabs.addAfteActiveTabHooks(() => {
 })
 
 ```
+
+## style
+`--tab-width: auto;`
+
+`--tab-padding: 0 16px;`
+
+`--label-font-size: 16px;`
+
+`--tab-bg-color:#666;`
+
+`--active-tab-bg-color: #ccc;`
+
+```html
+<ez-tab-list id="qwe"
+             style="--tab-width: auto;--tab-padding: 0 16px;--label-font-size: 16px;--tab-bg-color:#666;--active-tab-bg-color: #ccc;"
+             custom="false" closeable="true" active-index="0" active-class="active">
+</ez-tab-list>
+
+```

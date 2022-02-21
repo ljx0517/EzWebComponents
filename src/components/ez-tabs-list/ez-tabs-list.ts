@@ -142,7 +142,7 @@ class EzTabList extends HTMLElement {
         const event = new CustomEvent('active-tab', { detail:idx});
         this.dispatchEvent(event)
         this.afterActiveTabHooks.map((fn: () => void) => {
-          return fn();
+          fn();
         })
       })
     }

@@ -1,12 +1,31 @@
 
-:host ul{
-  color: green;
+:host{
+
 }
-.ul {
+
+
+
+//.open {
+//  display: inline-block;
+//  -webkit-transform: scale(1);
+//  -ms-transform: scale(1);
+//  transform: scale(1);
+//  opacity: 1;
+//}
+
+
+
+
+
+
+.anchor {
+  /* */
+  position: relative;
+  overflow: visible;
+}
+
+slot[name=pop]::slotted(*) {
   min-width: 112px;
-  transform: scale(1);
-}
-.ul {
   display: none;
   position: absolute;
   -webkit-box-sizing: border-box;
@@ -39,4 +58,18 @@
   border-radius: 4px;
   transform-origin-left: top left;
   transform-origin-right: top right;
+}
+slot[name=pop].open::slotted(*) {
+  display: inline-block;
+  -webkit-transform: scale(1);
+  -ms-transform: scale(1);
+  transform: scale(1);
+  opacity: 1;
+}
+.backdrop{
+  background: #333;
+  display: none;
+}
+.open .backdrop{
+  display: block;
 }

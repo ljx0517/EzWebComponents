@@ -8,7 +8,7 @@ module.exports = {
   target: "web",
   entry: {
     'ez-tabs-list': './src/components/ez-tabs-list/ez-tabs-list.ts',
-    'ez-menu-list': './src/components/ez-menu-list/ez-menu-list.ts',
+    'ez-pop-wrapper': './src/components/ez-pop-wrapper/ez-pop-wrapper.ts',
   },
   module: {
     rules: [

@@ -52,21 +52,24 @@
   </ez-tab-list>
 </div>
 <div>
-  <ez-menu-list>
-      <span slot="element-name">slot</span>
-      <span slot="description">A placeholder inside a web
-    component that users can fill with their own markup,
-    with the effect of composing different DOM trees
-    together.</span>
-      <dl slot="attributes">
-        <dt>name</dt>
-        <dd>The name of the slot.</dd>
-      </dl>
-  </ez-menu-list>
+  <ez-pop-wrapper id="pp">
+    <div slot="title">aaaa</div>
+    <div slot="pop">
+      <details>
+        <summary>Details</summary>
+        <p>Something small enough to escape casual notice.</p>
+        <details>
+          <summary>Details</summary>
+          Something small enough to escape casual notice.
+        </details>
+      </details>
+    </div>
+  </ez-pop-wrapper>
 </div>
 <script>
     const qwe = document.querySelector('#qwe')
     const qwe2 = document.querySelector('#qweCol')
+    const pp = document.querySelector('#pp')
 
     qwe.addEventListener("close-tab", (e) => {
         console.log('close', e.detail)

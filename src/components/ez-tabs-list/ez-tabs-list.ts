@@ -153,7 +153,7 @@ class EzTabList extends HTMLElement {
         close.addEventListener("click", (e) => {
           e.stopPropagation();
           e.preventDefault();
-          const b4event = new CustomEvent('before-close-tab', { detail: i });
+          const b4event = new CustomEvent('before-close-tab', { detail: {item: e.target, index: i} });
           this.dispatchEvent(b4event);
           const result = this.beforeCloseHooks.map((fn: () => boolean) => {
             return fn();
@@ -162,7 +162,7 @@ class EzTabList extends HTMLElement {
             return;
           }
           (e.target as HTMLElement).parentElement.remove();
-          const event = new CustomEvent('close-tab', { detail: i });
+          const event = new CustomEvent('close-tab', { detail: {item: e.target, index: 1} });
           this.dispatchEvent(event);
           this.afterCloseHooks.map(fn => {
             return fn();
@@ -186,7 +186,7 @@ class EzTabList extends HTMLElement {
         if (!result) {
           return
         }
-        const event = new CustomEvent('active-tab', { detail:idx});
+        const event = new CustomEvent('active-tab', { detail:{item: e.target, index: idx} });
         this.dispatchEvent(event)
         this.afterActiveTabHooks.map((fn: () => void) => {
           fn();

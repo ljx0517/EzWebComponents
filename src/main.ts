@@ -1,2 +1,2 @@
 import './components/ez-tabs-list/ez-tabs-list'
-import './components/ez-menu-list/ez-menu-list'
+import './componentsez-pop-wrapper/ez-pop-wrapper'

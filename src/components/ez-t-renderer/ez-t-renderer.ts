@@ -88,7 +88,8 @@ const DataSourceHandler: ProxyHandler<any> = {
     return Reflect.deleteProperty(target, prop);
   },
   ownKeys(target: any) { // to intercept property list
-    return Object.keys(target).filter(key => !key.startsWith('_'));
+    // return Object.keys(target).filter(key => !key.startsWith('_'));
+    return Reflect.ownKeys(target);
   }
 
 }
@@ -132,6 +133,8 @@ class EzTRenderer extends HTMLElement {
   private varReflectMap: {
     [key: string]: ((args: any) => void)[]
   } = {};
+  private vdom: Node;
+  private vChildNodes: any[];
 
   constructor() {
     super();
@@ -140,18 +143,11 @@ class EzTRenderer extends HTMLElement {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     shadow.adoptedStyleSheets = [stylesheet];
-    const tmpl = document.querySelector('template');
-    const dom = tmpl.content.cloneNode(true);
-    tmpl.remove()
-    // const vdom = tmpl.content.cloneNode(true)
 
-    iterativelyWalk(dom.childNodes as unknown as |Node[], this.check)
-    this.shadowRoot.append(dom);
 
-    // shadow.innerHTML = `
-    //    <slot name="title" class="${style.anchor}"></slot>
-    //    <slot name="pop" tabIndex="-1"></slot>
-    // `.replace(/[\s\n]*\n[\s\n]*/g, '');
+    shadow.innerHTML = `
+       <slot></slot>
+    `.replace(/[\s\n]*\n[\s\n]*/g, '');
   }
 
   connectedCallback() {
@@ -163,8 +159,24 @@ class EzTRenderer extends HTMLElement {
       // @ts-ignore
       stylesheet.replaceSync(style.toString());
     }
-    const evt = new CustomEvent('ready', {detail: this});
-    this.dispatchEvent(evt);
+
+
+    // const tmpl = document.querySelector('template');
+    // const dom = tmpl.content.cloneNode(true);
+    debugger
+    // const tmpl = this.shadowRoot.querySelector('slot');
+    // this.vdom = tmpl.cloneNode(true);
+
+    this.vChildNodes = [];
+    for (let i = 0; i < this.childNodes.length; i++) {
+      this.vChildNodes.push(this.childNodes[i])
+    }
+    this.dispatchEvent( new CustomEvent('created', {detail: this}));
+    console.log(22222)
+    iterativelyWalk(this.childNodes as unknown as |Node[], this.check)
+    // tmpl.remove()
+    // this.shadowRoot.append(dom);
+    this.dispatchEvent( new CustomEvent('mounted', {detail: this}));
   }
   render() {
     //
@@ -185,6 +197,7 @@ class EzTRenderer extends HTMLElement {
         return
       }
       const internalKey = this.getInternalKey(key)
+      self.dataSource[internalKey] = val;
       Object.defineProperty(source, key, {
         get() {
           return self.dataSource[internalKey];
@@ -207,6 +220,9 @@ class EzTRenderer extends HTMLElement {
   }
 
   check = (node: HTMLElement): boolean => {
+    if (node.nodeType === 8) {
+      return ;
+    }
     debugger
     console.log('check', node);
     if (node.nodeType === 3) {
@@ -220,19 +236,33 @@ class EzTRenderer extends HTMLElement {
         const action = (args: any) => {
           node.textContent = args
         }
-        this.varReflectMap[internalKey].push(action)
+        this.varReflectMap[internalKey].push(action);
+        debugger
+        if (this.dataSource[internalKey]) {
+          action(this.dataSource[internalKey]);
+        }
       })
       return
     }
 
     for (let i = 0; i < node.attributes.length; i++) {
       const attrName = node.attributes[i].name as unknown as string;
-      const name = attrName.substring(1)
-      if (attrName.startsWith(':') && name in this.dataSource) {
-
+      const attrValue = node.attributes[i].value as unknown as string;
+      const name = this.getInternalKey(attrName.substring(1));
+      debugger // check attrValue is plain value of valur ref
+      const internalKey = this.getInternalKey(attrValue);
+      if (attrName.startsWith(':') && internalKey in this.dataSource) {
+        if (!this.varReflectMap[internalKey]) {
+          this.varReflectMap[internalKey] = [];
+        }
+        this.varReflectMap[internalKey].push((args) => {
+          node.attributes[i].value = args;
+        });
       }
-      if (attrName.startsWith('@') && name in this.dataSource) {
-
+      if (attrName.startsWith('@') && internalKey in this.dataSource) {
+        // this.varReflectMap[internalKey].push((args) => {
+        //
+        // })
       }
 
     }

@@ -70,7 +70,16 @@
 <div>
   <ez-t-render id="etr"  style="display: block;height: 30px;width: 100%;">
 <!--    <template>-->
-      <div :name="name">{{aaaa}}</div>
+    >
+    <if when="a > b">
+      <select name="" id="">
+        <for item="listItem">
+          <option :name="item.key" :value="item.value"></option>
+        </for>
+      </select>
+      <else/>
+    </if>
+    <div :name="name">{{aaaa}}</div>
 <!--    </template>-->
   </ez-t-render>
 </div>

@@ -66,6 +66,14 @@
     </div>
   </ez-pop-wrapper>
 </div>
+
+<div>
+  <ez-t-render id="etr" style="display: block;height: 30px;width: 100%;">
+    <template>
+      <div>{{aaaa}}</div>
+    </template>
+  </ez-t-render>
+</div>
 <script>
     const qwe = document.querySelector('#qwe')
     const qwe2 = document.querySelector('#qweCol')
@@ -78,6 +86,15 @@
         console.log('active', e.detail)
       e.stopPropagation();
       e.preventDefault();
+    });
+    etr.addEventListener('ready', (e) => {
+      console.log(e.target, e.detail, e.target == e.detail);
+      window.obj = {
+        aaaa: "123"
+      }
+      e.target.setDataSource(window.obj);
+      debugger
+      window.obj.aaaa = 'ddd'
     })
 </script>
 </body>

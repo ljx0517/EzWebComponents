@@ -18,7 +18,7 @@
   padding: 12px;
 }
 </style>
-<div style="height: 60px">
+<div style="display: none;height: 60px">
 <ez-tab-list id="qwe"
              style="--tab-width: auto;--tab-padding: 0 24px 0 12px;--label-font-size: 16px;--tab-bg-color:#666;--active-tab-bg-color: #ccc;"
              custom="false" closeable="true" active-index="0" active-class="active">
@@ -34,7 +34,7 @@
     <div class="tab">John Smith 9 </div>
     <div class="tab">John Smith 10 </div>
     <div class="tab">John Smith 000 </div>
-  </ez-tab-list>
+  </ez-tab-list><br><br><br><br>
 </div>
 <div style="width: 200px;height: 100px;overflow: hidden;">
   <ez-tab-list id="qweCol" custom="true" mode="col" custom="true" closeable="true" active-index="0" active-class="active">
@@ -51,10 +51,12 @@
     <div class="tab">John Smith 10 </div>
     <div class="tab">John Smith 000 </div>
   </ez-tab-list>
+  <br><br><br><br>
 </div>
 
 
-<div>
+
+<div style="display: none;">
   <ez-pop-wrapper id="pp">
     <div slot="title">aaaa</div>
     <div slot="pop" class="p12">
@@ -68,12 +70,23 @@
       </details>
     </div>
   </ez-pop-wrapper>
+  <br><br><br><br>
 </div>
+
 <div>
-  <ez-renderer id="re">
-    <div>{{aaaa}}</div>
-  </ez-renderer>
+  <ez-t-render id="etr"  style="display: block;height: 30px;width: 100%;">
+<!--    <template>-->
+    <if :true="a > b">
+      <select name="" id="">
+        <option :each-dog="listItem" name="aaaa" :value="dog.item">{{dog.index}}</option>
+      </select>
+    </if>
+    <div :name="name">{{aaaa}}</div>
+<!--    </template>-->
+  </ez-t-render>
 </div>
+
+
 
 
 
@@ -81,7 +94,6 @@
     const qwe = document.querySelector('#qwe')
     const qwe2 = document.querySelector('#qweCol')
     const pp = document.querySelector('#pp')
-    // const pp = document.querySelector('#ie')
 
     qwe.addEventListener("close-tab", (e) => {
         console.log('close', e.detail)
@@ -90,14 +102,20 @@
         console.log('active', e.detail)
       e.stopPropagation();
       e.preventDefault();
+    });
+    etr.addEventListener('created', (e) => {
+      // console.log(e.target, e.detail, e.target == e.detail);
+      console.log(111111)
+      window.obj = {
+        aaaa: "123",
+        name: 'hah',
+        a: 2,
+        b: 1,
+      }
+      e.target.setState(window.obj);
+      debugger
+      window.obj.aaaa = 'ddd'
     })
-    re.addEventListener('ready', (e) => {
-      const reel = e.detail
-      reel.setDataSource({
-        aaaa: "123123"
-      })
-    })
-
 </script>
 </body>
 </html>

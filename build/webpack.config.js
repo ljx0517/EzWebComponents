@@ -9,7 +9,7 @@ module.exports = {
   entry: {
     'ez-tabs-list': './src/components/ez-tabs-list/ez-tabs-list.ts',
     'ez-pop-wrapper': './src/components/ez-pop-wrapper/ez-pop-wrapper.ts',
-    'ez-renderer': './src/components/ez-renderer/ez-renderer.ts',
+    'ez-t-renderer': './src/components/ez-t-renderer/ez-t-renderer.ts',
   },
   module: {
     rules: [

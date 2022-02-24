@@ -114,7 +114,7 @@ class EzPopWrapper extends HTMLElement {
     shadow.adoptedStyleSheets = [stylesheet];
     shadow.innerHTML = `
        <slot name="title" class="${style.anchor}"></slot>
-       <slot name="pop" tabIndex="-1"></slot>
+       <slot name="pop" tabIndex="-1" class="${style.popSlot}"></slot>
     `.replace(/[\s\n]*\n[\s\n]*/g, '');
   }
 
@@ -264,20 +264,19 @@ class EzPopWrapper extends HTMLElement {
     }
   }
   setPosition (position:  Partial<IDistance>) {
-      const rootHTML = this.anchor as HTMLElement;
-      rootHTML.style.left = 'left' in position ? `${position.left}px` : '';
+    const rootHTML = this.targetItem as HTMLElement;
+    rootHTML.style.left = 'left' in position ? `${position.left}px` : '';
     rootHTML.style.right = 'right' in position ? `${position.right}px` : '';
-  rootHTML.style.top = 'top' in position ? `${position.top}px` : '';
-  rootHTML.style.bottom =
-  'bottom' in position ? `${position.bottom}px` : '';
+    rootHTML.style.top = 'top' in position ? `${position.top}px` : '';
+    rootHTML.style.bottom = 'bottom' in position ? `${position.bottom}px` : '';
   }
   setMaxHeight(height: string) {
-    (this.anchor as HTMLElement).style.maxHeight = height;
+    (this.targetItem as HTMLElement).style.maxHeight = height;
   }
   setTransformOrigin (origin: string) {
     const propertyName = `transform-origin`;
      // (this.root as HTMLElement).style.setProperty(propertyName, origin);
-     (this.anchor as HTMLElement).style.setProperty(propertyName, origin);
+     (this.targetItem as HTMLElement).style.setProperty(propertyName, origin);
   }
   /**
    * Calculates the offsets for positioning the menu-surface when the

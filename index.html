@@ -14,7 +14,9 @@
 .tab.active{
     background: #ddd;
 }
-
+.p12{
+  padding: 12px;
+}
 </style>
 <div style="height: 60px">
 <ez-tab-list id="qwe"
@@ -34,7 +36,6 @@
     <div class="tab">John Smith 000 </div>
   </ez-tab-list>
 </div>
-<br><br><br><br>
 <div style="width: 200px;height: 100px;overflow: hidden;">
   <ez-tab-list id="qweCol" custom="true" mode="col" custom="true" closeable="true" active-index="0" active-class="active">
     <div class="tab">John Smith 111111 </div>
@@ -51,10 +52,12 @@
     <div class="tab">John Smith 000 </div>
   </ez-tab-list>
 </div>
+
+
 <div>
   <ez-pop-wrapper id="pp">
     <div slot="title">aaaa</div>
-    <div slot="pop">
+    <div slot="pop" class="p12">
       <details>
         <summary>Details</summary>
         <p>Something small enough to escape casual notice.</p>
@@ -66,10 +69,19 @@
     </div>
   </ez-pop-wrapper>
 </div>
+<div>
+  <ez-renderer id="re">
+    <div>{{aaaa}}</div>
+  </ez-renderer>
+</div>
+
+
+
 <script>
     const qwe = document.querySelector('#qwe')
     const qwe2 = document.querySelector('#qweCol')
     const pp = document.querySelector('#pp')
+    // const pp = document.querySelector('#ie')
 
     qwe.addEventListener("close-tab", (e) => {
         console.log('close', e.detail)
@@ -79,6 +91,13 @@
       e.stopPropagation();
       e.preventDefault();
     })
+    re.addEventListener('ready', (e) => {
+      const reel = e.detail
+      reel.setDataSource({
+        aaaa: "123123"
+      })
+    })
+
 </script>
 </body>
 </html>

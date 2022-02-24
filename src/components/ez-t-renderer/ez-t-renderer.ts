@@ -169,6 +169,9 @@ class EzTRenderer extends HTMLElement {
   private varReflectMap: {
     [key: string]: ((args: any) => void)[]
   } = {};
+  private varNodeMap: {
+    [key: string]: VELEMENT[]
+  } = {}
   private expressionNodeMap = new WeakMap();
   private originalChildNodes: any[];
   private virtualChildNodes: any[];
@@ -249,11 +252,14 @@ class EzTRenderer extends HTMLElement {
 
         set(value) {
           self.__state[internalKey] = value;
-          if (self.varReflectMap[internalKey]) {
-            self.varReflectMap[internalKey].forEach(fn => {
-              fn(value)
-            })
+          if (this.varNodeMap[internalKey]) {
+            this.varNodeMap[internalKey].dirty = true;
           }
+          // if (self.varReflectMap[internalKey]) {
+          //   self.varReflectMap[internalKey].forEach(fn => {
+          //     fn(value)
+          //   })
+          // }
         }
       });
 
@@ -281,17 +287,23 @@ class EzTRenderer extends HTMLElement {
       const vars = extractVars(txtNode.wholeText);
       vars.forEach((key) => {
         const internalKey = this.getInternalKey(key);
-        if (!this.varReflectMap[internalKey]) {
-          this.varReflectMap[internalKey] = [];
+        if (!this.varNodeMap[internalKey]) {
+          this.varNodeMap[internalKey] = [];
         }
-        const action = (args: any) => {
-          node.textContent = args
-        }
-        this.varReflectMap[internalKey].push(action);
-        debugger
-        if (this.__state[internalKey]) {
-          action(this.__state[internalKey]);
-        }
+        this.varNodeMap[internalKey].push(node)
+
+
+        // if (!this.varReflectMap[internalKey]) {
+        //   this.varReflectMap[internalKey] = [];
+        // }
+        // const action = (args: any) => {
+        //   node.textContent = args
+        // }
+        // this.varReflectMap[internalKey].push(action);
+        // debugger
+        // if (this.__state[internalKey]) {
+        //   action(this.__state[internalKey]);
+        // }
       })
       return
     }
@@ -315,23 +327,27 @@ class EzTRenderer extends HTMLElement {
         const exp = `${attrName.substring(1)} === ${attrValue}`;
         this.expressionNodeMap.set(lambda(exp), node)
       }
-      if (attrName.startsWith(':each-')) { // for loop
-        internalKey = this.getInternalKey(attrName.replace(':each-', ''))
-        if (!this.varReflectMap[internalKey]) {
-          this.varReflectMap[internalKey] = [];
-        }
-        this.varReflectMap[internalKey].push((args) => {
-          node.attributes[i].value = args;
-        })
-      }
+      // if (attrName.startsWith(':each-')) { // for loop
+      //   // internalKey = this.getInternalKey(attrName.replace(':each-', ''))
+      //   internalKey = this.getInternalKey(attrValue)
+      //   if (!this.varNodeMap[internalKey]) {
+      //     this.varNodeMap[internalKey] = [];
+      //   }
+      //   this.varNodeMap[internalKey].push(node)
+      // }
 
       if (attrName.startsWith(':') && internalKey in this.__state) {
-        if (!this.varReflectMap[internalKey]) {
-          this.varReflectMap[internalKey] = [];
+        // if (!this.varReflectMap[internalKey]) {
+        //   this.varReflectMap[internalKey] = [];
+        // }
+        // this.varReflectMap[internalKey].push((args) => {
+        //   node.attributes[i].value = args;
+        // });
+        internalKey = this.getInternalKey(attrValue)
+        if (!this.varNodeMap[internalKey]) {
+          this.varNodeMap[internalKey] = [];
         }
-        this.varReflectMap[internalKey].push((args) => {
-          node.attributes[i].value = args;
-        });
+        this.varNodeMap[internalKey].push(node)
       }
       if (attrName.startsWith('@') && internalKey in this.__state) {
         // this.varReflectMap[internalKey].push((args) => {

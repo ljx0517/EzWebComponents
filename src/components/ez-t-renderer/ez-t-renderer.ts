@@ -1,20 +1,56 @@
 import * as style from "./ez-t-renderer.less"
+const ELEMENT_NODE = 1;
+const DOCUMENT_FRAGMENT_NODE = 11;
+const TEXT_NODE = 3;
+const COMMENT_NODE = 8;
+
+enum LOOP_CONDITION_STATEMENT {
+  CONTINUE,
+  BREAK,
+  RETURN,
+  NOTHING
+}
+type VELEMENT  = HTMLElement & {dirty: boolean}
+function lambda(exp: string){
+  const sanitized = `console.log(obj);with(obj){return ${exp}}`
+  return Function('obj', sanitized);
+}
+// const expressionString = (function(){
+//   const cache: {[key: string]: CallableFunction} = {};
+//
+//   function expressionTemplate(exp: string){
+//     let fn = cache[exp];
+//     if (!fn){
+//       const sanitized = `with(obj){return ${exp}}`
+//       fn = Function('obj', sanitized);
+//     }
+//     return fn;
+//   }
+//   return expressionTemplate;
+// })();
+
 const stylesheet = new CSSStyleSheet();
 const slice = Array.prototype.slice
 
-function iterativelyWalk(nodes: Node|Node[], check: (n: HTMLElement) => boolean) {
+function walk(nodes: Node|Node[], check: (n: VELEMENT) => LOOP_CONDITION_STATEMENT) {
   if (!('length' in nodes)) {
     nodes = [nodes]
   }
 
   nodes = slice.call(nodes)
 
-  while((nodes as  HTMLElement[]).length) {
-    const node = (nodes as  HTMLElement[]).shift()
+  while((nodes as  VELEMENT[]).length) {
+    const node = (nodes as  VELEMENT[]).shift()
     const ret = check(node)
 
-    if (ret) {
-      return ret
+    if (ret === LOOP_CONDITION_STATEMENT.CONTINUE) {
+      continue
+    }
+    if (ret === LOOP_CONDITION_STATEMENT.BREAK) {
+      break
+    }
+    if (ret === LOOP_CONDITION_STATEMENT.RETURN) {
+      return
     }
 
     if (node.childNodes && node.childNodes.length) {
@@ -69,7 +105,7 @@ function extractVars(template: string, openChar = "{{", closeChar = "}}") {
 }
 
 
-const DataSourceHandler: ProxyHandler<any> = {
+const StateHandle: ProxyHandler<any> = {
   get(target: any, prop: string, receiver) {
     // let value = target[prop];
     // return (typeof value === 'function') ? value.bind(target) : value; // (*)
@@ -78,7 +114,7 @@ const DataSourceHandler: ProxyHandler<any> = {
   set(target: any, prop: string, val, receiver) { // to intercept property writing
     let newVal = val
     if (val && typeof val === 'object') {
-      newVal = new DataSourceProxy(val);
+      newVal = new StateProxy(val);
     }
     return Reflect.set(target, prop, newVal, receiver);
   },
@@ -97,9 +133,9 @@ const DataSourceHandler: ProxyHandler<any> = {
 
 
 
-class DataSourceProxy<T> {
+class StateProxy<T> {
   constructor(source: T) {
-    return new Proxy(source, DataSourceHandler);
+    return new Proxy(source, StateHandle);
   }
 }
 
@@ -114,7 +150,7 @@ const loopNestedObj = (obj: any) => {
       //do nothing
     }
   });
-  return new DataSourceProxy(obj)
+  return new StateProxy(obj)
 };
 
 
@@ -125,16 +161,17 @@ class EzTRenderer extends HTMLElement {
   private afterCloseHooks: (() => void)[] = [];
   private beforeActiveTabHooks:(() => boolean)[] = [];
   private afterActiveTabHooks: (() => void)[] = [];
-  private dataSource:{
+  private __state:{
   [key: string]: any
-} = new DataSourceProxy<{[key: string]: any}>({});
+} = new StateProxy<{[key: string]: any}>({});
   // private dataSource: {[key: string]: any} = {};
 
   private varReflectMap: {
     [key: string]: ((args: any) => void)[]
   } = {};
-  private vdom: Node;
-  private vChildNodes: any[];
+  private expressionNodeMap = new WeakMap();
+  private originalChildNodes: any[];
+  private virtualChildNodes: any[];
 
   constructor() {
     super();
@@ -167,13 +204,19 @@ class EzTRenderer extends HTMLElement {
     // const tmpl = this.shadowRoot.querySelector('slot');
     // this.vdom = tmpl.cloneNode(true);
 
-    this.vChildNodes = [];
+    this.originalChildNodes = [];
     for (let i = 0; i < this.childNodes.length; i++) {
-      this.vChildNodes.push(this.childNodes[i])
+      const n = this.childNodes[i];
+      if(n.nodeType == COMMENT_NODE
+        || n.nodeType == DOCUMENT_FRAGMENT_NODE
+        || n.nodeName == 'SCRIPT') {
+        continue;
+      }
+      this.originalChildNodes.push(this.childNodes[i].cloneNode(true))
     }
-    this.dispatchEvent( new CustomEvent('created', {detail: this}));
+    this.dispatchEvent(new CustomEvent('created', {detail: this}));
     console.log(22222)
-    iterativelyWalk(this.childNodes as unknown as |Node[], this.check)
+    walk(this.originalChildNodes as unknown as |VELEMENT[], this.check)
     // tmpl.remove()
     // this.shadowRoot.append(dom);
     this.dispatchEvent( new CustomEvent('mounted', {detail: this}));
@@ -185,9 +228,10 @@ class EzTRenderer extends HTMLElement {
 
 
   getInternalKey(key: string) {
-    return `__ez__|${key}`
+    // return `__ez__|${key}`
+    return key
   }
-  setDataSource(source: any) {
+  setState(source: any) {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     Object.entries(source).forEach(([key, val]) => {
@@ -197,14 +241,14 @@ class EzTRenderer extends HTMLElement {
         return
       }
       const internalKey = this.getInternalKey(key)
-      self.dataSource[internalKey] = val;
+      self.__state[internalKey] = val;
       Object.defineProperty(source, key, {
         get() {
-          return self.dataSource[internalKey];
+          return self.__state[internalKey];
         },
 
         set(value) {
-          self.dataSource[internalKey] = value;
+          self.__state[internalKey] = value;
           if (self.varReflectMap[internalKey]) {
             self.varReflectMap[internalKey].forEach(fn => {
               fn(value)
@@ -219,13 +263,20 @@ class EzTRenderer extends HTMLElement {
     this.render();
   }
 
-  check = (node: HTMLElement): boolean => {
-    if (node.nodeType === 8) {
+  check = (node: VELEMENT): LOOP_CONDITION_STATEMENT => {
+    node.dirty = false;
+    if (node.nodeName == 'SCRIPT') {
+      return;
+    }
+    if (node.nodeType === COMMENT_NODE || node.nodeType === DOCUMENT_FRAGMENT_NODE) { // comment & DOCUMENT_FRAGMENT_NODE
       return ;
     }
-    debugger
-    console.log('check', node);
-    if (node.nodeType === 3) {
+
+
+
+
+    console.log('check', node.nodeType, node.nodeName, node);
+    if (node.nodeType === TEXT_NODE) {
       const txtNode = (node as unknown as Text)
       const vars = extractVars(txtNode.wholeText);
       vars.forEach((key) => {
@@ -238,8 +289,8 @@ class EzTRenderer extends HTMLElement {
         }
         this.varReflectMap[internalKey].push(action);
         debugger
-        if (this.dataSource[internalKey]) {
-          action(this.dataSource[internalKey]);
+        if (this.__state[internalKey]) {
+          action(this.__state[internalKey]);
         }
       })
       return
@@ -249,9 +300,33 @@ class EzTRenderer extends HTMLElement {
       const attrName = node.attributes[i].name as unknown as string;
       const attrValue = node.attributes[i].value as unknown as string;
       const name = this.getInternalKey(attrName.substring(1));
-      debugger // check attrValue is plain value of valur ref
-      const internalKey = this.getInternalKey(attrValue);
-      if (attrName.startsWith(':') && internalKey in this.dataSource) {
+      let internalKey = this.getInternalKey(attrValue);
+      // if (node.tagName === 'IF') {
+      //   const exp = `${attrName.substring(1)} === ${attrValue}`;
+      //   const result = lambda(exp)(this.__state)
+      //   debugger
+      //   if (!result) {
+      //     return LOOP_CONDITION_STATEMENT.CONTINUE
+      //   }
+      // }
+
+      // check attrValue is plain value of valur ref
+      if (attrName.startsWith(':') && node.tagName === 'IF') { // if expression
+        const exp = `${attrName.substring(1)} === ${attrValue}`;
+        this.expressionNodeMap.set(lambda(exp), node)
+      }
+      if (attrName.startsWith(':each-')) { // for loop
+        internalKey = this.getInternalKey(attrName.replace(':each-', ''))
+        if (!this.varReflectMap[internalKey]) {
+          this.varReflectMap[internalKey] = [];
+        }
+        this.varReflectMap[internalKey].push((args) => {
+          node.attributes[i].value = args;
+        })
+      }
+
+
+      if (attrName.startsWith(':') && internalKey in this.__state) {
         if (!this.varReflectMap[internalKey]) {
           this.varReflectMap[internalKey] = [];
         }
@@ -259,7 +334,7 @@ class EzTRenderer extends HTMLElement {
           node.attributes[i].value = args;
         });
       }
-      if (attrName.startsWith('@') && internalKey in this.dataSource) {
+      if (attrName.startsWith('@') && internalKey in this.__state) {
         // this.varReflectMap[internalKey].push((args) => {
         //
         // })
@@ -268,7 +343,7 @@ class EzTRenderer extends HTMLElement {
     }
 
 
-    return false; // true will break walker
+    return LOOP_CONDITION_STATEMENT.NOTHING; // true will break walker
   }
 
 

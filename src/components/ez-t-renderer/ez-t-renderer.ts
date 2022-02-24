@@ -325,7 +325,6 @@ class EzTRenderer extends HTMLElement {
         })
       }
 
-
       if (attrName.startsWith(':') && internalKey in this.__state) {
         if (!this.varReflectMap[internalKey]) {
           this.varReflectMap[internalKey] = [];

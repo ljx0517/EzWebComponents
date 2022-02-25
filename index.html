@@ -14,7 +14,9 @@
 .tab.active{
     background: #ddd;
 }
-
+.p12{
+  padding: 12px;
+}
 </style>
 <div style="display: none;height: 60px">
 <ez-tab-list id="qwe"
@@ -52,10 +54,13 @@
   </ez-tab-list>
   <br><br><br><br>
 </div>
+
+
+
 <div style="display: none;">
   <ez-pop-wrapper id="pp">
     <div slot="title">aaaa</div>
-    <div slot="pop">
+    <div slot="pop" class="p12">
       <details>
         <summary>Details</summary>
         <p>Something small enough to escape casual notice.</p>
@@ -82,6 +87,11 @@
 <!--    </template>-->
   </ez-t-render>
 </div>
+
+
+
+
+
 <script>
     const qwe = document.querySelector('#qwe')
     const qwe2 = document.querySelector('#qweCol')

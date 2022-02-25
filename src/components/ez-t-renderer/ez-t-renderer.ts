@@ -10,7 +10,44 @@ enum LOOP_CONDITION_STATEMENT {
   RETURN,
   NOTHING
 }
+
+enum DOM_RENDER_ACTION_TYPE {
+  REPLACE,
+  REORDER,
+  ATTRS,
+  TEXT
+}
+
 type VELEMENT  = HTMLElement & {dirty: boolean}
+
+class DirtyableValue  {
+  private _value: any;
+  private _dirty= false;
+  constructor(value: any) {
+    this._value = value;
+  }
+
+  get value() {
+    return this._value
+  }
+  set value (val: any){
+    this._dirty = true;
+    this._value = val;
+  }
+  get isDirty () {
+    return this._dirty;
+  }
+  reset() {
+    this._dirty = false;
+  }
+  toString () {
+    return `<DirtyableValue>${this._value}`;
+  }
+  valueOf () {
+    return this._value;
+  }
+
+}
 function lambda(exp: string){
   const sanitized = `console.log(obj);with(obj){return ${exp}}`
   return Function('obj', sanitized);
@@ -32,14 +69,14 @@ function lambda(exp: string){
 const stylesheet = new CSSStyleSheet();
 const slice = Array.prototype.slice
 
-function walk(nodes: Node|Node[], check: (n: VELEMENT) => LOOP_CONDITION_STATEMENT) {
+function walk(nodes: Node|Node[]|NodeListOf<ChildNode>, check: (n: VELEMENT) => LOOP_CONDITION_STATEMENT) {
   if (!('length' in nodes)) {
     nodes = [nodes]
   }
 
   nodes = slice.call(nodes)
 
-  while((nodes as  VELEMENT[]).length) {
+  while((nodes as VELEMENT[]).length) {
     const node = (nodes as  VELEMENT[]).shift()
     const ret = check(node)
 
@@ -58,7 +95,45 @@ function walk(nodes: Node|Node[], check: (n: VELEMENT) => LOOP_CONDITION_STATEME
     }
   }
 }
+function watchDom(fragment: Node, check: (n: VELEMENT) => LOOP_CONDITION_STATEMENT) {
+  const mutationRecords = [];
+  const callback = function(mutationsList: MutationRecord[], observer: MutationObserver) {
+    console.log(mutationsList, observer );
+    // // Use traditional 'for loops' for IE 11
+    // for(const mutation of mutationsList) {
+    //   if (mutation.type === 'childList') {
+    //     console.log('A child node has been added or removed.');
+    //   }
+    //   else if (mutation.type === 'attributes') {
+    //     console.log('The ' + mutation.attributeName + ' attribute was modified.');
+    //   }
+    // }
+  };
+  const observer = new MutationObserver(callback);
+  // Start observing the target node for configured mutations
+  observer.observe(fragment, {
+    childList: true, // observe direct children
+    subtree: true, // and lower descendants too
+    attributes: true,
+    attributeOldValue: true,
+    characterDataOldValue: true, // pass old data to callback
+    characterData: true,
+  });
 
+  try{
+    walk(fragment.childNodes, check)
+  } catch(e) {
+    //
+  } finally {
+    // get a list of unprocessed mutations
+    // should be called before disconnecting,
+    // if you care about possibly unhandled recent mutations
+    const unhandledMutationRecords = observer.takeRecords();
+    unhandledMutationRecords.forEach(MutationRecord => mutationRecords.push(MutationRecord))
+    // Later, you can stop observing
+    observer.disconnect();
+  }
+}
 function subStrAtPos(tpl: string, step: number , pos: number) {
   const f = []
   for (let i = 0; i < step; i++) {
@@ -164,7 +239,10 @@ class EzTRenderer extends HTMLElement {
   private __state:{
   [key: string]: any
 } = new StateProxy<{[key: string]: any}>({});
-  // private dataSource: {[key: string]: any} = {};
+
+  // private __state:{
+  //   [key: string]: DirtyableValue
+  // } = new StateProxy<{[key: string]: DirtyableValue}>({});
 
   private varReflectMap: {
     [key: string]: ((args: any) => void)[]
@@ -173,8 +251,10 @@ class EzTRenderer extends HTMLElement {
     [key: string]: VELEMENT[]
   } = {}
   private expressionNodeMap = new WeakMap();
-  private originalChildNodes: any[];
-  private virtualChildNodes: any[];
+  private rendererNodeMap = new WeakMap();
+  private originalDomFragment: DocumentFragment;
+  // private virtualChildNodes: any[];
+  // private calcDomFragment: DocumentFragment;
 
   constructor() {
     super();
@@ -207,23 +287,36 @@ class EzTRenderer extends HTMLElement {
     // const tmpl = this.shadowRoot.querySelector('slot');
     // this.vdom = tmpl.cloneNode(true);
 
-    this.originalChildNodes = [];
-    for (let i = 0; i < this.childNodes.length; i++) {
-      const n = this.childNodes[i];
-      if(n.nodeType == COMMENT_NODE
-        || n.nodeType == DOCUMENT_FRAGMENT_NODE
-        || n.nodeName == 'SCRIPT') {
-        continue;
-      }
-      this.originalChildNodes.push(this.childNodes[i].cloneNode(true))
-    }
+    // this.originalDomFragment = document.createDocumentFragment();
+    // // this.calcDomFragment = document.createDocumentFragment();
+    // while (this.childNodes.length) {
+    //   const n = this.childNodes[0];
+    //   if(n.nodeType == COMMENT_NODE
+    //     || n.nodeType == DOCUMENT_FRAGMENT_NODE
+    //     || n.nodeName == 'SCRIPT') {
+    //     n.remove()
+    //     continue;
+    //   }
+    //   console.log(n);
+    //   // this.originalDomFragment.appendChild(n)
+    //   this.originalDomFragment.appendChild(n.cloneNode(true))
+    //   // this.calcDomFragment.appendChild(n);
+    // }
     this.dispatchEvent(new CustomEvent('created', {detail: this}));
     console.log(22222)
-    walk(this.originalChildNodes as unknown as |VELEMENT[], this.check)
+    // walk(this.originalChildNodes.childNodes, (node) => {
+    //   this.rendererNodeMap.set(node, node.cloneNode())
+    //   this.calcChildNodes.appendChild(node)
+    //   return LOOP_CONDITION_STATEMENT.NOTHING
+    // })
+    // walk(this.originalDomFragment.childNodes, this.check)
+    walk(this.childNodes, this.check)
+    // walk(this.originalChildNodes.cloneNode(true), this.check)
     // tmpl.remove()
     // this.shadowRoot.append(dom);
     this.dispatchEvent( new CustomEvent('mounted', {detail: this}));
   }
+
   render() {
     //
   }
@@ -234,7 +327,43 @@ class EzTRenderer extends HTMLElement {
     // return `__ez__|${key}`
     return key
   }
+  makeStateReflectable(source: any, root='') {
+    // console.log('root', root);
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+    Object.entries(source).forEach(([key, val]) => {
+      const pathKey = `${root ? `${root}.` : ''}${key}`;
+      console.log('pathKey', pathKey);
+      if (val && typeof val === "object") {
+        self.makeStateReflectable(val, pathKey);
+        return
+      }
+      const internalKey = this.getInternalKey(pathKey)
+      self.__state[internalKey] = val;
+      Object.defineProperty(source, key, {
+        get() {
+          console.log('[state] [GET]', internalKey, self.__state[internalKey]);
+          return self.__state[internalKey];
+        },
+
+        set(value) {
+          console.log('[state] [SET]', internalKey, value);
+          self.__state[internalKey] = value;
+          // if (this.varNodeMap[internalKey]) {
+          //   this.varNodeMap[internalKey].dirty = true;
+          // }
+          // if (self.varReflectMap[internalKey]) {
+          //   self.varReflectMap[internalKey].forEach(fn => {
+          //     fn(value)
+          //   })
+          // }
+        }
+      });
+
+    })
+  }
   setState(source: any) {
+    return this.makeStateReflectable(source);
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
     Object.entries(source).forEach(([key, val]) => {
@@ -279,12 +408,20 @@ class EzTRenderer extends HTMLElement {
     }
 
 
-
-
     console.log('check', node.nodeType, node.nodeName, node);
     if (node.nodeType === TEXT_NODE) {
-      const txtNode = (node as unknown as Text)
+      const txtNode = (node as unknown as Text);
+
+
+      // const txtExp = txtNode.wholeText
+      //   .replace(/\{\{/gi, '`${', )
+      //   .replace(/\}\}/gi, '}`', )
+      // const txt = lambda(txtExp)(this.__state)
+
       const vars = extractVars(txtNode.wholeText);
+      if (vars.length) {
+
+      }
       vars.forEach((key) => {
         const internalKey = this.getInternalKey(key);
         if (!this.varNodeMap[internalKey]) {

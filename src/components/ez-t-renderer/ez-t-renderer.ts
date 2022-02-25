@@ -48,10 +48,7 @@ class DirtyableValue  {
   }
 
 }
-function lambda(exp: string){
-  const sanitized = `console.log(obj);with(obj){return ${exp}}`
-  return Function('obj', sanitized);
-}
+
 // const expressionString = (function(){
 //   const cache: {[key: string]: CallableFunction} = {};
 //
@@ -66,9 +63,54 @@ function lambda(exp: string){
 //   return expressionTemplate;
 // })();
 
+// https://stackoverflow.com/questions/543533/restricting-eval-to-a-narrow-scope
+// https://stackoverflow.com/questions/61552/are-there-legitimate-uses-for-javascripts-with-statement
+function ___lambda(exp: string,ctx={}, node:any=null) {
+  if (node) {
+    ctx = new Proxy(ctx,{
+      has:()=>true,
+      get: (target: any, prop: string, receiver) => {
+        console.log( prop, prop in target)
+        if (Object.prototype.hasOwnProperty.call(target, prop)) {
+          if (!varNodeMap[prop]) {
+            varNodeMap[prop] = new Set<VELEMENT>()
+          }
+          varNodeMap[prop].add(node)
+        }
+        return Reflect.get(target, prop, receiver);
+      },
+    })
+  }
+
+  // execute script in private context
+  const func = (new Function( `with(this) { return ${exp};}`));
+  return func.call(ctx);
+}
+
+const lambda: CallableFunction = (function(){
+  const cache: {[key: string]: CallableFunction} = {};
+
+  function expressionTemplate(exp: string){
+    let fn = cache[exp];
+    if (!fn){
+      fn =(new Function( 'ctx', `with(ctx) { return ${exp};}`));
+      cache[exp] = fn;
+    }
+    return fn;
+  }
+  return expressionTemplate;
+})();
+
+
+
 const stylesheet = new CSSStyleSheet();
 const slice = Array.prototype.slice
-
+const varNodeMap: {
+  [key: string]: Set<VELEMENT>
+} = {};
+const varActionMap: {
+  [key: string]: Set<any>
+} = {};
 function walk(nodes: Node|Node[]|NodeListOf<ChildNode>, check: (n: VELEMENT) => LOOP_CONDITION_STATEMENT) {
   if (!('length' in nodes)) {
     nodes = [nodes]
@@ -181,9 +223,37 @@ function extractVars(template: string, openChar = "{{", closeChar = "}}") {
 
 
 const StateHandle: ProxyHandler<any> = {
+  has:() => true,
   get(target: any, prop: string, receiver) {
+    if (prop === 'startRecordExpressionVars') {
+      this.recordExpressionVars = []
+      return () => {
+        //
+      };
+    }
+    if (prop === 'stopRecordExpressionVars') {
+      return () => {
+        const result = [...this.recordExpressionVars]
+        try{
+          return result;
+        } finally {
+          this.recordExpressionVars.length = 0;
+          delete this.recordExpressionVars;
+        }
+      }
+
+
+    }
+
     // let value = target[prop];
     // return (typeof value === 'function') ? value.bind(target) : value; // (*)
+    console.log( '__state get', prop, prop in target)
+    if (Object.prototype.hasOwnProperty.call(target, prop)) {
+      if (this.recordExpressionVars) {
+        this.recordExpressionVars.push(prop)
+      }
+      // varNodeMap[prop] = node
+    }
     return Reflect.get(target, prop, receiver);
   },
   set(target: any, prop: string, val, receiver) { // to intercept property writing
@@ -247,11 +317,18 @@ class EzTRenderer extends HTMLElement {
   private varReflectMap: {
     [key: string]: ((args: any) => void)[]
   } = {};
-  private varNodeMap: {
-    [key: string]: VELEMENT[]
-  } = {}
+  // private varNodeMap: {
+  //   [key: string]: VELEMENT[]
+  // } = {}
+  // private varNodeMap: {
+  //   [key: string]: Set<VELEMENT>
+  // } = {};
+  private varActionMap: {
+    [key: string]: CallableFunction[]
+  } = {};
   private expressionNodeMap = new WeakMap();
   private rendererNodeMap = new WeakMap();
+  private rendererNodeObj: {[key: string]: any} = {};
   private originalDomFragment: DocumentFragment;
   // private virtualChildNodes: any[];
   // private calcDomFragment: DocumentFragment;
@@ -321,6 +398,30 @@ class EzTRenderer extends HTMLElement {
     //
   }
 
+// https://stackoverflow.com/questions/543533/restricting-eval-to-a-narrow-scope
+// https://stackoverflow.com/questions/61552/are-there-legitimate-uses-for-javascripts-with-statement
+  ____lambda(exp: string,ctx={}, node:any=null) {
+    if (node) {
+      ctx = new Proxy(ctx,{
+        has:()=>true,
+        get: (target: any, prop: string, receiver) => {
+          console.log( prop, prop in target)
+          if (Object.prototype.hasOwnProperty.call(target, prop)) {
+            if (!varNodeMap[prop]) {
+              varNodeMap[prop] = new Set<VELEMENT>()
+            }
+            varNodeMap[prop].add(node)
+          }
+          return Reflect.get(target, prop, receiver);
+        },
+      })
+    }
+
+    // execute script in private context
+    const func = (new Function( `with(this) { return ${exp};}`));
+    return func.call(ctx);
+  }
+
 
 
   getInternalKey(key: string) {
@@ -349,9 +450,11 @@ class EzTRenderer extends HTMLElement {
         set(value) {
           console.log('[state] [SET]', internalKey, value);
           self.__state[internalKey] = value;
-          // if (this.varNodeMap[internalKey]) {
-          //   this.varNodeMap[internalKey].dirty = true;
-          // }
+          if (self.varActionMap[internalKey]) {
+            self.varActionMap[internalKey].forEach(act => {
+              act()
+            })
+          }
           // if (self.varReflectMap[internalKey]) {
           //   self.varReflectMap[internalKey].forEach(fn => {
           //     fn(value)
@@ -363,38 +466,7 @@ class EzTRenderer extends HTMLElement {
     })
   }
   setState(source: any) {
-    return this.makeStateReflectable(source);
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const self = this;
-    Object.entries(source).forEach(([key, val]) => {
-      // this.dataSource[`__ez__|${key}`] = val;
-      if (val && typeof val === "object") {
-        source[key] = loopNestedObj(val);
-        return
-      }
-      const internalKey = this.getInternalKey(key)
-      self.__state[internalKey] = val;
-      Object.defineProperty(source, key, {
-        get() {
-          return self.__state[internalKey];
-        },
-
-        set(value) {
-          self.__state[internalKey] = value;
-          if (this.varNodeMap[internalKey]) {
-            this.varNodeMap[internalKey].dirty = true;
-          }
-          // if (self.varReflectMap[internalKey]) {
-          //   self.varReflectMap[internalKey].forEach(fn => {
-          //     fn(value)
-          //   })
-          // }
-        }
-      });
-
-    })
-    // this.dataSource = loopNestedObj(source);
-    // this.dataSource = source; ;
+    this.makeStateReflectable(source);
     this.render();
   }
 
@@ -408,40 +480,52 @@ class EzTRenderer extends HTMLElement {
     }
 
 
-    console.log('check', node.nodeType, node.nodeName, node);
+    // console.log('check', node.nodeType, node.nodeName, node);
     if (node.nodeType === TEXT_NODE) {
       const txtNode = (node as unknown as Text);
 
 
-      // const txtExp = txtNode.wholeText
-      //   .replace(/\{\{/gi, '`${', )
-      //   .replace(/\}\}/gi, '}`', )
-      // const txt = lambda(txtExp)(this.__state)
-
-      const vars = extractVars(txtNode.wholeText);
-      if (vars.length) {
-
+      const txtExp = txtNode.wholeText
+        .replace(/\{\{/gi, '${', )
+        .replace(/\}\}/gi, '}', )
+      const lambdaFn = lambda("`" +txtExp + "`");
+      this.__state.startRecordExpressionVars()
+      const txt = lambdaFn(this.__state) as string;
+      const vars = this.__state.stopRecordExpressionVars();
+      node.textContent = txt;
+      const action = (args: any) => {
+        node.textContent = lambdaFn(this.__state) as string
       }
-      vars.forEach((key) => {
-        const internalKey = this.getInternalKey(key);
-        if (!this.varNodeMap[internalKey]) {
-          this.varNodeMap[internalKey] = [];
+      vars.forEach((v: string) => {
+        if (!this.varActionMap[v]) {
+          this.varActionMap[v] = [];
         }
-        this.varNodeMap[internalKey].push(node)
-
-
-        // if (!this.varReflectMap[internalKey]) {
-        //   this.varReflectMap[internalKey] = [];
-        // }
-        // const action = (args: any) => {
-        //   node.textContent = args
-        // }
-        // this.varReflectMap[internalKey].push(action);
-        // debugger
-        // if (this.__state[internalKey]) {
-        //   action(this.__state[internalKey]);
-        // }
+        this.varActionMap[v].push(action);
       })
+      // this.expressionNodeMap.set(node, action)
+
+      // const vars = extractVars(txtNode.wholeText);
+      //
+      // vars.forEach((key) => {
+      //   const internalKey = this.getInternalKey(key);
+      //   if (!this.varNodeMap[internalKey]) {
+      //     this.varNodeMap[internalKey] = new Set<VELEMENT>();
+      //   }
+      //   this.varNodeMap[internalKey].add(node)
+      //
+      //
+      //   // if (!this.varReflectMap[internalKey]) {
+      //   //   this.varReflectMap[internalKey] = [];
+      //   // }
+      //   // const action = (args: any) => {
+      //   //   node.textContent = args
+      //   // }
+      //   // this.varReflectMap[internalKey].push(action);
+      //   // debugger
+      //   // if (this.__state[internalKey]) {
+      //   //   action(this.__state[internalKey]);
+      //   // }
+      // })
       return
     }
 
@@ -462,7 +546,7 @@ class EzTRenderer extends HTMLElement {
       // check attrValue is plain value of valur ref
       if (attrName.startsWith(':') && node.tagName === 'IF') { // if expression
         const exp = `${attrName.substring(1)} === ${attrValue}`;
-        this.expressionNodeMap.set(lambda(exp), node)
+        // this.expressionNodeMap.set(lambda(exp), node)
       }
       // if (attrName.startsWith(':each-')) { // for loop
       //   // internalKey = this.getInternalKey(attrName.replace(':each-', ''))
@@ -481,10 +565,11 @@ class EzTRenderer extends HTMLElement {
         //   node.attributes[i].value = args;
         // });
         internalKey = this.getInternalKey(attrValue)
-        if (!this.varNodeMap[internalKey]) {
-          this.varNodeMap[internalKey] = [];
+        if (!varNodeMap[internalKey]) {
+          varNodeMap[internalKey] = new Set<VELEMENT>();
         }
-        this.varNodeMap[internalKey].push(node)
+
+        varNodeMap[internalKey].add(node)
       }
       if (attrName.startsWith('@') && internalKey in this.__state) {
         // this.varReflectMap[internalKey].push((args) => {

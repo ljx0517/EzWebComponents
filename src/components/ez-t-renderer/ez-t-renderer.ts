@@ -546,7 +546,7 @@ class EzTRenderer extends HTMLElement {
     if (!node.parentElement) {
       return
     }
-    
+
     const lambdaFn = lambda(attrValue);
     this.__state.startRecordExpressionVars()
     const result = lambdaFn({...this.__state, ...node.compileContext});

@@ -123,7 +123,7 @@ class EzTabList extends HTMLElement {
       })
     }
     this.initInternalEvent();
-    console.log(this.mode, Mode.col, this.scrollContent);
+    // console.log(this.mode, Mode.col, this.scrollContent);
 
     if (this.mode === Mode.col) {
       const container = this.shadowRoot.querySelector(`.${style.scrollContent}`) as HTMLElement

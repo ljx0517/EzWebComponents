@@ -18,7 +18,12 @@ enum DOM_RENDER_ACTION_TYPE {
   TEXT
 }
 
-type VELEMENT  = HTMLElement & {compileContext: {[key: string]: any}}
+type iterableObj<T>= {
+  [key: string]: T,
+  // [Symbol.iterator]: T
+  // [Symbol.iterator]() : IterableIterator<any>;
+}
+type VELEMENT  = HTMLElement & {compileContext: iterableObj<any>}
 type EXPRESSION_ACTION = (...args: any) => void;
 type FOR_LOOP_CONFIG = {
   begin: Node,
@@ -345,9 +350,8 @@ class EzTRenderer extends HTMLElement {
   private afterCloseHooks: (() => void)[] = [];
   private beforeActiveTabHooks:(() => boolean)[] = [];
   private afterActiveTabHooks: (() => void)[] = [];
-  private __state:{
-  [key: string]: any
-} = new StateProxy<{[key: string]: any}>({});
+  // private __state: StateProxy<iterableObj<any>> = new StateProxy<iterableObj<any>>({});
+  private __state: Record<string, any> = new StateProxy<Record<string, any>>({});
 
   // private __state:{
   //   [key: string]: DirtyableValue
@@ -539,9 +543,13 @@ class EzTRenderer extends HTMLElement {
   }
 
   bindAttrNodeAction(node: VELEMENT, attrName: string, attrValue: string) {
+    if (!node.parentElement) {
+      return
+    }
+    
     const lambdaFn = lambda(attrValue);
     this.__state.startRecordExpressionVars()
-    const result = lambdaFn(this.__state);
+    const result = lambdaFn({...this.__state, ...node.compileContext});
     const vars = this.__state.stopRecordExpressionVars();
     vars.forEach((v: string) => {
       if (!this.varExpressionObj[v]) {
@@ -597,7 +605,6 @@ class EzTRenderer extends HTMLElement {
 
 
   bindForLoopNodeAction(node: VELEMENT, loopVarName: string, bindVar: string) {
-
     const begin = node.previousSibling;
     const end = node.nextSibling;
 
@@ -611,7 +618,7 @@ class EzTRenderer extends HTMLElement {
       varKeyPath: loopVarName
     }
     this.varExpressionObj[loopVarName].add(forKey);
-    this.expressionNodeMap.set(forKey, ((forKeyCfg: FOR_LOOP_CONFIG) => {
+    const action = ((forKeyCfg: FOR_LOOP_CONFIG) => {
       const {
         begin, end, forNode, varKeyPath
       } = forKeyCfg;
@@ -624,8 +631,9 @@ class EzTRenderer extends HTMLElement {
       }
 
       this.__state[varKeyPath].map((item: any, index: number) => {
-        const renderForNode = forNode.cloneNode(true);
-
+        const renderForNode = forNode.cloneNode(true) as HTMLElement;
+        console.log(1,renderForNode)
+        renderForNode.setAttribute('for-index', String(index))
         Object.defineProperty(renderForNode, 'compileContext', {
           value: {
             [bindVar]: {
@@ -638,7 +646,9 @@ class EzTRenderer extends HTMLElement {
         });
         end.parentNode.insertBefore(renderForNode, end);
       });
-    }).bind(null, forKey));
+    }).bind(null, forKey)
+    action();
+    this.expressionNodeMap.set(forKey, action);
     this.cacheLoopTagDomFragment.appendChild(node)
   }
 
@@ -681,7 +691,7 @@ class EzTRenderer extends HTMLElement {
 
     if (isLoopNode) {
       const loopVar = node.getAttribute(eachVarName)
-      const bindVar = loopVar.replace(':each-', '')
+      const bindVar = eachVarName.replace(':each-', '')
       this.bindForLoopNodeAction(node, loopVar, bindVar)
     }
     for (let i = 0; i < attrs.length; i++) {
@@ -800,7 +810,7 @@ class EzTRenderer extends HTMLElement {
         const eventName = attrName.substring(1);
         console.log('[event]', attrName, attrValue);
         node.addEventListener(eventName, (evt) => {
-          this.__state[attrValue](evt)
+          (this.__state[attrValue] as CallableFunction)(evt)
         })
 
       }

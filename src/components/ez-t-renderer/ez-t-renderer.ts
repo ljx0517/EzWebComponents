@@ -18,9 +18,13 @@ enum DOM_RENDER_ACTION_TYPE {
   TEXT
 }
 
-type VELEMENT  = HTMLElement & {dirty: boolean}
+type VELEMENT  = HTMLElement & {compileContext: {[key: string]: any}}
 type EXPRESSION_ACTION = (...args: any) => void;
-
+type FOR_LOOP_CONFIG = {
+  begin: Node,
+  end: Node,
+  varKeyPath: string,
+  forNode: Node}
 class DirtyableValue  {
   private _value: any;
   private _dirty= false;
@@ -83,7 +87,12 @@ function ___lambda(exp: string,ctx={}, node:any=null) {
   }
 
   // execute script in private context
-  const func = (new Function( `with(this) { return ${exp};}`));
+  const func = (new Function( `with(this) {
+   try {
+    return ${exp};
+   } catch(e) {
+   }
+  }`));
   return func.call(ctx);
 }
 
@@ -93,6 +102,7 @@ const lambda: CallableFunction = (function(){
   function expressionTemplate(exp: string){
     let fn = cache[exp];
     if (!fn){
+      // fn =(new Function( 'ctx', `with(ctx) { try {return ${exp};} catch(r) {}}`));
       fn =(new Function( 'ctx', `with(ctx) { return ${exp};}`));
       cache[exp] = fn;
     }
@@ -143,6 +153,22 @@ function walk(nodes: Node|Node[]|NodeListOf<ChildNode>, check: (n: VELEMENT) => 
     }
   }
 }
+function compileWalker(nodes: Node|Node[]|NodeListOf<ChildNode>, compile: (n: VELEMENT) => void) {
+  if (!('length' in nodes)) {
+    nodes = [nodes]
+  }
+  nodes = slice.call(nodes)
+  while((nodes as VELEMENT[]).length) {
+    const node = (nodes as  VELEMENT[]).shift()
+    node.normalize();
+    compile(node)
+    if (node.childNodes && node.childNodes.length) {
+      nodes = slice.call(node.childNodes).concat(nodes)
+    }
+  }
+}
+
+
 function watchDom(fragment: Node, check: (n: VELEMENT) => LOOP_CONDITION_STATEMENT) {
   const mutationRecords = [];
   const callback = function(mutationsList: MutationRecord[], observer: MutationObserver) {
@@ -214,7 +240,6 @@ function extractVars(template: string, openChar = "{{", closeChar = "}}") {
     if (subStrAtPos(template, openChar.length, i) == openChar) {
       for (let j=i+1; j<=(template.length - closeChar.length ); j++) {
         if (subStrAtPos(template, closeChar.length, j) == closeChar) {
-          // debugger
           // data[data.length] = template.slice(i+openChar.length, j);
           data.push(template.slice(i+openChar.length, j))
           i = j+1;
@@ -269,7 +294,7 @@ const StateHandle: ProxyHandler<any> = {
   },
   set(target: any, prop: string, val, receiver) { // to intercept property writing
     let newVal = val
-    if (val && typeof val === 'object') {
+    if (val && !Array.isArray(val) && typeof val === 'object') {
       newVal = new StateProxy(val);
     }
     if (val && typeof val === 'function') {
@@ -341,7 +366,7 @@ class EzTRenderer extends HTMLElement {
   //   [key: string]: Set<CallableFunction>
   // } = {};
 
-  private varExpressionObj: {[key: string]: Set<EXPRESSION_ACTION|Node>} = {};
+  private varExpressionObj: {[key: string]: Set<EXPRESSION_ACTION|Node|FOR_LOOP_CONFIG>} = {};
   private expressionNodeMap = new WeakMap();
   private nodePositionMap = new WeakMap();
   private rendererNodeObj: {[key: string]: any} = {};
@@ -380,11 +405,12 @@ class EzTRenderer extends HTMLElement {
 
     // const tmpl = document.querySelector('template');
     // const dom = tmpl.content.cloneNode(true);
-    debugger
+
     // const tmpl = this.shadowRoot.querySelector('slot');
     // this.vdom = tmpl.cloneNode(true);
 
     this.cacheIfTagDomFragment = document.createDocumentFragment();
+    this.cacheLoopTagDomFragment = document.createDocumentFragment();
     /*this.originalDomFragment = document.createDocumentFragment();
     // // this.calcDomFragment = document.createDocumentFragment();
     while (false && this.childNodes.length) {
@@ -408,7 +434,7 @@ class EzTRenderer extends HTMLElement {
     //   return LOOP_CONDITION_STATEMENT.NOTHING
     // })
     // walk(this.originalDomFragment.childNodes, this.check)
-    walk(this.childNodes, this.check)
+    compileWalker(this.childNodes, this.compile)
     // walk(this.originalChildNodes.cloneNode(true), this.check)
     // tmpl.remove()
     // this.shadowRoot.append(dom);
@@ -454,12 +480,13 @@ class EzTRenderer extends HTMLElement {
             // self.__state[internalKey] = self.bindStateFunction(value)
             value = bindFunctionScope(source ,value)
           }
+          const beforeValue = self.__state[internalKey];
           self.__state[internalKey] = value // new DirtyableValue(value, internalKey);
 
           const expSet = self.varExpressionObj[internalKey];
           expSet && expSet.forEach(exp => {
             const act = self.expressionNodeMap.get(exp);
-            act()
+            act(internalKey, beforeValue, value)
           })
         }
       });
@@ -499,8 +526,6 @@ class EzTRenderer extends HTMLElement {
 
   bindCalcNodeAction(strExpr: string, node: VELEMENT|Text, action: (...args: any) => void) {
     const lambdaFn = lambda(strExpr);
-    this.expressionNodeMap.set(node, action.bind(null, lambdaFn, node))
-
     this.__state.startRecordExpressionVars()
     const result = lambdaFn(this.__state);
     const vars = this.__state.stopRecordExpressionVars();
@@ -508,23 +533,115 @@ class EzTRenderer extends HTMLElement {
       if (!this.varExpressionObj[v]) {
         this.varExpressionObj[v] = new Set<EXPRESSION_ACTION>();
       }
-      // this.varExpressionObj[v].push(action.bind(null, lambdaFn));
       this.varExpressionObj[v].add(node);
     });
-    return result;
+    this.expressionNodeMap.set(node, action.bind(null, lambdaFn, node))
   }
 
-  bindForLoopNodeAction(varName: string, node: VELEMENT, action: (...args: any) => void) {
-    const loopItemName = varName.replace(':each-', '')
-    const holder = document.createComment(`each ${loopItemName} of ${varName}`)
-    node.parentNode.insertBefore(holder, node);
-    this.expressionNodeMap.set(node, action.bind(node))
-    if (!this.varExpressionObj[varName]) {
-      this.varExpressionObj[varName] = new Set<Node>();
+  bindAttrNodeAction(node: VELEMENT, attrName: string, attrValue: string) {
+    const lambdaFn = lambda(attrValue);
+    this.__state.startRecordExpressionVars()
+    const result = lambdaFn(this.__state);
+    const vars = this.__state.stopRecordExpressionVars();
+    vars.forEach((v: string) => {
+      if (!this.varExpressionObj[v]) {
+        this.varExpressionObj[v] = new Set<EXPRESSION_ACTION>();
+      }
+      this.varExpressionObj[v].add(node);
+    });
+    this.expressionNodeMap.set(node, () => {
+      const result = lambdaFn({...this.__state, ...node.compileContext});
+      node.setAttribute(attrName, result)
+    })
+  }
+
+
+  bindIfNodeAction(node: VELEMENT, conditionExpr: string) {
+    const lambdaFn = lambda(conditionExpr);
+    this.__state.startRecordExpressionVars()
+    const result = lambdaFn(this.__state);
+    const vars = this.__state.stopRecordExpressionVars();
+    vars.forEach((v: string) => {
+      if (!this.varExpressionObj[v]) {
+        this.varExpressionObj[v] = new Set<EXPRESSION_ACTION>();
+      }
+      this.varExpressionObj[v].add(node);
+    });
+    this.expressionNodeMap.set(node, () => {
+      const result = lambdaFn(this.__state);
+      if (!result) {
+        this.removeNode(node);
+      } else {
+        this.restoreRemoveNode(node);
+      }
+    })
+  }
+
+  bindTextNodeAction(strExpr: string, node: Text) {
+    const lambdaFn = lambda(strExpr);
+    this.__state.startRecordExpressionVars()
+    const result = lambdaFn(this.__state);
+    const vars = this.__state.stopRecordExpressionVars();
+    vars.forEach((v: string) => {
+      if (!this.varExpressionObj[v]) {
+        this.varExpressionObj[v] = new Set<EXPRESSION_ACTION>();
+      }
+      this.varExpressionObj[v].add(node);
+    });
+    this.expressionNodeMap.set(node, () => {
+      const result = lambdaFn(this.__state);
+      node.textContent = result;
+    })
+    node.textContent = result;
+  }
+
+
+  bindForLoopNodeAction(node: VELEMENT, loopVarName: string, bindVar: string) {
+
+    const begin = node.previousSibling;
+    const end = node.nextSibling;
+
+    if (!this.varExpressionObj[loopVarName]) {
+      this.varExpressionObj[loopVarName] = new Set();
     }
-    this.varExpressionObj[varName].add(holder);
+    const forKey = {
+      begin,
+      end,
+      forNode: node,
+      varKeyPath: loopVarName
+    }
+    this.varExpressionObj[loopVarName].add(forKey);
+    this.expressionNodeMap.set(forKey, ((forKeyCfg: FOR_LOOP_CONFIG) => {
+      const {
+        begin, end, forNode, varKeyPath
+      } = forKeyCfg;
+      let start = begin.nextSibling;
+
+      while(start && start != end) {
+        const next = start.nextSibling;
+        (start as HTMLElement).remove();
+        start = next;
+      }
+
+      this.__state[varKeyPath].map((item: any, index: number) => {
+        const renderForNode = forNode.cloneNode(true);
+
+        Object.defineProperty(renderForNode, 'compileContext', {
+          value: {
+            [bindVar]: {
+              item, index
+            }
+          },
+          configurable: false,
+          enumerable: false,
+          writable: false,
+        });
+        end.parentNode.insertBefore(renderForNode, end);
+      });
+    }).bind(null, forKey));
     this.cacheLoopTagDomFragment.appendChild(node)
   }
+
 
 
   bindStateFunction(fn: () => void) {
@@ -532,9 +649,68 @@ class EzTRenderer extends HTMLElement {
       return eval(fn.toString());
     }).call(this.__state)
   }
+  compile = (node: VELEMENT) => {
+    if (node.nodeName == 'SCRIPT') {
+      return;
+    }
+    if (node.nodeType === COMMENT_NODE || node.nodeType === DOCUMENT_FRAGMENT_NODE) { // comment & DOCUMENT_FRAGMENT_NODE
+      return ;
+    }
+
+    if (node.nodeType === TEXT_NODE) {
+      const txtNode = (node as unknown as Text);
+      const txtExp = txtNode.wholeText
+          .replace(/\{\{/gi, '${', )
+          .replace(/\}\}/gi, '}', )
+      this.bindTextNodeAction("`" +txtExp + "`", txtNode);
+      return
+    }
+
+    const attrs = node.getAttributeNames();
+    console.log('attrs', attrs);
+    const eachVarName = attrs.find((attr) => {
+      return attr.startsWith(':each-')
+    });
+    const ifVarName = attrs.find((attr) => {
+      return attr.startsWith(':if-')
+    });
+
+    const isIfNode = Boolean(ifVarName);
+    const isLoopNode = Boolean(eachVarName);
+
+
+    if (isLoopNode) {
+      const loopVar = node.getAttribute(eachVarName)
+      const bindVar = loopVar.replace(':each-', '')
+      this.bindForLoopNodeAction(node, loopVar, bindVar)
+    }
+    for (let i = 0; i < attrs.length; i++) {
+      const attr = node.getAttributeNode(attrs[i])
+      const attrName = attr.name as unknown as string;
+      const attrValue = attr.value as unknown as string;
+      const name = this.getInternalKey(attrName.substring(1));
+      if (attrName.startsWith(':if-')) { // if expression
+        const ifExp = `${attrName.substring(4)} === ${attrValue}`;
+        console.log('[if]', ifExp);
+        this.bindIfNodeAction(node, ifExp);
+      }
+
+      if (attrName.startsWith(':')) {
+        console.log('[attr]', attrName, attrValue);
+        this.bindAttrNodeAction(node, attrValue, attrValue );
+      }
+      if (attrName.startsWith('@')) {
+        const eventName = attrName.substring(1);
+        console.log('[event]', attrName, attrValue);
+        node.addEventListener(eventName, (evt) => {
+          this.__state[attrValue](evt)
+        })
+
+      }
+    }
+  }
 
   check = (node: VELEMENT): LOOP_CONDITION_STATEMENT => {
-    node.dirty = false;
     if (node.nodeName == 'SCRIPT') {
       return;
     }
@@ -570,14 +746,7 @@ class EzTRenderer extends HTMLElement {
     if (isLoopNode) {
       const loopVar = node.getAttribute(varName)
       const loopItemVarName = varName.replace(':each-', '');
-
-
-      this.bindForLoopNodeAction(loopVar, node, () => {
-        this.__state[loopVar].forEach((item: any, index: number) => {
-          // holder.parentNode.appendChild()
-        })
-        console.log(this.__state[loopVar]);
-      })
+      this.bindForLoopNodeAction(node, loopVar, loopItemVarName)
       return LOOP_CONDITION_STATEMENT.CONTINUE;
     }
     for (let i = 0; i < attrs.length; i++) {

@@ -673,11 +673,11 @@ class EzTRenderer extends HTMLElement {
         start = next;
       }
       // let iter = this.__state[varKeyPath]
-      let arrayLike = [];
+      let arrayLike = iter;
       if (typeof iter === 'function') {
         arrayLike = iter();
       }
-      arrayLike.map((item: any, index: number) => {
+      (arrayLike as unknown as Array<any>).map((item: any, index: number) => {
         const renderForNode = forNode.cloneNode(true) as HTMLElement;
         // console.log(1,renderForNode)
         // renderForNode.setAttribute('for-index', String(index))

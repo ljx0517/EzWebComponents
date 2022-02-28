@@ -82,8 +82,9 @@
 <!--    <div :if-true="a > b">2</div>-->
 <!--    <div :if-true="a > b">3</div>-->
     <select name="" id="" >
-      <option :each-dog="listItem" name="aaaa" :value="dog.item">{{dog.index}}</option>
+      <option :each-dog="listItem" name="aaaa" :item-index="dog.index" :value="dog.item">{{dog.item}}</option>
     </select>
+    <div>{{html}}</div>
 <!--    <div :if-false="(a > b)">-->
 <!--      <p @click="fn2">if false</p>-->
 <!--    </div>-->
@@ -123,6 +124,7 @@
         color: 'red',
         a: 2,
         b: 1,
+        html: `<p>ssssss</p>`,
         listItem: [1, 2, 3, 4],
         fn1: (e) =>{
           console.log('fn1',e, this);

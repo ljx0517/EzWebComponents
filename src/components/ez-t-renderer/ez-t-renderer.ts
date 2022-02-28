@@ -3,6 +3,7 @@ const ELEMENT_NODE = 1;
 const DOCUMENT_FRAGMENT_NODE = 11;
 const TEXT_NODE = 3;
 const COMMENT_NODE = 8;
+const randomLocalsScopeName = `___$locals$___${Date.now()}`
 
 enum LOOP_CONDITION_STATEMENT {
   CONTINUE,
@@ -108,7 +109,16 @@ const lambda: CallableFunction = (function(){
     let fn = cache[exp];
     if (!fn){
       // fn =(new Function( 'ctx', `with(ctx) { try {return ${exp};} catch(r) {}}`));
-      fn =(new Function( 'ctx', `with(ctx) { return ${exp};}`));
+      // fn =(new Function( 'ctx', `with(ctx) { return ${exp};}`));
+      fn = (new Function( `ctx, ${randomLocalsScopeName}`, `
+      if (!${randomLocalsScopeName} || !Object.keys(${randomLocalsScopeName}).length) {
+        ${randomLocalsScopeName} = {};
+      };
+      with(ctx) { 
+        with(${randomLocalsScopeName}) { 
+          return  ${exp};
+        }
+      }`))
       cache[exp] = fn;
     }
     return fn;
@@ -130,13 +140,13 @@ const slice = Array.prototype.slice
 
 
 
-function walkTree(node: HTMLElement|Node, compile: (n: VELEMENT) => void) {
+function treeWalker(node: HTMLElement|Node, compile: (n: VELEMENT) => void) {
   if (node.nodeType === ELEMENT_NODE || node.nodeType === DOCUMENT_FRAGMENT_NODE) {
     let curChild = node.firstChild;
     while (curChild) {
       // console.log('[nodeName]',curChild.nodeName)
       compile(curChild as VELEMENT)
-      walkTree(curChild, compile);
+      treeWalker(curChild, compile);
       curChild = curChild.nextSibling;
     }
   }
@@ -273,7 +283,12 @@ function bindFunctionScope(ctx: any, fn: () => void) {
 }
 
 const StateHandle: ProxyHandler<any> = {
-  has:() => true,
+  has:(target: any, p) => {
+    if (p === randomLocalsScopeName) {
+      return false;
+    }
+    return true;
+  },
   get(target: any, prop: string, receiver) {
     if (prop === 'startRecordExpressionVars') {
       this.recordExpressionVars = []
@@ -449,8 +464,8 @@ class EzTRenderer extends HTMLElement {
     //   return LOOP_CONDITION_STATEMENT.NOTHING
     // })
     // walk(this.originalDomFragment.childNodes, this.check)
-    // compileWalker(this.childNodes, this.compile)
-    walkTree(this, this.compile)
+    compileWalker(this.childNodes, this.compile)
+    // walkTree(this, this.compile)
     // walk(this.originalChildNodes.cloneNode(true), this.check)
     // tmpl.remove()
     // this.shadowRoot.append(dom);
@@ -477,7 +492,7 @@ class EzTRenderer extends HTMLElement {
     // }
     // Object.entries(source).forEach(([key, val]) => {
       const pathKey = `${root ? `${root}.` : ''}${key}`;
-      console.log('pathKey', pathKey);
+      // console.log('pathKey', pathKey);
       if (val &&  !Array.isArray(val)  && typeof val === "object") {
         self.makeStateReflectable(val, pathKey);
         return
@@ -544,19 +559,6 @@ class EzTRenderer extends HTMLElement {
 
 
 
-  bindCalcNodeAction(strExpr: string, node: VELEMENT|Text, action: (...args: any) => void) {
-    const lambdaFn = lambda(strExpr);
-    this.__state.startRecordExpressionVars()
-    const result = lambdaFn(this.__state);
-    const vars = this.__state.stopRecordExpressionVars();
-    vars.forEach((v: string) => {
-      if (!this.varExpressionObj[v]) {
-        this.varExpressionObj[v] = new Set<EXPRESSION_ACTION>();
-      }
-      this.varExpressionObj[v].add(node);
-    });
-    this.expressionNodeMap.set(node, action.bind(null, lambdaFn, node))
-  }
   getNodeCompileScope(node: VELEMENT| Text): any {
     const parent = node.parentNode;
     const parentScope = this.compileContentNodeMap.get(parent);
@@ -591,13 +593,13 @@ class EzTRenderer extends HTMLElement {
       }
       this.varExpressionObj[v].add(node);
     });
-    const action = ((attrNode: VELEMENT, actAttrName: string) => {
-      // const result = lambdaFn({...this.__state, ...node.compileContext});
+    const action = ((attrNode: VELEMENT, fn: CallableFunction, actAttrName: string) => {
       const scope = this.getNodeCompileScope(attrNode);
       // const result = lambdaFn({...this.__state, ...scope});
-      const result = lambdaFn( Object.assign(this.__state, scope));
+      // const result = lambdaFn( Object.assign(this.__state, scope));
+      const result = fn( this.__state, scope);
       attrNode.setAttribute(actAttrName, result)
-    }).bind(null, node, attrName.substring(1));
+    }).bind(null, node, lambdaFn, attrName.substring(1));
     this.expressionNodeMap.set(node, action);
     action();
   }
@@ -630,11 +632,11 @@ class EzTRenderer extends HTMLElement {
     }
     const lambdaFn = lambda(strExpr);
     const scope = this.getNodeCompileScope(node);
-    console.log(2, node)
+    // console.log(2, node)
     this.__state.startRecordExpressionVars();
     // const result = lambdaFn({...this.__state, ...scope});
-    const result = lambdaFn( Object.assign(this.__state, scope));
-    // const result = lambdaFn(this.__state);
+    // const result = lambdaFn( Object.assign(this.__state, scope));
+    const result = lambdaFn(this.__state, scope);
     const vars = this.__state.stopRecordExpressionVars();
     vars.forEach((v: string) => {
       if (!this.varExpressionObj[v]) {
@@ -645,7 +647,8 @@ class EzTRenderer extends HTMLElement {
     this.expressionNodeMap.set(node, () => {
       const scope = this.getNodeCompileScope(node);
       // const result = lambdaFn({...this.__state, ...scope});
-      const result = lambdaFn( Object.assign(this.__state, scope));
+      // const result = lambdaFn( Object.assign(this.__state, scope));
+      const result = lambdaFn( this.__state, scope);
       node.textContent = result;
     })
     node.textContent = result;
@@ -685,7 +688,7 @@ class EzTRenderer extends HTMLElement {
       this.__state[varKeyPath].map((item: any, index: number) => {
         const renderForNode = forNode.cloneNode(true) as HTMLElement;
         // console.log(1,renderForNode)
-        renderForNode.setAttribute('for-index', String(index))
+        // renderForNode.setAttribute('for-index', String(index))
         const nodeCompileContext = this.compileContentNodeMap.get(renderForNode)
         this.compileContentNodeMap.set(renderForNode, {
           ...nodeCompileContext,
@@ -695,7 +698,7 @@ class EzTRenderer extends HTMLElement {
         });
 
         end.parentNode.insertBefore(renderForNode, end);
-        walkTree(renderForNode as VELEMENT, this.compile)
+        compileWalker(renderForNode as VELEMENT, this.compile)
       });
     }).bind(null, forKey)
     action();
@@ -772,11 +775,12 @@ class EzTRenderer extends HTMLElement {
 
     if (node.nodeType === TEXT_NODE) {
       const txtNode = (node as unknown as Text);
+      // TODO only replace paired {{}}
       const txtExp = txtNode.wholeText
           .replace(/\{\{/gi, '${', )
           .replace(/\}\}/gi, '}', )
       if (txtNode.wholeText.trim()) {
-        console.log(1,txtNode.wholeText.trim())
+        console.log(1, txtNode.wholeText.trim(), txtExp)
         this.bindTextNodeAction("`" +txtExp + "`", txtNode);
       }
       return
@@ -806,6 +810,7 @@ class EzTRenderer extends HTMLElement {
       const attrName = attr.name as unknown as string;
       const attrValue = attr.value as unknown as string;
       const name = this.getInternalKey(attrName.substring(1));
+
       if (attrName.startsWith(':if-')) { // if expression
         const ifExp = `${attrName.substring(4)} === ${attrValue}`;
         console.log('[if]', ifExp);

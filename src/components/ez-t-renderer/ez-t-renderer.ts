@@ -370,43 +370,17 @@ const loopNestedObj = (obj: any) => {
 
 class EzTRenderer extends HTMLElement {
 
-
-  private beforeCloseHooks:(() => boolean)[] = [];
-  private afterCloseHooks: (() => void)[] = [];
-  private beforeActiveTabHooks:(() => boolean)[] = [];
-  private afterActiveTabHooks: (() => void)[] = [];
-  // private __state: StateProxy<iterableObj<any>> = new StateProxy<iterableObj<any>>({});
   private __state: Record<string, any> = new StateProxy<Record<string, any>>({});
-
-  // private __state:{
-  //   [key: string]: DirtyableValue
-  // } = new StateProxy<{[key: string]: DirtyableValue}>({});
-
-  private varReflectMap: {
-    [key: string]: ((args: any) => void)[]
-  } = {};
-  // private varNodeMap: {
-  //   [key: string]: VELEMENT[]
-  // } = {}
-  // private varNodeMap: {
-  //   [key: string]: Set<VELEMENT>
-  // } = {};
-  // private varActionMap: {
-  //   [key: string]: Set<CallableFunction>
-  // } = {};
 
   private varExpressionObj: {[key: string]: Set<EXPRESSION_ACTION|Node|FOR_LOOP_CONFIG>} = {};
   private expressionNodeMap = new WeakMap();
   private nodePositionMap = new WeakMap();
   private compileContentNodeMap = new WeakMap();
-  private rendererNodeObj: {[key: string]: any} = {};
-  private originalDomFragment: DocumentFragment;
   private cacheIfTagDomFragment: DocumentFragment;
   private cacheLoopTagDomFragment: DocumentFragment;
-  // private userStateScope: {[key: string]: any}  = {};
-  private bindScopeFunction = {}
-  // private virtualChildNodes: any[];
-  // private calcDomFragment: DocumentFragment;
+
+  // for internal change value
+  private sourceRef: any;
 
   constructor() {
     super();
@@ -529,6 +503,7 @@ class EzTRenderer extends HTMLElement {
     }
   }
   setState(source: any) {
+    this.sourceRef = source;
     this.makeStateReflectable(source);
     this.render();
   }

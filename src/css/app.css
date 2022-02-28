@@ -79,6 +79,10 @@ html, body {
   top: 0;
   display: flex;
 }
+.group-tools-btn i{
+  cursor: pointer;
+}
+
 
 
 .sub-module-tool-box{

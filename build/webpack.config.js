@@ -1,6 +1,6 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 const resolve = dir => path.join(__dirname, '..', dir);
 
 module.exports = {
@@ -8,9 +8,10 @@ module.exports = {
   target: "web",
   entry: {
     'ez-manager': './src/main.ts',
-    // 'ez-tabs-list': './src/components/ez-tabs-list/index.ts',
-    // 'ez-pop-wrapper': './src/components/ez-pop-wrapper/index.ts',
-    // 'ez-widget': './src/components/ez-widget/index.ts',
+    'httpclient': './src/common/httpclient.ts',
+    'ez-tabs-list': './src/components/ez-tabs-list/index.ts',
+    'ez-pop-wrapper': './src/components/ez-pop-wrapper/index.ts',
+    'ez-widget': './src/components/ez-widget/index.ts',
   },
   module: {
     rules: [
@@ -161,4 +162,9 @@ module.exports = {
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
   },
+  // plugins: [
+  //   new HtmlWebpackPlugin({
+  //     scriptLoading: 'module'
+  //   })
+  // ]
 };

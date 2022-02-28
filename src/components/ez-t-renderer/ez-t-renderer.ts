@@ -486,8 +486,10 @@ class EzTRenderer extends HTMLElement {
 
           const expSet = self.varExpressionObj[internalKey];
           expSet && expSet.forEach(exp => {
-            const act = self.expressionNodeMap.get(exp);
-            act(internalKey, beforeValue, value)
+            const acts = self.expressionNodeMap.get(exp);
+            acts.forEach((act: CallableFunction) => {
+              act(internalKey, beforeValue, value)
+            })
           })
         }
       });
@@ -500,10 +502,11 @@ class EzTRenderer extends HTMLElement {
     this.render();
   }
   removeNode(node: VELEMENT) {
-    const index = Array.from(node.parentNode.children).indexOf(node);
+    // const index = Array.from(node.parentNode.children).indexOf(node);
+    const next = node.nextSibling
     this.nodePositionMap.set(node, {
       parent: node.parentElement,
-      index
+      next
     });
     this.cacheIfTagDomFragment.appendChild(node);
   }
@@ -512,13 +515,12 @@ class EzTRenderer extends HTMLElement {
     if (!info) {
       return;
     }
-    const {parent, index} = info;
-    const afterNode = parent.children[index];
-    if (!afterNode) {
+    const {parent, next} = info;
+    if (!next) {
       parent.appendChild(node);
       return
     }
-    parent.insertBefore(node, afterNode)
+    parent.insertBefore(node, next)
 
   }
 
@@ -567,12 +569,17 @@ class EzTRenderer extends HTMLElement {
       const result = fn( this.__state, scope);
       attrNode.setAttribute(actAttrName, result)
     }).bind(null, node, lambdaFn, attrName.substring(1));
-    this.expressionNodeMap.set(node, action);
+    if (!this.expressionNodeMap.get(node)) {
+      this.expressionNodeMap.set(node, new Set())
+    }
+    this.expressionNodeMap.get(node).add(action)
     action();
   }
 
 
-  bindIfNodeAction(node: VELEMENT, conditionExpr: string) {
+  bindIfNodeAction(node: VELEMENT, attrName: string, attrValue: string) {
+    node.removeAttribute(attrName)
+    const conditionExpr = `${attrName.substring(4)} === ${attrValue}`;
     const lambdaFn = lambda(conditionExpr);
     this.__state.startRecordExpressionVars()
     const result = lambdaFn(this.__state);
@@ -583,14 +590,19 @@ class EzTRenderer extends HTMLElement {
       }
       this.varExpressionObj[v].add(node);
     });
-    this.expressionNodeMap.set(node, () => {
-      const result = lambdaFn(this.__state);
+    const action = ((actNode: VELEMENT, fn: CallableFunction) => {
+      const result = fn(this.__state);
       if (!result) {
-        this.removeNode(node);
+        this.removeNode(actNode);
       } else {
-        this.restoreRemoveNode(node);
+        this.restoreRemoveNode(actNode);
       }
-    })
+    }).bind(null, node, lambdaFn)
+    if (!this.expressionNodeMap.get(node)) {
+      this.expressionNodeMap.set(node, new Set())
+    }
+    this.expressionNodeMap.get(node).add(action)
+    action();
   }
 
   bindTextNodeAction(strExpr: string, node: Text) {
@@ -611,14 +623,19 @@ class EzTRenderer extends HTMLElement {
       }
       this.varExpressionObj[v].add(node);
     });
-    this.expressionNodeMap.set(node, () => {
+    const action =  () => {
       const scope = this.getNodeCompileScope(node);
       // const result = lambdaFn({...this.__state, ...scope});
       // const result = lambdaFn( Object.assign(this.__state, scope));
       const result = lambdaFn( this.__state, scope);
       node.textContent = result;
-    })
-    node.textContent = result;
+    }
+
+    if (!this.expressionNodeMap.get(node)) {
+      this.expressionNodeMap.set(node, new Set())
+    }
+    this.expressionNodeMap.get(node).add(action)
+    action()
   }
 
 
@@ -694,7 +711,11 @@ class EzTRenderer extends HTMLElement {
       });
     }).bind(null, forKey)
     action();
-    this.expressionNodeMap.set(forKey, action);
+    if (!this.expressionNodeMap.get(forKey)) {
+      this.expressionNodeMap.set(forKey, new Set())
+    }
+    this.expressionNodeMap.get(forKey).add(action)
+
     this.cacheLoopTagDomFragment.appendChild(storeNode)
   }
 
@@ -751,9 +772,9 @@ class EzTRenderer extends HTMLElement {
       const name = this.getInternalKey(attrName.substring(1));
 
       if (attrName.startsWith(':if-')) { // if expression
-        const ifExp = `${attrName.substring(4)} === ${attrValue}`;
-        console.log('[if]', ifExp);
-        this.bindIfNodeAction(node, ifExp);
+        console.log('[if]', attrName, attrValue);
+        this.bindIfNodeAction(node, attrName, attrValue);
+        continue
       }
 
       if (attrName.startsWith(':')) {

@@ -78,10 +78,12 @@
   <ez-t-render id="etr"  style="display: block;height: 30px;width: 100%;">
 <!--    <template>-->
     <div :name="name + '_www'" :style="'color:'+fn3()+';'">{{aaaa}} {{name}}</div>
-<!--    <div :if-true="a > b">1</div>-->
-<!--    <div :if-true="a > b">2</div>-->
-<!--    <div :if-true="a > b">3</div>-->
-    <select name="" id="" >
+    <div :if-true="a > b">1</div>
+    <div :if-false="a > b">2</div>
+    <select name="" >
+      <option :each-dog="filterItem()" name="aaaa" :item-index="dog.index" :value="dog.item">{{dog.item}}</option>
+    </select>
+    <select name="" >
       <option :each-dog="listItem" name="aaaa" :item-index="dog.index" :value="dog.item">{{dog.item}}</option>
     </select>
     <div>{{html}}</div>

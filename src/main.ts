@@ -4,6 +4,7 @@ import './css/icons.css';
 // import './components/ez-tabs-list/index'
 // import './components/ez-pop-wrapper/index'
 // import './components/ez-widget/index'
+// import HttpClient from './common/httpclient'
 
 function ready(fn: () => void) {
   if (document.readyState != 'loading'){

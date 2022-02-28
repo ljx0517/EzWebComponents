@@ -6,6 +6,13 @@ const resolve = dir => path.join(__dirname, '..', dir);
 module.exports = {
   watch: true,
   target: "web",
+  // entry: () => new Promise((resolve) => resolve([
+  //   './src/main.ts',
+  //   // './src/common/httpclient.ts',
+  //   './src/components/ez-tabs-list/index.ts',
+  //   './src/components/ez-pop-wrapper/index.ts',
+  //   './src/components/ez-widget/index.ts',
+  // ])),
   entry: {
     'ez-manager': './src/main.ts',
     'httpclient': './src/common/httpclient.ts',

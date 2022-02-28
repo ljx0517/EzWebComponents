@@ -7,9 +7,10 @@ module.exports = {
   watch: true,
   target: "web",
   entry: {
-    'ez-tabs-list': './src/components/ez-tabs-list/index.ts',
-    'ez-pop-wrapper': './src/components/ez-pop-wrapper/index.ts',
-    'ez-widget': './src/components/ez-widget/index.ts',
+    'ez-manager': './src/main.ts',
+    // 'ez-tabs-list': './src/components/ez-tabs-list/index.ts',
+    // 'ez-pop-wrapper': './src/components/ez-pop-wrapper/index.ts',
+    // 'ez-widget': './src/components/ez-widget/index.ts',
   },
   module: {
     rules: [

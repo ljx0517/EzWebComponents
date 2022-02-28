@@ -17,6 +17,9 @@
   text-transform: none;
   line-height: 1;
 
+  text-align: center;
+  vertical-align: middle;
+
   /* Better Font Rendering =========== */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

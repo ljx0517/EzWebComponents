@@ -30,6 +30,7 @@ type FOR_LOOP_CONFIG = {
   begin: Node,
   end: Node,
   varKeyPath: string,
+  iter: CallableFunction,
   forNode: Node}
 class DirtyableValue  {
   private _value: any;
@@ -65,19 +66,7 @@ class DirtyableValue  {
 
 }
 
-// const expressionString = (function(){
-//   const cache: {[key: string]: CallableFunction} = {};
-//
-//   function expressionTemplate(exp: string){
-//     let fn = cache[exp];
-//     if (!fn){
-//       const sanitized = `with(obj){return ${exp}}`
-//       fn = Function('obj', sanitized);
-//     }
-//     return fn;
-//   }
-//   return expressionTemplate;
-// })();
+
 
 // https://stackoverflow.com/questions/543533/restricting-eval-to-a-narrow-scope
 // https://stackoverflow.com/questions/61552/are-there-legitimate-uses-for-javascripts-with-statement
@@ -291,18 +280,18 @@ const StateHandle: ProxyHandler<any> = {
   },
   get(target: any, prop: string, receiver) {
     if (prop === 'startRecordExpressionVars') {
-      this.recordExpressionVars = []
+      this.recordExpressionVars = new Set()
       return () => {
         //
       };
     }
     if (prop === 'stopRecordExpressionVars') {
       return () => {
-        const result = [...this.recordExpressionVars]
+        const result = Array.from(this.recordExpressionVars)
         try{
           return result;
         } finally {
-          this.recordExpressionVars.length = 0;
+          this.recordExpressionVars.clear();
           delete this.recordExpressionVars;
         }
       }
@@ -315,7 +304,7 @@ const StateHandle: ProxyHandler<any> = {
 
     if (Object.prototype.hasOwnProperty.call(target, prop)) {
       if (this.recordExpressionVars) {
-        this.recordExpressionVars.push(prop)
+        this.recordExpressionVars.add(prop)
         console.log( '__state get', prop, prop in target)
       }
       // varNodeMap[prop] = node
@@ -490,6 +479,9 @@ class EzTRenderer extends HTMLElement {
             value = bindFunctionScope(source ,value)
           }
           const beforeValue = self.__state[internalKey];
+          if (beforeValue === value) {
+            return
+          }
           self.__state[internalKey] = value // new DirtyableValue(value, internalKey);
 
           const expSet = self.varExpressionObj[internalKey];
@@ -633,6 +625,7 @@ class EzTRenderer extends HTMLElement {
   bindLoopNodeAction(node: VELEMENT, loopVarName: string, bindVar: string) {
     const begin = node.previousSibling;
     const end = node.nextSibling;
+    loopVarName = loopVarName.replace('(', '').replace(')', '')
 
     node.removeAttribute(`:each-${bindVar}`)
     const storeNode = node.cloneNode(true)
@@ -640,16 +633,36 @@ class EzTRenderer extends HTMLElement {
     if (!this.varExpressionObj[loopVarName]) {
       this.varExpressionObj[loopVarName] = new Set();
     }
+
+    let iter = this.__state[loopVarName];
+    let vars = [];
+    if (typeof iter === 'function') {
+      const ldn = lambda(iter.toString())
+      this.__state.startRecordExpressionVars();
+      iter = ldn.call(this.__state, this.__state) // first for `this`, second for ctx
+      iter()
+      vars = this.__state.stopRecordExpressionVars();
+    }
+
+
+
     const forKey = {
       begin,
       end,
       forNode: storeNode,
-      varKeyPath: loopVarName
+      varKeyPath: loopVarName,
+      iter
     }
+    vars.forEach((v: string) => {
+      if (!this.varExpressionObj[v]) {
+        this.varExpressionObj[v] = new Set<EXPRESSION_ACTION>();
+      }
+      this.varExpressionObj[v].add(forKey);
+    });
     this.varExpressionObj[loopVarName].add(forKey);
     const action = ((forKeyCfg: FOR_LOOP_CONFIG) => {
       const {
-        begin, end, forNode, varKeyPath
+        begin, end, forNode, varKeyPath, iter
       } = forKeyCfg;
       let start = begin.nextSibling;
 
@@ -659,8 +672,12 @@ class EzTRenderer extends HTMLElement {
         void (start as HTMLElement).remove();
         start = next;
       }
-
-      this.__state[varKeyPath].map((item: any, index: number) => {
+      // let iter = this.__state[varKeyPath]
+      let arrayLike = [];
+      if (typeof iter === 'function') {
+        arrayLike = iter();
+      }
+      arrayLike.map((item: any, index: number) => {
         const renderForNode = forNode.cloneNode(true) as HTMLElement;
         // console.log(1,renderForNode)
         // renderForNode.setAttribute('for-index', String(index))
@@ -680,59 +697,6 @@ class EzTRenderer extends HTMLElement {
     this.expressionNodeMap.set(forKey, action);
     this.cacheLoopTagDomFragment.appendChild(storeNode)
   }
-  replaceWith_version_bindLoopNodeAction(node: VELEMENT, loopVarName: string, bindVar: string) {
-    const begin = node.previousSibling;
-    const end = node.nextSibling;
-
-    const storeNode = node.cloneNode(true)
-
-    if (!this.varExpressionObj[loopVarName]) {
-      this.varExpressionObj[loopVarName] = new Set();
-    }
-    const forKey = {
-      begin,
-      end,
-      forNode: storeNode,
-      varKeyPath: loopVarName
-    }
-    this.varExpressionObj[loopVarName].add(forKey);
-    const action = ((forKeyCfg: FOR_LOOP_CONFIG) => {
-      const {
-        begin, end, forNode, varKeyPath
-      } = forKeyCfg;
-      let start = begin.nextSibling;
-
-      while(start && start != end) {
-        const next = start.nextSibling;
-        console.log("rrrrrrrrrrrrrrrrrrrrrrr")
-        void (start as HTMLElement).remove();
-        start = next;
-      }
-
-      const holder = document.createComment('replace-loop-tag-holder')
-      end.parentNode.insertBefore(holder, end);
-
-      const replaceNodes: HTMLElement[] = [];
-      this.__state[varKeyPath].map((item: any, index: number) => {
-        const renderForNode = forNode.cloneNode(true) as HTMLElement;
-        // console.log(1,renderForNode)
-        renderForNode.setAttribute('for-index', String(index))
-        const nodeCompileContext = this.compileContentNodeMap.get(renderForNode)
-        this.compileContentNodeMap.set(renderForNode, {
-          ...nodeCompileContext,
-          [bindVar]: {
-            item, index
-          },
-        });
-        replaceNodes.push(renderForNode);
-      });
-      holder.replaceWith(...replaceNodes)
-    }).bind(null, forKey)
-    action();
-    this.expressionNodeMap.set(forKey, action);
-    this.cacheLoopTagDomFragment.appendChild(storeNode)
-  }
-
 
 
   bindStateFunction(fn: () => void) {

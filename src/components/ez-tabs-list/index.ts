@@ -1,4 +1,4 @@
-import * as style from "./ez-tabs-list.less"
+import * as style from "./style.less"
 const stylesheet = new CSSStyleSheet();
 // TODO support column mode
 export interface IClientRect {

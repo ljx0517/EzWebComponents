@@ -1,4 +1,4 @@
-import * as style from "./ez-t-renderer.less"
+import * as style from "./index.less"
 const ELEMENT_NODE = 1;
 const DOCUMENT_FRAGMENT_NODE = 11;
 const TEXT_NODE = 3;
@@ -357,7 +357,7 @@ const loopNestedObj = (obj: any) => {
 };
 
 
-class EzTRenderer extends HTMLElement {
+class EzWidget extends HTMLElement {
 
   private __state: Record<string, any> = new StateProxy<Record<string, any>>({});
 
@@ -815,4 +815,4 @@ class EzTRenderer extends HTMLElement {
 
   // there can be other element methods and properties
 }
-customElements.define("ez-t-render", EzTRenderer);
+customElements.define("ez-widget", EzWidget);

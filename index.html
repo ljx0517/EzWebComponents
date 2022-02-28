@@ -75,7 +75,7 @@
 </div>
 
 <div>
-  <ez-t-render id="etr"  style="display: block;height: 30px;width: 100%;">
+  <ez-widget id="etr"  style="display: block;height: 30px;width: 100%;">
 <!--    <template>-->
     <div :name="name + '_www'" :style="'color:'+fn3()+';'">{{aaaa}} {{name}}</div>
     <div :if-true="a > b">1</div>
@@ -97,7 +97,13 @@
 <!--    </if>-->
 
 <!--    </template>-->
-  </ez-t-render>
+  </ez-widget>
+</div>
+<br><br><br>
+<div>
+  <ez-pop-dialog id="dlg" visible={aaaa}>
+    aaaa
+  </ez-pop-dialog>
 </div>
 
 
@@ -146,7 +152,6 @@
         }
       }
       e.target.setState(window.obj);
-      debugger
       window.obj.aaaa = 'ddd'
     })
 </script>

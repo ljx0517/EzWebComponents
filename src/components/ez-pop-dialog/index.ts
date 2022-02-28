@@ -1,4 +1,4 @@
-import * as style from "./ez-pop-dialog.less"
+import * as style from "./style.less"
 const stylesheet = new CSSStyleSheet();
 
 

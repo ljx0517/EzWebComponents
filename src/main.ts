@@ -1,3 +1,3 @@
-import './components/ez-tabs-list/ez-tabs-list'
-import './components/ez-pop-wrapper/ez-pop-wrapper'
-import './components/ez-widget/ez-widget'
+import './components/ez-tabs-list/index'
+import './components/ez-pop-wrapper/index'
+import './components/ez-widget/index'

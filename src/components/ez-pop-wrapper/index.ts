@@ -1,4 +1,4 @@
-import * as style from "./ez-pop-wrapper.less"
+import * as style from "./style.less"
 const stylesheet = new CSSStyleSheet();
 
 

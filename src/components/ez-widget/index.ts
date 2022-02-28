@@ -1,4 +1,4 @@
-import * as style from "./index.less"
+import * as style from "./style.less"
 const ELEMENT_NODE = 1;
 const DOCUMENT_FRAGMENT_NODE = 11;
 const TEXT_NODE = 3;

@@ -12,6 +12,7 @@ enum LOOP_CONDITION_STATEMENT {
   NOTHING
 }
 
+
 enum DOM_RENDER_ACTION_TYPE {
   REPLACE,
   REORDER,
@@ -19,6 +20,7 @@ enum DOM_RENDER_ACTION_TYPE {
   TEXT
 }
 
+type ACTOR = (...args: any) => void|CallableFunction;
 type iterableObj<T>= {
   [key: string]: T,
   // [Symbol.iterator]: T
@@ -36,7 +38,17 @@ class DirtyableValue  {
   private _value: any;
   private _dirty= false;
   private _pathKey = '';
+  static isPrimitiveValue(value: undefined |null |boolean | number | string | symbol): boolean {
+    if (value === null) {
+      return true;
+    }
+    const t = typeof value;
+    const primitiveTypes = ['undefined' , 'boolean', 'number', 'string', 'symbol']
+    return primitiveTypes.includes(t)
+  }
   constructor(value: any, pathKey:string) {
+
+
     this._value = value;
     this._pathKey = pathKey;
   }
@@ -365,6 +377,8 @@ class EzWidget extends HTMLElement {
   private expressionNodeMap = new WeakMap();
   private nodePositionMap = new WeakMap();
   private compileContentNodeMap = new WeakMap();
+
+  private nodeActorsMap = new WeakMap<VELEMENT, Set<ACTOR>>()
   private cacheIfTagDomFragment: DocumentFragment;
   private cacheLoopTagDomFragment: DocumentFragment;
 
@@ -451,7 +465,7 @@ class EzWidget extends HTMLElement {
     const keys = Object.keys(source);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      const val = source[key]
+      let val = source[key]
     // }
     // Object.entries(source).forEach(([key, val]) => {
       const pathKey = `${root ? `${root}.` : ''}${key}`;
@@ -461,6 +475,9 @@ class EzWidget extends HTMLElement {
         return
       }
       const internalKey = this.getInternalKey(pathKey)
+      // if (DirtyableValue.isPrimitiveValue(val)) {
+      //   val = new DirtyableValue(val, internalKey);
+      // }
       self.__state[internalKey] = val; // new DirtyableValue(val, internalKey);
       Object.defineProperty(source, key, {
         get() {

@@ -1,4 +1,5 @@
 import * as style from "./style.less"
+import * as fastdom from './fastdom';
 const ELEMENT_NODE = 1;
 const DOCUMENT_FRAGMENT_NODE = 11;
 const TEXT_NODE = 3;
@@ -26,7 +27,7 @@ type iterableObj<T>= {
   // [Symbol.iterator]: T
   // [Symbol.iterator]() : IterableIterator<any>;
 }
-type VELEMENT  = HTMLElement & {compileContext: iterableObj<any>}
+type VELEMENT  = (HTMLElement ) & {___ez_compiled: boolean, compileContext: iterableObj<any>}
 type EXPRESSION_ACTION = (...args: any) => void;
 type FOR_LOOP_CONFIG = {
   begin: Node,
@@ -248,26 +249,22 @@ function subStrAtPos(tpl: string, step: number , pos: number) {
 function extractVars(template: string, openChar = "{{", closeChar = "}}") {
 
   let i = 0;
+  const ol = openChar.length;
+  const cl = closeChar.length;
+  const tl = template.length;
   const data = [];
-
-  // do {
-  //   if (template[i] == openChar) {
-  //     for (let j=i+1; j<template.length; j++) {
-  //       if (template[j] == closeChar) {
-  //         data[data.length] = template.slice(i+1, j);
-  //         i = j+1;
-  //         break;
-  //       }
-  //     }
-  //   }
-  // } while (++i < template.length);
-
   do {
-    if (subStrAtPos(template, openChar.length, i) == openChar) {
-      for (let j=i+1; j<=(template.length - closeChar.length ); j++) {
-        if (subStrAtPos(template, closeChar.length, j) == closeChar) {
+    if (/*subStrAtPos(template, openChar.length, i)*/template.substring(i, i+ol) == openChar) {
+      for (let j=i+1; j<=(tl - cl ); j++) {
+        if (/*subStrAtPos(template, closeChar.length, j) */template.substring(j, j+cl) == closeChar) {
           // data[data.length] = template.slice(i+openChar.length, j);
-          data.push(template.slice(i+openChar.length, j))
+          const start = i+ol;
+          const end = j;
+          data.push({
+            start,
+            end,
+            name: template.slice(start, end)
+          })
           i = j+1;
           break;
         }
@@ -378,7 +375,12 @@ class EzWidget extends HTMLElement {
   private nodePositionMap = new WeakMap();
   private compileContentNodeMap = new WeakMap();
 
-  private nodeActorsMap = new WeakMap<VELEMENT, Set<ACTOR>>()
+  private nodeActorsMap = new WeakMap<VELEMENT|Text, Set<ACTOR>>()
+  // private compileVarNodes = new WeakMap<VELEMENT|Text, Set<CallableFunction>>()
+  private compileVarQueue = new Set<CallableFunction>()
+  private varBindNodeObj: {[key: string]: Set<VELEMENT>} = {};
+
+
   private cacheIfTagDomFragment: DocumentFragment;
   private cacheLoopTagDomFragment: DocumentFragment;
 
@@ -501,13 +503,14 @@ class EzWidget extends HTMLElement {
           }
           self.__state[internalKey] = value // new DirtyableValue(value, internalKey);
 
-          const expSet = self.varExpressionObj[internalKey];
-          expSet && expSet.forEach(exp => {
-            const acts = self.expressionNodeMap.get(exp);
-            acts.forEach((act: CallableFunction) => {
-              act(internalKey, beforeValue, value)
-            })
-          })
+          const nodes = self.varBindNodeObj[internalKey];
+          nodes && nodes.forEach(node => {
+            self.nodeActorsMap.get(node).forEach(act => {
+              fastdom.mutate(() => {
+                act();
+              })
+            });
+          });
         }
       });
 
@@ -622,7 +625,32 @@ class EzWidget extends HTMLElement {
     action();
   }
 
-  bindTextNodeAction(strExpr: string, node: Text) {
+  bindTextNodeActor(strExpr: string, node: VELEMENT) {
+    const lambdaFn = lambda(strExpr);
+    const actor: ACTOR =  ((result :string) => {
+      if (!result) {
+        const scope = this.getNodeCompileScope(node);
+        result = lambdaFn( this.__state, scope)
+      }
+      node.textContent = result;
+    });
+    const compileVar = () => {
+      this.__state.startRecordExpressionVars();
+      const scope = this.getNodeCompileScope(node);
+      const result = lambdaFn(this.__state, scope);
+      const vars = this.__state.stopRecordExpressionVars();
+      vars.forEach((v: string) => {
+        if (!this.varBindNodeObj[v]) {
+          this.varBindNodeObj[v] = new Set<VELEMENT>();
+        }
+        this.varBindNodeObj[v].add(node);
+      });
+      return result
+    }
+    this.bindNodeActor(node, actor, compileVar);
+  }
+
+  bindTextNodeAction(strExpr: string, node: Text) {return
     if (!node.parentElement.parentElement) {
       return
     }
@@ -737,10 +765,29 @@ class EzWidget extends HTMLElement {
   }
 
 
+
   bindStateFunction(fn: () => void) {
     return (function() {
       return eval(fn.toString());
     }).call(this.__state)
+  }
+  bindNodeActor(node: VELEMENT|Text, actor: ACTOR, compileVar: CallableFunction) {
+    if (!this.nodeActorsMap.get(node)) {
+      this.nodeActorsMap.set(node, new Set())
+    }
+    this.nodeActorsMap.get(node).add(actor)
+    fastdom.measure(() => {
+      const result = compileVar()
+      fastdom.mutate(() => {
+        actor(result);
+      })
+    })
+    // this.compileVarQueue.add(compileVar)
+
+    // if (!this.compileVarNodes.get(node)) {
+    //   this.compileVarNodes.set(node, new Set())
+    // }
+    // this.compileVarNodes.get(node).add(compileVar)
   }
   compile = (node: VELEMENT) => {
     if (node.nodeName == 'SCRIPT') {
@@ -752,17 +799,40 @@ class EzWidget extends HTMLElement {
 
     if (node.nodeType === TEXT_NODE) {
       const txtNode = (node as unknown as Text);
-      // TODO only replace paired {{}}
-      const txtExp = txtNode.wholeText
-          .replace(/\{\{/gi, '${', )
-          .replace(/\}\}/gi, '}', )
       if (txtNode.wholeText.trim()) {
-        console.log(1, txtNode.wholeText.trim(), txtExp)
-        this.bindTextNodeAction("`" +txtExp + "`", txtNode);
+        const textNodes = [];
+        const pos: number[] = [];
+        console.log(0, txtNode.wholeText)
+        txtNode.wholeText.replace(/{([^{}]+?)}/g, (match, contents, offset, input_string) => {
+          pos.push(offset as number)
+          pos.push(offset + match.length)
+          console.log(1, match)
+          return match;
+        });
+
+        let s = 0;
+        console.log('pos.length', pos.length)
+        const isEnd = pos.length % 2;
+        while(pos.length) {
+          const p = pos.shift();
+          const t = txtNode.wholeText.substring(s, p)
+
+          const tn = document.createTextNode(t)
+          if (pos.length % 2 === isEnd) {
+            // t = t.replace(/\{\{/gi, '${', )
+            //     .replace(/\}\}/gi, '}', );
+            console.log(2, t)
+            this.bindTextNodeActor("`$" + t + "`", tn as unknown as VELEMENT);
+          }
+          textNodes.push(tn)
+          s = p;
+        }
+        console.log(textNodes)
+        txtNode.replaceWith(...textNodes)
       }
       return
     }
-
+    return
     let attrs = node.getAttributeNames();
     console.log('attrs', attrs);
     const eachVarName = attrs.find((attr) => {

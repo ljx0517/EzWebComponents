@@ -20,6 +20,15 @@ module.exports = {
     'ez-pop-wrapper': './src/components/ez-pop-wrapper/index.ts',
     'ez-widget': './src/components/ez-widget/index.ts',
   },
+  output: {
+    scriptType: 'module',
+  },
+  experiments: {
+    outputModule: true,
+  },
+  // output: {
+  //   module: true,
+  // },
   module: {
     rules: [
       // {

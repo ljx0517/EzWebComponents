@@ -77,7 +77,7 @@ p {
 </div>
 
 <div style="display: none">
-  <ez-widget id="etr"  style="display: block;height: 30px;width: 100%;">
+  <ez-widget-wwww id="etr"  style="display: block;height: 30px;width: 100%;">
 <!--    <template>-->
     <div :name="name + '_www'" :style="'color:'+fn3()+';'">{{aaaa}} {{name}}</div>
     <div :if-true="a > b">1</div>
@@ -99,19 +99,16 @@ p {
 <!--    </if>-->
 
 <!--    </template>-->
-  </ez-widget>
+  </ez-widget-wwww>
 </div>
 <h1>test text</h1>
 <ez-widget id="testTextW1"  style="">
-  <p>this is aaaa : {{aaaa}}</p>
-  <p>this is bbbb : {{bbbb}}</p>
-  <p>this is color : {{color}}</p>
-  <p>this is color2 : {{color}}</p>
+  <p>this is aaaa : {aaaa}} {{  src} {{bbbb}}} }} </p>
+  <img src={src} {alt}><br>
 </ez-widget>
 
-<button {src}>
-  Log out
-</button>
+
+
 <input type="text" :bind-value="aaa">
 svelte
 https://svelte.dev/tutorial/adding-data
@@ -134,6 +131,8 @@ https://svelte.dev/tutorial/adding-data
       window.obj = {
         aaaa: "123",
         bbbb: "123",
+        src: 'src-src-src',
+        alt: 'alt-alt-alt',
         name: 'hah',
         color: 'red',
         color2: 'green',

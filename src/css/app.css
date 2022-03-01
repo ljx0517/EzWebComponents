@@ -58,7 +58,7 @@ html, body {
   display: flex;
   line-height: 35px;
   border-bottom: 1px solid #dadce0;
-
+  position: relative;
 }
 
 .sub-module-tool[open] {

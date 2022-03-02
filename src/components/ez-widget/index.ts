@@ -246,6 +246,53 @@ function subStrAtPos(tpl: string, step: number , pos: number) {
   return f.join('')
 }
 
+
+function extractVarsV2(template: string, openChar = "{", closeChar = "}") {
+
+  let i = 0;
+  const ol = openChar.length;
+  const cl = closeChar.length;
+  const tl = template.length;
+  const data = [];
+  const sq = [];
+  const dq = [];
+  do {
+    if (template.substring(i, i+ol) == openChar) {
+      for (let j=i+1; j<=(tl - cl ); j++) {
+        if (template[j] === "'") {
+          sq.length & 1 ? sq.pop() : sq.push(null);
+        }
+
+        if (template[j] === '"') {
+          dq.length & 1 ? dq.pop() : dq.push(null);
+        }
+        if(template.substring(j, j+ol) == openChar && !sq.length && !dq.length) {
+          i = j
+        }
+
+        if (template.substring(j, j+cl) == closeChar && ( !sq.length && !dq.length )  ) {
+          sq.length = 0;
+          dq.length = 0;
+          const start = i;
+          const end = j+cl;
+          data.push({
+            start,
+            end,
+            name: template.slice(start, end),
+            var: template.slice(start + ol, j)
+          })
+          i = j+1;
+          break;
+        }
+      }
+    }
+  } while (++i <= (template.length - openChar.length ))
+
+  return data;
+}
+
+
+
 function extractVars(template: string, openChar = "{{", closeChar = "}}") {
 
   let i = 0;
@@ -316,6 +363,9 @@ const StateHandle: ProxyHandler<any> = {
         this.recordExpressionVars.add(prop)
         console.log( '__state get', prop, prop in target)
       }
+      if (typeof target[prop] === 'function') {
+        return target[prop]();
+      }
       // varNodeMap[prop] = node
     }
     return Reflect.get(target, prop, receiver);
@@ -326,7 +376,14 @@ const StateHandle: ProxyHandler<any> = {
       newVal = new StateProxy(val);
     }
     if (val && typeof val === 'function') {
-      newVal = bindFunctionScope(target, val)
+      // TODO should I make arrow function bind state?
+      // https://github.com/flycrum/check-is-arrow-function/blob/master/src/lib/checkIsArrowFunction.ts
+      // console.log('function', val,Object.getOwnPropertyNames(val))
+      // if (Object.getOwnPropertyNames(val).includes('prototype')) {
+      //   newVal = val.bind(target);
+      // } else {
+      //   newVal = bindFunctionScope(target, val)
+      // }
     }
     return Reflect.set(target, prop, newVal, receiver);
   },
@@ -648,7 +705,17 @@ class EzWidget extends HTMLElement {
   }
 
   bindNodeExpression(node: VELEMENT, strExpr: string, action: CallableFunction) {
-    const lambdaFn = lambda(strExpr);
+    // let lambdaFn = (localScope: any, extendsScope: any): any => {
+    //   return
+    // }
+    // if (typeof this.__state[strExpr] == 'function') {
+    //   lambdaFn = this.__state[strExpr];
+    // } else {
+    //   strExpr = "`$" + strExpr + "`"
+    //   lambdaFn = lambda(strExpr);
+    // }
+    const lambdaFn = lambda(strExpr)
+
     const compileVar = () => {
       this.__state.startRecordExpressionVars();
       const scope = this.getNodeCompileScope(node);
@@ -816,68 +883,8 @@ class EzWidget extends HTMLElement {
     // }
     // this.compileVarNodes.get(node).add(compileVar)
   }
-  compile = (node: VELEMENT) => {
-    if (node.nodeName == 'SCRIPT') {
-      return;
-    }
-    if (node.nodeType === COMMENT_NODE || node.nodeType === DOCUMENT_FRAGMENT_NODE) { // comment & DOCUMENT_FRAGMENT_NODE
-      return ;
-    }
-
-    if (node.nodeType === TEXT_NODE) {
-      const txtNode = (node as unknown as Text);
-      if (txtNode.wholeText.trim()) {
-        const textNodes = [];
-        const pos: number[] = [];
-        txtNode.wholeText.replace(EXPRESSION_REGEX, (match, contents, offset, input_string) => {
-          pos.push(offset as number)
-          pos.push(offset + match.length)
-          return match;
-        });
-        EXPRESSION_REGEX.lastIndex = 0;
-        let s = 0;
-        console.log('pos.length', pos.length)
-        if (txtNode.wholeText.length != pos[pos.length - 1]) {
-          pos.push(txtNode.wholeText.length )
-        }
-        const isEnd = pos.length % 2;
-        while(pos.length) {
-          const p = pos.shift();
-          let t = txtNode.wholeText.substring(s, p)
-
-          let tn: any = null;
-          let isHtmlNode = false;
-          if (t.startsWith('{@')) {
-            isHtmlNode = true;
-            tn = document.createComment('')
-            const holderForReplace = document.createComment('')
-            textNodes.push(holderForReplace)
-            t = t.replace('{@', '{');
-          } else {
-            tn = document.createTextNode(t)
-          }
-
-          // const tn = document.createTextNode(t)
-          if (pos.length % 2 === isEnd) {
-            // this.bindTextNodeActor(tn as unknown as VELEMENT, "`$" + t + "`");
-            this.bindNodeExpression(tn as unknown as VELEMENT, "`$" + t + "`", (result: any) => {
-              if (isHtmlNode) {
-                tn.previousSibling.replaceWith(document.createRange().createContextualFragment(result));
-              } else {
-                tn.textContent = result;
-              }
-
-            });
-          }
-          textNodes.push(tn)
-          s = p;
-        }
-        txtNode.replaceWith(...textNodes)
-      }
-      // text node stop here
-      return;
-    }
-    let attrs = node.getAttributeNames();
+  expandShorthandAttributes(node: VELEMENT) {
+    const attrs = node.getAttributeNames();
     for (let i = 0; i < attrs.length; i++) {
       const attr = node.getAttributeNode(attrs[i])
       let attrName = attr.name as unknown as string;
@@ -891,7 +898,63 @@ class EzWidget extends HTMLElement {
         node.setAttribute(attrName, attrValue)
       }
     }
-    console.log('attrs', attrs);
+  }
+  compile = (node: VELEMENT) => {
+    if (node.nodeName == 'SCRIPT') {
+      return;
+    }
+    if (node.nodeType === COMMENT_NODE || node.nodeType === DOCUMENT_FRAGMENT_NODE) { // comment & DOCUMENT_FRAGMENT_NODE
+      return ;
+    }
+
+    if (node.nodeType === TEXT_NODE) {
+      const txtNode = (node as unknown as Text);
+      if (txtNode.wholeText.trim()) {
+        const textNodes = [];
+        const expressionStr = txtNode.wholeText;
+        const vars = extractVarsV2(expressionStr);
+        if (vars.length) {
+          let s = 0;
+          while(vars.length) {
+            const {name, start, end} = vars.shift();
+            let t = expressionStr.substring(s, start);
+            textNodes.push(document.createTextNode(t) );
+            t = name
+            let tn: any = null;
+            let isHtmlNode = false;
+            if (name.startsWith('{!')) {
+              isHtmlNode = true;
+              tn = document.createComment('')
+              const holderForReplace = document.createComment('')
+              textNodes.push(holderForReplace)
+              t = t.replace('{!', '{');
+            } else {
+              tn = document.createTextNode(t)
+            }
+            this.bindNodeExpression(tn as unknown as VELEMENT, "`$" + t + "`" , (result: any) => {
+              if (isHtmlNode) {
+                tn.previousSibling.replaceWith(document.createRange().createContextualFragment(result));
+              } else {
+                tn.textContent = result;
+              }
+            })
+            textNodes.push(tn)
+            s = end
+          }
+          if (s < expressionStr.length) {
+            const t = expressionStr.substring(s)
+            textNodes.push(document.createTextNode(t))
+          }
+          txtNode.replaceWith(...textNodes)
+        }
+
+      }
+      // text node stop here
+      return;
+    }
+
+    this.expandShorthandAttributes(node);
+
     /*const eachVarName = attrs.find((attr) => {
       return attr.startsWith(':each-')
     });
@@ -908,7 +971,8 @@ class EzWidget extends HTMLElement {
       const bindVar = eachVarName.replace(':each-', '')
       this.bindLoopNodeAction(node, loopVar, bindVar)
     }*/
-    attrs = node.getAttributeNames()
+    const attrs = node.getAttributeNames()
+    console.log('attrs', node, attrs);
     for (let i = 0; i < attrs.length; i++) {
       const attr = node.getAttributeNode(attrs[i])
       const attrName = attr.name as unknown as string;
@@ -920,10 +984,19 @@ class EzWidget extends HTMLElement {
       //   continue
       // }
 
+      const attrVars = extractVarsV2(attrValue);
+      if (attrVars.length) {
+        console.log('attrValue', attrValue)
+        let attrStr = attrValue;
+        attrVars.forEach((v) => {
+          attrStr = attrStr.replaceAll(v.name, "$" + v.name + "");
+        })
+        this.bindNodeExpression(node as unknown as VELEMENT, "`" + attrStr + "`", (result: any) => {
+          console.log(node, attrName, result)
+          node.setAttribute(attrName, result);
+        });
+      }
 
-      this.bindNodeExpression(node as unknown as VELEMENT, "`$" + attrValue + "`", (result: any) => {
-        node.setAttribute(attrName, result);
-      })
 
 
       if (attrName.startsWith(':')) {

@@ -104,13 +104,44 @@ p {
 <!--    </template>-->
   </ez-widget-wwww>
 </div>
+
 <h1>test text</h1>
 <ez-widget id="testTextW1"  style="">
-  <p>this is aaaa : {aaaa}} {{  src} {{@bbbb}}} }} </p>
-  <img src={src} {alt}><br>
+
+  <p>this is aaaa : {aaaa}} {{  src} {{!bbbb}}} }} </p>
+  <img src={src} {alt} aa="sss" dd="dfdf"><br>
+  <button>
+    Clicked {count} {count === 1 ? 'time' : 'times'}
+  </button> .ref="color"
   <div {name}
        title="{name}!!!"
-       style="color:{fn3};">{{color}} {{name}}</div>
+       style="color:{fn3};font-size: {fn2}">{{color}} {{name}}</div>
+<!--
+  <h3>Escaping every curly brace</h3>
+  <pre><code>
+  function test(e) {'{'}
+    console.log(e)
+  {'}'}
+</code></pre>
+
+
+  <h3>Wrapping the whole code block in a string literal</h3>
+  <pre><code>
+  {`
+  function test(e) {
+    console.log(e)
+  }
+	`}
+</code></pre>
+
+
+  <h3>Using &#123; and &#125;</h3>
+  <pre><code>
+  function test(e) &#123;
+    console.log(e)
+  &#125;
+</code></pre>
+  -->
 </ez-widget>
 
 
@@ -135,6 +166,7 @@ https://svelte.dev/tutorial/adding-data
       // console.log(e.target, e.detail, e.target == e.detail);
       console.log(111111)
       window.obj = {
+        count: 0,
         aaaa: "123",
         bbbb: "<b>boldHtml</b>",
         src: 'src-src-src',
@@ -142,9 +174,9 @@ https://svelte.dev/tutorial/adding-data
         name: 'hah',
         color: 'red',
         color2: 'green',
+        fontSize: 16,
         a: 2,
         b: 1,
-        html: `<p>ssssss</p>`,
         listItem: [1, 2, 3, 4],
         filterCondition: 1,
         filterItem: () => {
@@ -152,13 +184,16 @@ https://svelte.dev/tutorial/adding-data
             return (i % 2) === this.filterCondition;
           });
         },
+        incrementCount() {
+          this.count += 1;
+        },
         fn1: (e) =>{
           console.log('fn1',e, this);
         },
-        fn2: (e) => {
-          console.log('fn2',e, this);
+        fn2() {
+          return `${this.fontSize}px`
         },
-        fn3: () => {
+        fn3() {
           return this.color2
         }
       }

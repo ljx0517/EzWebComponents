@@ -12,7 +12,7 @@ enum LOOP_CONDITION_STATEMENT {
   RETURN,
   NOTHING
 }
-
+const EXPRESSION_REGEX = /{([^{}]+?)}/g
 
 enum DOM_RENDER_ACTION_TYPE {
   REPLACE,
@@ -467,11 +467,8 @@ class EzWidget extends HTMLElement {
     const keys = Object.keys(source);
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i];
-      let val = source[key]
-    // }
-    // Object.entries(source).forEach(([key, val]) => {
+      const val = source[key]
       const pathKey = `${root ? `${root}.` : ''}${key}`;
-      // console.log('pathKey', pathKey);
       if (val &&  !Array.isArray(val)  && typeof val === "object") {
         self.makeStateReflectable(val, pathKey);
         return
@@ -625,7 +622,7 @@ class EzWidget extends HTMLElement {
     action();
   }
 
-  bindTextNodeActor(strExpr: string, node: VELEMENT) {
+  bindTextNodeActor(node: VELEMENT, strExpr: string) {
     const lambdaFn = lambda(strExpr);
     const actor: ACTOR =  ((result :string) => {
       if (!result) {
@@ -649,6 +646,37 @@ class EzWidget extends HTMLElement {
     }
     this.bindNodeActor(node, actor, compileVar);
   }
+
+  bindNodeExpression(node: VELEMENT, strExpr: string, action: CallableFunction) {
+    const lambdaFn = lambda(strExpr);
+    const compileVar = () => {
+      this.__state.startRecordExpressionVars();
+      const scope = this.getNodeCompileScope(node);
+      const result = lambdaFn(this.__state, scope);
+      const vars = this.__state.stopRecordExpressionVars();
+      vars.forEach((v: string) => {
+        if (!this.varBindNodeObj[v]) {
+          this.varBindNodeObj[v] = new Set<VELEMENT>();
+        }
+        this.varBindNodeObj[v].add(node);
+      });
+      return result
+    }
+    const actor: ACTOR =  ((result :string) => {
+      if (!result) {
+        const scope = this.getNodeCompileScope(node);
+        result = lambdaFn( this.__state, scope)
+      }
+      action(result)
+      // node.textContent = result;
+    });
+
+    this.bindNodeActor(node, actor, compileVar);
+  }
+  textToExpression(text: string) {
+
+  }
+
 
   bindTextNodeAction(strExpr: string, node: Text) {return
     if (!node.parentElement.parentElement) {
@@ -783,7 +811,6 @@ class EzWidget extends HTMLElement {
       })
     })
     // this.compileVarQueue.add(compileVar)
-
     // if (!this.compileVarNodes.get(node)) {
     //   this.compileVarNodes.set(node, new Set())
     // }
@@ -802,40 +829,70 @@ class EzWidget extends HTMLElement {
       if (txtNode.wholeText.trim()) {
         const textNodes = [];
         const pos: number[] = [];
-        console.log(0, txtNode.wholeText)
-        txtNode.wholeText.replace(/{([^{}]+?)}/g, (match, contents, offset, input_string) => {
+        txtNode.wholeText.replace(EXPRESSION_REGEX, (match, contents, offset, input_string) => {
           pos.push(offset as number)
           pos.push(offset + match.length)
-          console.log(1, match)
           return match;
         });
-
+        EXPRESSION_REGEX.lastIndex = 0;
         let s = 0;
         console.log('pos.length', pos.length)
+        if (txtNode.wholeText.length != pos[pos.length - 1]) {
+          pos.push(txtNode.wholeText.length )
+        }
         const isEnd = pos.length % 2;
         while(pos.length) {
           const p = pos.shift();
-          const t = txtNode.wholeText.substring(s, p)
+          let t = txtNode.wholeText.substring(s, p)
 
-          const tn = document.createTextNode(t)
+          let tn: any = null;
+          let isHtmlNode = false;
+          if (t.startsWith('{@')) {
+            isHtmlNode = true;
+            tn = document.createComment('')
+            const holderForReplace = document.createComment('')
+            textNodes.push(holderForReplace)
+            t = t.replace('{@', '{');
+          } else {
+            tn = document.createTextNode(t)
+          }
+
+          // const tn = document.createTextNode(t)
           if (pos.length % 2 === isEnd) {
-            // t = t.replace(/\{\{/gi, '${', )
-            //     .replace(/\}\}/gi, '}', );
-            console.log(2, t)
-            this.bindTextNodeActor("`$" + t + "`", tn as unknown as VELEMENT);
+            // this.bindTextNodeActor(tn as unknown as VELEMENT, "`$" + t + "`");
+            this.bindNodeExpression(tn as unknown as VELEMENT, "`$" + t + "`", (result: any) => {
+              if (isHtmlNode) {
+                tn.previousSibling.replaceWith(document.createRange().createContextualFragment(result));
+              } else {
+                tn.textContent = result;
+              }
+
+            });
           }
           textNodes.push(tn)
           s = p;
         }
-        console.log(textNodes)
         txtNode.replaceWith(...textNodes)
       }
-      return
+      // text node stop here
+      return;
     }
-    return
     let attrs = node.getAttributeNames();
+    for (let i = 0; i < attrs.length; i++) {
+      const attr = node.getAttributeNode(attrs[i])
+      let attrName = attr.name as unknown as string;
+      let attrValue = attr.value as unknown as string;
+      const isShorthand =  EXPRESSION_REGEX.exec(attrName)
+      EXPRESSION_REGEX.lastIndex = 0; // reset pos
+      if (isShorthand) {
+        node.removeAttribute(attrName);
+        attrName = isShorthand[1];
+        attrValue = `{${attrName}}`
+        node.setAttribute(attrName, attrValue)
+      }
+    }
     console.log('attrs', attrs);
-    const eachVarName = attrs.find((attr) => {
+    /*const eachVarName = attrs.find((attr) => {
       return attr.startsWith(':each-')
     });
     // const ifVarName = attrs.find((attr) => {
@@ -850,19 +907,24 @@ class EzWidget extends HTMLElement {
       const loopVar = node.getAttribute(eachVarName)
       const bindVar = eachVarName.replace(':each-', '')
       this.bindLoopNodeAction(node, loopVar, bindVar)
-    }
+    }*/
     attrs = node.getAttributeNames()
     for (let i = 0; i < attrs.length; i++) {
       const attr = node.getAttributeNode(attrs[i])
       const attrName = attr.name as unknown as string;
       const attrValue = attr.value as unknown as string;
-      const name = this.getInternalKey(attrName.substring(1));
 
-      if (attrName.startsWith(':if-')) { // if expression
-        console.log('[if]', attrName, attrValue);
-        this.bindIfNodeAction(node, attrName, attrValue);
-        continue
-      }
+      // if (attrName.startsWith(':if-')) { // if expression
+      //   console.log('[if]', attrName, attrValue);
+      //   this.bindIfNodeAction(node, attrName, attrValue);
+      //   continue
+      // }
+
+
+      this.bindNodeExpression(node as unknown as VELEMENT, "`$" + attrValue + "`", (result: any) => {
+        node.setAttribute(attrName, result);
+      })
+
 
       if (attrName.startsWith(':')) {
         console.log('[attr]', attrName, attrValue);

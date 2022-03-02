@@ -20,6 +20,9 @@
 p {
   margin-top: 4px;
   margin-bottom: 4px;
+  color: purple;
+  font-family: 'Comic Sans MS', cursive;
+  /*font-size: 2em;*/
 }
 </style>
 <div style="display: none;height: 60px">
@@ -103,8 +106,11 @@ p {
 </div>
 <h1>test text</h1>
 <ez-widget id="testTextW1"  style="">
-  <p>this is aaaa : {aaaa}} {{  src} {{bbbb}}} }} </p>
+  <p>this is aaaa : {aaaa}} {{  src} {{@bbbb}}} }} </p>
   <img src={src} {alt}><br>
+  <div {name}
+       title="{name}!!!"
+       style="color:{fn3};">{{color}} {{name}}</div>
 </ez-widget>
 
 
@@ -130,7 +136,7 @@ https://svelte.dev/tutorial/adding-data
       console.log(111111)
       window.obj = {
         aaaa: "123",
-        bbbb: "123",
+        bbbb: "<b>boldHtml</b>",
         src: 'src-src-src',
         alt: 'alt-alt-alt',
         name: 'hah',

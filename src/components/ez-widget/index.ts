@@ -5,7 +5,13 @@ const DOCUMENT_FRAGMENT_NODE = 11;
 const TEXT_NODE = 3;
 const COMMENT_NODE = 8;
 const randomLocalsScopeName = `___$locals$___${Date.now()}`
+const IS_PROXY = Symbol("IS_PROXY")
+const PARENT_PATH = Symbol("PARENT_PATH")
 
+type VAR_AND_EXPRESSION = {
+  expression: string;
+  vars: string[];
+}
 enum LOOP_CONDITION_STATEMENT {
   CONTINUE,
   BREAK,
@@ -78,7 +84,11 @@ class DirtyableValue  {
   }
 
 }
-
+function isReflectable(v: any) {
+  // FIXME to do with or without Array
+  return v != null && typeof v !== 'function' &&  !Array.isArray(v) && typeof v == 'object';
+  // return !(v != null &&  !Array.isArray(v) && typeof v !== 'function' && typeof v !== 'object');
+}
 
 
 // https://stackoverflow.com/questions/543533/restricting-eval-to-a-narrow-scope
@@ -112,15 +122,19 @@ const lambda: CallableFunction = (function(){
     if (!fn){
       // fn =(new Function( 'ctx', `with(ctx) { try {return ${exp};} catch(r) {}}`));
       // fn =(new Function( 'ctx', `with(ctx) { return ${exp};}`));
-      fn = (new Function( `ctx, ${randomLocalsScopeName}`, `
-      if (!${randomLocalsScopeName} || !Object.keys(${randomLocalsScopeName}).length) {
-        ${randomLocalsScopeName} = {};
-      };
-      with(ctx) { 
-        with(${randomLocalsScopeName}) { 
-          return  ${exp};
-        }
-      }`))
+      try{
+        fn = (new Function( `ctx, ${randomLocalsScopeName}`, `
+        if (!${randomLocalsScopeName} || !Object.keys(${randomLocalsScopeName}).length) {
+          ${randomLocalsScopeName} = {};
+        };
+        with(ctx) { 
+          with(${randomLocalsScopeName}) { 
+            return  ${exp};
+          }
+        }`))
+      } catch (e) {
+        throw new Error(`[Template Compile Error] SyntaxError:${e.message}`)
+      }
       cache[exp] = fn;
     }
     return fn;
@@ -309,6 +323,13 @@ const StateHandle: ProxyHandler<any> = {
   },
   get(target: any, prop: string|symbol, receiver) {
     console.log('get', target, prop)
+    if (prop === IS_PROXY) {
+      return true;
+    }
+    // if (prop === 'ctx') {
+    //   return receiver;
+    // }
+
     if (prop === 'startRecordExpressionVars') {
       this.recordExpressionVars = new Set()
       return () => {
@@ -332,9 +353,16 @@ const StateHandle: ProxyHandler<any> = {
     // let value = target[prop];
     // return (typeof value === 'function') ? value.bind(target) : value; // (*)
 
-    if (Object.prototype.hasOwnProperty.call(target, prop)) {
+    if (typeof prop != 'symbol' && Object.prototype.hasOwnProperty.call(target, prop)) {
       if (this.recordExpressionVars) {
-        this.recordExpressionVars.add(prop)
+        // const parent = Object.getOwnPropertyDescriptor(receiver, PARENT_PATH);
+        const parent = receiver[PARENT_PATH]
+        let varName = prop;
+        if (parent) {
+          varName = `${parent}.${String(prop)}`;
+        }
+        this.recordExpressionVars.add(varName);
+
         console.log( '__state get', prop, prop in target)
       }
       if (typeof target[prop] === 'function') {
@@ -344,7 +372,7 @@ const StateHandle: ProxyHandler<any> = {
         //   return target[prop]();
         // }
       }
-      // varNodeMap[prop] = node
+
     }
     if (prop != Symbol.unscopables && String(prop).includes('.')) {
       const props = String(prop).split('.');
@@ -353,8 +381,9 @@ const StateHandle: ProxyHandler<any> = {
       let p = null;
       for (let i = 0; i < props.length; i++) {
         p = props[i];
-        if (typeof target[p] === 'undefined') {
-          return undefined;
+        if (typeof layer[p] === 'undefined') {
+          return undefined
+          // layer[p] =  new StateProxy({});
         }
         layer = layer[p]
       }
@@ -364,32 +393,48 @@ const StateHandle: ProxyHandler<any> = {
   },
   set(target: any, prop: string|symbol, val, receiver) { // to intercept property writing
     let newVal = val
-    if (val && !Array.isArray(val) && typeof val === 'object') {
+    if (isReflectable(val)) {
       newVal = new StateProxy(val);
     }
     if (val && typeof val === 'function') {
       // TODO should I make arrow function bind state?
       // https://github.com/flycrum/check-is-arrow-function/blob/master/src/lib/checkIsArrowFunction.ts
     }
+    // if (prop === 'objPath') {
+    //   return this.objPath.push(prop);
+    // }
+    // (receiver as any).WATCH_PATH = prop
+
     if (prop != Symbol.unscopables && String(prop).includes('.')) {
       const props = String(prop).split('.');
       const final = props.pop()
       let p = null;
+      const objPath = [];
       for (let i = 0; i < props.length; i++) {
         p = props[i];
+        objPath.push(p)
         if (typeof target[p] === 'undefined') {
           // If we're setting
-          if (typeof val !== 'undefined') {
+          if (typeof newVal !== 'undefined') {
             // If we're not at the end of the props, keep adding new empty objects
             if (i != props.length)
-              target[p] = {};
+              target[p] = new StateProxy({});
+              const pt = objPath.join('.');
+              Object.defineProperty(target[p],
+                PARENT_PATH,
+                {
+                  value: pt,
+                  configurable: false,
+                  enumerable: false,
+                  writable: false,
+                  });
           }
           else
             return undefined;
         }
         target = target[p]
       }
-      target[final] = val;
+      target[final] = newVal;
       return true
     }
     return Reflect.set(target, prop, newVal, receiver);
@@ -398,6 +443,35 @@ const StateHandle: ProxyHandler<any> = {
     // delete target[prop];
     // return true;
     return Reflect.deleteProperty(target, prop);
+  },
+  getOwnPropertyDescriptor(target, prop) {
+    let value = undefined;
+    if (prop != Symbol.unscopables && String(prop).includes('.')) {
+      const props = String(prop).split('.');
+      const final = props.pop();
+      let layer = target;
+      let p = null;
+      for (let i = 0; i < props.length; i++) {
+        p = props[i];
+        if (typeof layer[p] === 'undefined') {
+          return undefined
+        }
+        layer = layer[p]
+      }
+      value = layer[final];
+    } else {
+      value = Object.prototype.hasOwnProperty.call(target, prop)
+      if (value) {
+        return {
+          // value : value,
+          //use a logical set of descriptors:
+          enumerable : true,
+          configurable : true,
+          writable : true
+        };
+      }
+    }
+
   },
   ownKeys(target: any) { // to intercept property list
     // return Object.keys(target).filter(key => !key.startsWith('_'));
@@ -419,7 +493,7 @@ class StateProxy<T> {
 
 const loopNestedObj = (obj: any) => {
   Object.entries(obj).forEach(([key, val]) => {
-    if (val && !Array.isArray(val) && typeof val === "object") {
+    if (isReflectable(val)) {
       obj[key] = loopNestedObj(val);
     } else { // or do something with key and val.
       console.log(key, val);
@@ -535,15 +609,20 @@ class EzWidget extends HTMLElement {
       const key = keys[i];
       const val = source[key]
       const pathKey = `${root ? `${root}.` : ''}${key}`;
-      if (val &&  !Array.isArray(val)  && typeof val === "object") {
-        self.makeStateReflectable(val, pathKey);
-        continue
-      }
       const internalKey = this.getInternalKey(pathKey)
+      console.log('internalKey', internalKey)
       // if (DirtyableValue.isPrimitiveValue(val)) {
       //   val = new DirtyableValue(val, internalKey);
       // }
       self.__state[internalKey] = val; // new DirtyableValue(val, internalKey);
+      if (typeof val === 'function') {
+        continue
+      }
+
+      if (isReflectable(val)) {
+        self.makeStateReflectable(val, pathKey);
+        continue;
+      }
       Object.defineProperty(source, key, {
         get() {
           console.log('[state] [GET]', internalKey, self.__state[internalKey]);
@@ -552,7 +631,7 @@ class EzWidget extends HTMLElement {
 
         set(value) {
           console.log('[state] [SET]', internalKey, value);
-          if (value && !Array.isArray(val) && typeof value === "object") {
+          if (isReflectable(value)) {
             self.makeStateReflectable(value, pathKey);
             return
           }
@@ -688,43 +767,20 @@ class EzWidget extends HTMLElement {
     action();
   }
 
-  bindTextNodeActor(node: VELEMENT, strExpr: string) {
-    const lambdaFn = lambda(strExpr);
-    const actor: ACTOR =  ((result :string) => {
-      if (!result) {
-        const scope = this.getNodeCompileScope(node);
-        result = lambdaFn( this.__state, scope)
+
+  bindNodeExpression(node: VELEMENT, exp: VAR_AND_EXPRESSION, action: CallableFunction) {
+    const lambdaFn = lambda(exp.expression)
+
+    exp.vars.forEach((v: string) => {
+      console.log('var', v)
+      if (!Object.prototype.hasOwnProperty.call(this.__state, v)) {
+        return;
       }
-      node.textContent = result;
+      if (!this.varBindNodeObj[v]) {
+        this.varBindNodeObj[v] = new Set<VELEMENT>();
+      }
+      this.varBindNodeObj[v].add(node);
     });
-    const compileVar = () => {
-      this.__state.startRecordExpressionVars();
-      const scope = this.getNodeCompileScope(node);
-      const result = lambdaFn(this.__state, scope);
-      const vars = this.__state.stopRecordExpressionVars();
-      vars.forEach((v: string) => {
-        if (!this.varBindNodeObj[v]) {
-          this.varBindNodeObj[v] = new Set<VELEMENT>();
-        }
-        this.varBindNodeObj[v].add(node);
-      });
-      return result
-    }
-    this.bindNodeActor(node, actor, compileVar);
-  }
-
-  bindNodeExpression(node: VELEMENT, strExpr: string, action: CallableFunction) {
-    // let lambdaFn = (localScope: any, extendsScope: any): any => {
-    //   return
-    // }
-    // if (typeof this.__state[strExpr] == 'function') {
-    //   lambdaFn = this.__state[strExpr];
-    // } else {
-    //   strExpr = "`$" + strExpr + "`"
-    //   lambdaFn = lambda(strExpr);
-    // }
-    const lambdaFn = lambda(strExpr)
-
     const compileVar = () => {
       this.__state.startRecordExpressionVars();
       const scope = this.getNodeCompileScope(node);
@@ -749,9 +805,7 @@ class EzWidget extends HTMLElement {
 
     this.bindNodeActor(node, actor, compileVar);
   }
-  textToExpression(text: string) {
 
-  }
 
 
   bindTextNodeAction(strExpr: string, node: Text) {return
@@ -962,7 +1016,11 @@ class EzWidget extends HTMLElement {
             } else {
               tn = document.createTextNode(t)
             }
-            this.bindNodeExpression(tn as unknown as VELEMENT, "`$" + t + "`" , (result: any) => {
+
+            this.bindNodeExpression(tn as unknown as VELEMENT, {
+              expression: "`$" + t + "`",
+              vars:[varName]
+            } , (result: any) => {
               if (isHtmlNode) {
                 tn.previousSibling.replaceWith(document.createRange().createContextualFragment(result));
               } else {
@@ -1017,12 +1075,13 @@ class EzWidget extends HTMLElement {
 
       const attrVars = extractVarsV2(attrValue);
       if (attrVars.length) {
+        const vars: string[] = [];
         console.log('attrValue', attrValue)
         let attrStr = attrValue;
         attrVars.forEach((v) => {
           console.log(v)
           let varName = v.expName;
-
+          vars.push(v.varName)
           if (typeof this.__state[v.varName] === 'function') {
             // const p1 = varName.indexOf('{')
             // const p2 =varName.lastIndexOf('}')
@@ -1032,7 +1091,10 @@ class EzWidget extends HTMLElement {
           attrStr = attrStr.replaceAll(v.expName, "$" + varName + "");
         })
         console.log(attrStr)
-        this.bindNodeExpression(node as unknown as VELEMENT, "`" + attrStr + "`", (result: any) => {
+        this.bindNodeExpression(node as unknown as VELEMENT, {
+          expression: "`" + attrStr + "`",
+          vars
+        }, (result: any) => {
           // console.log(node, attrName, result)
           node.setAttribute(attrName, result);
         });

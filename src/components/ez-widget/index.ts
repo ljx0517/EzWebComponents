@@ -89,6 +89,13 @@ function isReflectable(v: any) {
   return v != null && typeof v !== 'function' &&  !Array.isArray(v) && typeof v == 'object';
   // return !(v != null &&  !Array.isArray(v) && typeof v !== 'function' && typeof v !== 'object');
 }
+const toCamel = (s: string) => {
+  return s.replace(/([-_][a-z])/ig, ($1: string) => {
+    return $1.toUpperCase()
+      .replace('-', '')
+      .replace('_', '');
+  });
+};
 
 
 // https://stackoverflow.com/questions/543533/restricting-eval-to-a-narrow-scope
@@ -292,8 +299,8 @@ function extractVarsV2(template: string, openChar = "{", closeChar = "}") {
           data.push({
             start,
             end,
-            expName: template.slice(start, end),
-            varName: template.slice(start + ol, j)
+            expName: template.slice(start, end).trim(),
+            varName: template.slice(start + ol, j).trim()
           })
           i = j+1;
           break;
@@ -362,9 +369,9 @@ const StateHandle: ProxyHandler<any> = {
           varName = `${parent}.${String(prop)}`;
         }
         this.recordExpressionVars.add(varName);
-
         console.log( '__state get', prop, prop in target)
       }
+      // 引起循环调用，应该规避掉循环调用还是注释下面凑合
       if (typeof target[prop] === 'function') {
         // if (this.recordExpressionVars) {
         //   return target[prop].call(receiver);
@@ -374,21 +381,21 @@ const StateHandle: ProxyHandler<any> = {
       }
 
     }
-    if (prop != Symbol.unscopables && String(prop).includes('.')) {
-      const props = String(prop).split('.');
-      const final = props.pop();
-      let layer = target;
-      let p = null;
-      for (let i = 0; i < props.length; i++) {
-        p = props[i];
-        if (typeof layer[p] === 'undefined') {
-          return undefined
-          // layer[p] =  new StateProxy({});
-        }
-        layer = layer[p]
-      }
-      return layer[final];
-    }
+    // if (prop != Symbol.unscopables && String(prop).includes('.')) {
+    //   const props = String(prop).split('.');
+    //   const final = props.pop();
+    //   let layer = target;
+    //   let p = null;
+    //   for (let i = 0; i < props.length; i++) {
+    //     p = props[i];
+    //     if (typeof layer[p] === 'undefined') {
+    //       return undefined
+    //       // layer[p] =  new StateProxy({});
+    //     }
+    //     layer = layer[p]
+    //   }
+    //   return layer[final];
+    // }
     return Reflect.get(target, prop, receiver);
   },
   set(target: any, prop: string|symbol, val, receiver) { // to intercept property writing
@@ -405,7 +412,7 @@ const StateHandle: ProxyHandler<any> = {
     // }
     // (receiver as any).WATCH_PATH = prop
 
-    if (prop != Symbol.unscopables && String(prop).includes('.')) {
+    /*if (prop != Symbol.unscopables && String(prop).includes('.')) {
       const props = String(prop).split('.');
       const final = props.pop()
       let p = null;
@@ -418,7 +425,7 @@ const StateHandle: ProxyHandler<any> = {
           if (typeof newVal !== 'undefined') {
             // If we're not at the end of the props, keep adding new empty objects
             if (i != props.length)
-              target[p] = new StateProxy({});
+              target[p] = {}; // new StateProxy({});
               const pt = objPath.join('.');
               Object.defineProperty(target[p],
                 PARENT_PATH,
@@ -436,7 +443,7 @@ const StateHandle: ProxyHandler<any> = {
       }
       target[final] = newVal;
       return true
-    }
+    }*/
     return Reflect.set(target, prop, newVal, receiver);
   },
   deleteProperty(target: any, prop: string) { // to intercept property deletion
@@ -458,10 +465,10 @@ const StateHandle: ProxyHandler<any> = {
         }
         layer = layer[p]
       }
-      value = layer[final];
+      return layer[final];
     } else {
       value = Object.prototype.hasOwnProperty.call(target, prop)
-      if (value) {
+      if (value != undefined) {
         return {
           // value : value,
           //use a logical set of descriptors:
@@ -624,8 +631,8 @@ class EzWidget extends HTMLElement {
         continue;
       }
       Object.defineProperty(source, key, {
-        get() {
-          console.log('[state] [GET]', internalKey, self.__state[internalKey]);
+        get() { // ? 嵌套Object，应该从内部__state取还是外部source取？，内部外部取都会产生循环调用
+          console.log('[state] [GET]',internalKey, self.__state[internalKey]);
           return self.__state[internalKey];
         },
 
@@ -666,9 +673,11 @@ class EzWidget extends HTMLElement {
   removeNode(node: VELEMENT) {
     // const index = Array.from(node.parentNode.children).indexOf(node);
     const next = node.nextSibling
+    const prev = node.previousSibling
     this.nodePositionMap.set(node, {
       parent: node.parentElement,
-      next
+      next,
+      prev
     });
     this.cacheIfTagDomFragment.appendChild(node);
   }
@@ -677,13 +686,12 @@ class EzWidget extends HTMLElement {
     if (!info) {
       return;
     }
-    const {parent, next} = info;
+    const {parent, next, prev} = info;
     if (!next) {
       parent.appendChild(node);
       return
     }
     parent.insertBefore(node, next)
-
   }
 
 
@@ -804,6 +812,90 @@ class EzWidget extends HTMLElement {
     });
 
     this.bindNodeActor(node, actor, compileVar);
+  }
+
+  bindNodeLoop(node: VELEMENT, loopVarName: string, bindVar: string) {
+    const begin = document.createComment(`each ${bindVar} of ${loopVarName}`)
+    const end = document.createComment(`end each`)
+    node.parentNode.insertBefore(begin, node)
+    node.parentNode.insertBefore(end, node.nextSibling)
+
+    // const begin = node.previousSibling;
+    // const end = node.nextSibling;
+    loopVarName = loopVarName.replace('(', '').replace(')', '')
+
+    const storeNode = node; // .cloneNode(true)
+
+    if (!this.varBindNodeObj[loopVarName]) {
+      this.varBindNodeObj[loopVarName] = new Set<VELEMENT>();
+    }
+
+    let iter = this.__state[loopVarName];
+    let vars = [];
+    if (typeof iter === 'function') {
+      const ldn = lambda(iter.toString())
+      this.__state.startRecordExpressionVars();
+      iter = ldn.call(this.__state, this.__state) // first for `this`, second for ctx
+      iter()
+      vars = this.__state.stopRecordExpressionVars();
+    }
+
+
+
+    const forKey = {
+      begin,
+      end,
+      forNode: storeNode,
+      varKeyPath: loopVarName,
+      iter
+    }
+    vars.forEach((v: string) => {
+      if (!this.varExpressionObj[v]) {
+        this.varExpressionObj[v] = new Set<EXPRESSION_ACTION>();
+      }
+      this.varExpressionObj[v].add(forKey);
+    });
+    this.varExpressionObj[loopVarName].add(forKey);
+    const action = ((forKeyCfg: FOR_LOOP_CONFIG) => {
+      const {
+        begin, end, forNode, varKeyPath, iter
+      } = forKeyCfg;
+      let start = begin.nextSibling;
+
+      while(start && start != end) {
+        const next = start.nextSibling;
+        console.log("rrrrrrrrrrrrrrrrrrrrrrr")
+        void (start as HTMLElement).remove();
+        start = next;
+      }
+      // let iter = this.__state[varKeyPath]
+      let arrayLike = iter;
+      if (typeof iter === 'function') {
+        arrayLike = iter();
+      }
+      (arrayLike as unknown as Array<any>).map((item: any, index: number) => {
+        const renderForNode = forNode.cloneNode(true) as HTMLElement;
+        // console.log(1,renderForNode)
+        // renderForNode.setAttribute('for-index', String(index))
+        const nodeCompileContext = this.compileContentNodeMap.get(renderForNode)
+        this.compileContentNodeMap.set(renderForNode, {
+          ...nodeCompileContext,
+          [bindVar]: {
+            item, index
+          },
+        });
+
+        end.parentNode.insertBefore(renderForNode, end);
+        compileWalker(renderForNode as VELEMENT, this.compile)
+      });
+    }).bind(null, forKey)
+    action();
+    if (!this.expressionNodeMap.get(forKey)) {
+      this.expressionNodeMap.set(forKey, new Set())
+    }
+    this.expressionNodeMap.get(forKey).add(action)
+
+    this.cacheLoopTagDomFragment.appendChild(storeNode)
   }
 
 
@@ -977,6 +1069,9 @@ class EzWidget extends HTMLElement {
       }
     }
   }
+  isTrigger(attrName: string) {
+    return attrName.startsWith('@')
+  }
   compile = (node: VELEMENT) => {
     if (node.nodeName == 'SCRIPT') {
       return;
@@ -1043,37 +1138,93 @@ class EzWidget extends HTMLElement {
     }
 
     this.expandShorthandAttributes(node);
-
-    /*const eachVarName = attrs.find((attr) => {
-      return attr.startsWith(':each-')
-    });
-    // const ifVarName = attrs.find((attr) => {
-    //   return attr.startsWith(':if-')
-    // });
-    //
-    // const isIfNode = Boolean(ifVarName);
-    const isLoopNode = Boolean(eachVarName);
-
-
-    if (isLoopNode) {
-      const loopVar = node.getAttribute(eachVarName)
-      const bindVar = eachVarName.replace(':each-', '')
-      this.bindLoopNodeAction(node, loopVar, bindVar)
-    }*/
     const attrs = node.getAttributeNames()
+    /* const eachVarName = attrs.find((attr) => {
+       return attr.startsWith(':each-')
+     });
+     const ifVarName = attrs.find((attr) => {
+       return attr.startsWith(':if-')
+     });
+
+     const isIfNode = Boolean(ifVarName);
+     /*const isLoopNode = Boolean(eachVarName);
+
+
+     if (isLoopNode) {
+       const loopVar = node.getAttribute(eachVarName)
+       const bindVar = eachVarName.replace(':each-', '')
+       this.bindLoopNodeAction(node, loopVar, bindVar)
+     }*/
+
     console.log('attrs', node, attrs);
     for (let i = 0; i < attrs.length; i++) {
       const attr = node.getAttributeNode(attrs[i])
       const attrName = attr.name as unknown as string;
       const attrValue = attr.value as unknown as string;
 
-      // if (attrName.startsWith(':if-')) { // if expression
-      //   console.log('[if]', attrName, attrValue);
-      //   this.bindIfNodeAction(node, attrName, attrValue);
-      //   continue
-      // }
+      if (attrName.startsWith(':if-')) { // if expression
+        console.log('[if]', attrName, attrValue);
+        const ifPlaceHolder = document.createComment(`if ${attrName}==${attrValue}`) as unknown as VELEMENT
+        // node.parentNode.insertBefore(ifPlaceHolder, node)
+        node.parentNode.insertBefore(ifPlaceHolder, node.nextSibling)
+        node.removeAttribute(attrName)
+        const vars = extractVarsV2(attrValue)
+        if (vars[0]) { // should only one
+          let { varName } = vars[0];
+          if (typeof this.__state[varName] === 'function') {
+            varName = `${varName}()`
+          }
+          const conditionExpr = `${attrName.substring(4)} === ${varName}`
+          this.bindNodeExpression(node as unknown as VELEMENT, {
+            expression: conditionExpr,
+            vars:[]
+          } , (result: any) => {
+            if (!result) {
+              this.removeNode(node);
+            } else {
+              this.restoreRemoveNode(node);
+            }
+          })
+        }
+        continue
+      }
 
-      const attrVars = extractVarsV2(attrValue);
+      if (attrName.startsWith(':each-')) { // each expression
+        console.log('[each]', attrName, attrValue);
+        let loopVar = toCamel(attrName.replace(':each-', '')  )
+        let bindVar = attrValue
+        // const eachPlaceHolder = document.createComment(`each ${attrValue } of ${loopVar}`) as unknown as VELEMENT
+        // node.parentNode.insertBefore(eachPlaceHolder, node.nextSibling)
+        node.removeAttribute(attrName)
+        const loopItemVars = extractVarsV2(loopVar)
+        if (loopItemVars[0]) {
+          const { varName } = loopItemVars[0];
+          loopVar = varName
+          console.log('[each] [loopVar]', loopVar)
+        }
+        const eachItemVars = extractVarsV2(attrValue)
+        if (eachItemVars[0]) {
+          const { varName } = eachItemVars[0];
+          bindVar = varName
+          console.log('[each] [bindVar]', bindVar)
+        }
+        let loopExpression = loopVar;
+        debugger
+        if (typeof this.__state[loopVar] === 'function') {
+          loopExpression = `${loopVar}()`
+        }
+        this.bindNodeExpression(node, {
+          expression: loopExpression,
+          vars: [loopVar]
+        }, (result: IteratorResult<any>) => {
+          console.log('[loop]', result);
+        })
+        // this.bindNodeLoop(node, loopVar, bindVar);
+        continue
+      }
+
+
+      const attrVars = this.isTrigger(attrName) ? [] : extractVarsV2(attrValue);
       if (attrVars.length) {
         const vars: string[] = [];
         console.log('attrValue', attrValue)
@@ -1083,9 +1234,6 @@ class EzWidget extends HTMLElement {
           let varName = v.expName;
           vars.push(v.varName)
           if (typeof this.__state[v.varName] === 'function') {
-            // const p1 = varName.indexOf('{')
-            // const p2 =varName.lastIndexOf('}')
-            // varName = varName.substring(p1 + 1, p2)
             varName = `{${v.varName}()}`
           }
           attrStr = attrStr.replaceAll(v.expName, "$" + varName + "");
@@ -1107,15 +1255,30 @@ class EzWidget extends HTMLElement {
         this.bindAttrNodeAction(node, attrName, attrValue );
       }
       if (attrName.startsWith('@')) {
+        node.removeAttribute(attrName)
         const eventName = attrName.substring(1);
         console.log('[event]', attrName, attrValue);
+        const callbacks = extractVarsV2(attrValue);
+        let callback = attrValue;
+        if (callbacks && callbacks.length) {
+          for (let j = 0; j < callbacks.length; j++) {
+            const cb = callbacks[j];
+            let cbName: any = cb;
+            if (cb && cb.varName) {
+              cbName = cb.varName
+            }
+            if (this.sourceRef[cbName] ) {
+              callback = cbName
+            }
+          }
+        }
+        console.log('callback', callback)
         node.addEventListener(eventName, (evt) => {
           // this.__state[attrValue](evt)
           fastdom.mutate(() => {
-            this.sourceRef[attrValue](evt)
+            this.sourceRef[callback](evt)
           })
         })
-
       }
     }
   }

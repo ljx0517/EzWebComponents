@@ -109,25 +109,31 @@ p {
 <ez-widget id="testTextW1"  style="">
 
 <!--  <p>this is aaaa : {aaaa}} {{  src} {{!bbbb}}} }} </p>-->
-<!--  <img src={src} {alt} {...pkg}><br>-->
-<!--  <img {...pkg}><br>-->
-<!--  <div>{pkg.name}</div>-->
-<!--  <img {...pkg}  title="{pkg.name}"><br>-->
+<!--  <img src={src} {alt} {...user}><br>-->
+<!--  <img {...user}><br>-->
+<!--  <div>{user.name}</div>-->
+  <img {...user}  title="{user.name}"><br>
   {!bbbb}
   <button @click="incrementCount">
     Clicked {count} {count === 1 ? 'time' : 'times'}
   </button>
   <p>{count} doubled is {count * 2} | {doubled}| {doubled()}</p>
   <p>{numbers.join(' + ')} = {sum}</p>
-  <button @click=addNumber>
+  <button @click="{addNumber  }">
     Add a number
   </button>
 <!--  <div {name}-->
 <!--       title="{name}!!!"-->
 <!--       style="color:{fn3()};font-size: {fn2()}">{{color}} {{name}}</div>-->
   <div style="color:{fn3};font-size: {fn2()}">2222</div>
+  <button :if-true={user.isLogin} @click={toggle}>
+    Log out
+  </button>
 
-
+  <button :if-false={user.loggedIn} @click={toggle}>
+    Log in
+  </button>
+  <p :each-get-numbers="{num}"></p>
 
 <!--  <input type="text" .value="aaa">-->
 
@@ -157,12 +163,20 @@ https://svelte.dev/tutorial/adding-data
       // console.log(e.target, e.detail, e.target == e.detail);
       console.log(111111)
       window.obj = {
-        pkg:{name: 1, title: "22"},
+        user: {
+          loggedIn: false,
+          name: 'Joe',
+          isLogin(){
+            console.log(this.loggedIn)
+            return this.loggedIn
+          }
+        },
         count: 0,
         doubled () {
           return this.count * 2
         },
         numbers: [1, 2, 3, 4],
+        getNumbers: () => ['a', 'b', 'c'],
         sum(){
           return this.numbers.reduce((t, n) => t + n, 0)
         } ,
@@ -179,10 +193,9 @@ https://svelte.dev/tutorial/adding-data
         fontSize: 16,
         a: 2,
         b: 1,
-        listItem: [1, 2, 3, 4],
         filterCondition: 1,
         filterItem: () => {
-          return this.listItem.filter((i) => {
+          return this.numbers.filter((i) => {
             return (i % 2) === this.filterCondition;
           });
         },
@@ -197,6 +210,9 @@ https://svelte.dev/tutorial/adding-data
         },
         fn3() {
           return this.color2
+        },
+        toggle() {
+          this.user.loggedIn = !this.user.loggedIn;
         }
       }
       e.target.setState(window.obj);

@@ -372,33 +372,37 @@ const StateHandle: ProxyHandler<any> = {
         console.log( '__state get', prop, prop in target)
       }
       // 引起循环调用，应该规避掉循环调用还是注释下面凑合
-      if (typeof target[prop] === 'function') {
+      // if (typeof target[prop] === 'function') {
         // if (this.recordExpressionVars) {
         //   return target[prop].call(receiver);
         // } else {
         //   return target[prop]();
         // }
-      }
+      // }
 
     }
-    // if (prop != Symbol.unscopables && String(prop).includes('.')) {
-    //   const props = String(prop).split('.');
-    //   const final = props.pop();
-    //   let layer = target;
-    //   let p = null;
-    //   for (let i = 0; i < props.length; i++) {
-    //     p = props[i];
-    //     if (typeof layer[p] === 'undefined') {
-    //       return undefined
-    //       // layer[p] =  new StateProxy({});
-    //     }
-    //     layer = layer[p]
-    //   }
-    //   return layer[final];
-    // }
+    /*if (prop != Symbol.unscopables && String(prop).includes('.')) {
+      const props = String(prop).split('.');
+      const final = props.pop();
+      let layer = target;
+      let p = null;
+      for (let i = 0; i < props.length; i++) {
+        p = props[i];
+        if (typeof layer[p] === 'undefined') {
+          return undefined
+          // layer[p] =  new StateProxy({});
+        }
+        layer = layer[p]
+      }
+      return layer[final];
+    }*/
     return Reflect.get(target, prop, receiver);
   },
   set(target: any, prop: string|symbol, val, receiver) { // to intercept property writing
+    if (Object.prototype.hasOwnProperty.call(target, prop)) {
+      // return true;
+      // throw new Error(`property ${String(prop)} has already been set`);
+    }
     let newVal = val
     if (isReflectable(val)) {
       newVal = new StateProxy(val);
@@ -441,8 +445,8 @@ const StateHandle: ProxyHandler<any> = {
         }
         target = target[p]
       }
-      target[final] = newVal;
-      return true
+      // target[final] = newVal;
+      return Reflect.set(target, final, newVal, receiver);
     }*/
     return Reflect.set(target, prop, newVal, receiver);
   },
@@ -453,7 +457,7 @@ const StateHandle: ProxyHandler<any> = {
   },
   getOwnPropertyDescriptor(target, prop) {
     let value = undefined;
-    if (prop != Symbol.unscopables && String(prop).includes('.')) {
+    /*if (prop != Symbol.unscopables && String(prop).includes('.')) {
       const props = String(prop).split('.');
       const final = props.pop();
       let layer = target;
@@ -465,18 +469,18 @@ const StateHandle: ProxyHandler<any> = {
         }
         layer = layer[p]
       }
-      return layer[final];
-    } else {
+      value = layer[final];
+    } else {*/
       value = Object.prototype.hasOwnProperty.call(target, prop)
-      if (value != undefined) {
-        return {
-          // value : value,
-          //use a logical set of descriptors:
-          enumerable : true,
-          configurable : true,
-          writable : true
-        };
-      }
+    // }
+    if (value && value != undefined) {
+      return {
+        value : value,
+        //use a logical set of descriptors:
+        enumerable : true,
+        configurable : true,
+        writable : true
+      };
     }
 
   },
@@ -607,7 +611,66 @@ class EzWidget extends HTMLElement {
     // return `__ez__|${key}`
     return key
   }
-  makeStateReflectable(source: any, root='') {
+  makeStateReflectable(state: {[p: string]: any}, source: any, root='') {
+    // console.log('root', root);
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const self = this;
+    const keys = Object.keys(source);
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const val = source[key]
+      const pathKey = `${root ? `${root}.` : ''}${key}`;
+      const internalKey = this.getInternalKey(pathKey)
+      console.log('internalKey', internalKey)
+      // if (DirtyableValue.isPrimitiveValue(val)) {
+      //   val = new DirtyableValue(val, internalKey);
+      // }
+      state[internalKey] = val; // new DirtyableValue(val, internalKey);
+      if (typeof val === 'function') {
+        continue
+      }
+
+      if (isReflectable(val)) {
+        self.makeStateReflectable(state, val, pathKey);
+        continue;
+      }
+      Object.defineProperty(source, key, {
+        get() { // ? 嵌套Object，应该从内部__state取还是外部source取？，内部外部取都会产生循环调用
+          console.log('[state] [GET]',internalKey, state[internalKey]);
+          return state[internalKey];
+        },
+
+        set(value) {
+          console.log('[state] [SET]', internalKey, value);
+          if (isReflectable(value)) {
+            self.makeStateReflectable(state, value, pathKey);
+            return
+          }
+          if (typeof value === 'function') {
+            // self.__state[internalKey] = self.bindStateFunction(value)
+            value = bindFunctionScope(source ,value)
+          }
+          const beforeValue = state[internalKey];
+          if (beforeValue === value) {
+            return
+          }
+          state[internalKey] = value // new DirtyableValue(value, internalKey);
+
+          const nodes = self.varBindNodeObj[internalKey];
+          nodes && nodes.forEach((node: any) => {
+            self.nodeActorsMap.get(node).forEach(act => {
+              fastdom.mutate(() => {
+                act();
+              })
+            });
+          });
+        }
+      });
+
+    }
+  }
+
+  makeStateReflectable__(source: any, root='') {
     // console.log('root', root);
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const self = this;
@@ -667,7 +730,7 @@ class EzWidget extends HTMLElement {
   }
   setState(source: any) {
     this.sourceRef = source;
-    this.makeStateReflectable(source);
+    this.makeStateReflectable(this.__state, source);
     this.render();
   }
   removeNode(node: VELEMENT) {
@@ -783,6 +846,9 @@ class EzWidget extends HTMLElement {
       console.log('var', v)
       if (!Object.prototype.hasOwnProperty.call(this.__state, v)) {
         return;
+      }
+      if (typeof this.__state[v] !== 'function') {
+        return
       }
       if (!this.varBindNodeObj[v]) {
         this.varBindNodeObj[v] = new Set<VELEMENT>();
@@ -1051,7 +1117,7 @@ class EzWidget extends HTMLElement {
         attrName = isShorthand[1];
         if (attrName.trim().startsWith('...')) {
           const propsName = attrName.trim().replace('...', '');
-          const propsObj = this.sourceRef[propsName];
+          const propsObj = this.sourceRef[propsName];debugger
           if (this.sourceRef[propsName]) {
             const propsKeys =Object.keys(propsObj)
             for (let j = 0; j < propsKeys.length; j++) {

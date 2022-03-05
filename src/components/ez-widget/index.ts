@@ -1,5 +1,6 @@
 import * as style from "./style.less"
 import * as fastdom from './fastdom';
+import {VERSION} from "ts-node";
 const ELEMENT_NODE = 1;
 const DOCUMENT_FRAGMENT_NODE = 11;
 const TEXT_NODE = 3;
@@ -11,6 +12,8 @@ const PARENT_PATH = Symbol("PARENT_PATH")
 type VAR_AND_EXPRESSION = {
   expression: string;
   vars: string[];
+  monitState?: boolean,
+  runtimeFn?: CallableFunction
 }
 enum LOOP_CONDITION_STATEMENT {
   CONTINUE,
@@ -33,14 +36,9 @@ type iterableObj<T>= {
   // [Symbol.iterator]: T
   // [Symbol.iterator]() : IterableIterator<any>;
 }
-type VELEMENT  = (HTMLElement ) & {___ez_compiled: boolean, compileContext: iterableObj<any>}
+type VELEMENT  = (HTMLElement ) & {___uniqueItemKey?:string|symbol, ___ez_compiled: boolean, compileContext: iterableObj<any>}
 type EXPRESSION_ACTION = (...args: any) => void;
-type FOR_LOOP_CONFIG = {
-  begin: Node,
-  end: Node,
-  varKeyPath: string,
-  iter: CallableFunction,
-  forNode: Node}
+
 class DirtyableValue  {
   private _value: any;
   private _dirty= false;
@@ -201,7 +199,7 @@ function walk(nodes: Node|Node[]|NodeListOf<ChildNode>, check: (n: VELEMENT) => 
     }
   }
 }
-function compileWalker(nodes: Node|Node[]|NodeListOf<ChildNode>, compile: (n: VELEMENT) => void) {
+function compileWalker(nodes: Node|Node[]|NodeListOf<ChildNode>, compile: (n: VELEMENT) => LOOP_CONDITION_STATEMENT) {
   if (!('length' in nodes)) {
     nodes = [nodes]
   }
@@ -209,7 +207,16 @@ function compileWalker(nodes: Node|Node[]|NodeListOf<ChildNode>, compile: (n: VE
   while((nodes as VELEMENT[]).length) {
     const node = (nodes as  VELEMENT[]).shift()
     node.normalize();
-    compile(node)
+    const ret = compile(node)
+    if (ret === LOOP_CONDITION_STATEMENT.CONTINUE) {
+      continue
+    }
+    if (ret === LOOP_CONDITION_STATEMENT.BREAK) {
+      break
+    }
+    if (ret === LOOP_CONDITION_STATEMENT.RETURN) {
+      return
+    }
     if (node.childNodes && node.childNodes.length) {
       nodes = slice.call(node.childNodes).concat(nodes)
     }
@@ -344,8 +351,11 @@ const StateHandle: ProxyHandler<any> = {
       };
     }
     if (prop === 'stopRecordExpressionVars') {
+      // TODO 如果一个函数内没执行到的块里的变量将记录不到, 咋处理?
+      // 除非返回全部state内变量, 或者通过编译,通过Acorn语法树提取变量
       return () => {
-        const result = Array.from(this.recordExpressionVars)
+        const result = Object.keys(target);
+        // const result = Array.from(this.recordExpressionVars)
         try{
           return result;
         } finally {
@@ -519,7 +529,7 @@ class EzWidget extends HTMLElement {
 
   private __state: Record<string, any> = new StateProxy<Record<string, any>>({});
 
-  private varExpressionObj: {[key: string]: Set<EXPRESSION_ACTION|Node|FOR_LOOP_CONFIG>} = {};
+  private varExpressionObj: {[key: string]: Set<EXPRESSION_ACTION|Node>} = {};
   private expressionNodeMap = new WeakMap();
   private nodePositionMap = new WeakMap();
   private compileContentNodeMap = new WeakMap();
@@ -646,7 +656,7 @@ class EzWidget extends HTMLElement {
             self.makeStateReflectable(state, value, pathKey);
             return
           }
-          if (typeof value === 'function') {
+          if (typeof value === 'function') {debugger
             // self.__state[internalKey] = self.bindStateFunction(value)
             value = bindFunctionScope(source ,value)
           }
@@ -705,7 +715,7 @@ class EzWidget extends HTMLElement {
             self.makeStateReflectable(value, pathKey);
             return
           }
-          if (typeof value === 'function') {
+          if (typeof value === 'function') {debugger
             // self.__state[internalKey] = self.bindStateFunction(value)
             value = bindFunctionScope(source ,value)
           }
@@ -840,14 +850,20 @@ class EzWidget extends HTMLElement {
 
 
   bindNodeExpression(node: VELEMENT, exp: VAR_AND_EXPRESSION, action: CallableFunction) {
-    const lambdaFn = lambda(exp.expression)
+    let lambdaFn: CallableFunction = () => {}
+    if (exp.runtimeFn) {
+      lambdaFn = exp.runtimeFn
+    } else {
+      lambdaFn = lambda(exp.expression)
+    }
+
 
     exp.vars.forEach((v: string) => {
       console.log('var', v)
       if (!Object.prototype.hasOwnProperty.call(this.__state, v)) {
         return;
       }
-      if (typeof this.__state[v] !== 'function') {
+      if (typeof this.__state[v] == 'function') {
         return
       }
       if (!this.varBindNodeObj[v]) {
@@ -856,16 +872,25 @@ class EzWidget extends HTMLElement {
       this.varBindNodeObj[v].add(node);
     });
     const compileVar = () => {
-      this.__state.startRecordExpressionVars();
+      if (!node.parentNode) {
+        return
+      }
       const scope = this.getNodeCompileScope(node);
-      const result = lambdaFn(this.__state, scope);
-      const vars = this.__state.stopRecordExpressionVars();
-      vars.forEach((v: string) => {
-        if (!this.varBindNodeObj[v]) {
-          this.varBindNodeObj[v] = new Set<VELEMENT>();
-        }
-        this.varBindNodeObj[v].add(node);
-      });
+      let result = null
+      if (exp.monitState) {
+        this.__state.startRecordExpressionVars();
+        result = lambdaFn(this.__state, scope);
+        const vars = this.__state.stopRecordExpressionVars();
+        vars.forEach((v: string) => {
+          if (!this.varBindNodeObj[v]) {
+            this.varBindNodeObj[v] = new Set<VELEMENT>();
+          }
+          this.varBindNodeObj[v].add(node);
+        });
+      } else {
+        result = lambdaFn(this.__state, scope);
+      }
+
       return result
     }
     const actor: ACTOR =  ((result :string) => {
@@ -880,205 +905,77 @@ class EzWidget extends HTMLElement {
     this.bindNodeActor(node, actor, compileVar);
   }
 
-  bindNodeLoop(node: VELEMENT, loopVarName: string, bindVar: string) {
+  bindNodeLoop(node: VELEMENT, loopVarName: string, bindVar: string, eachKey = '') {
     const begin = document.createComment(`each ${bindVar} of ${loopVarName}`)
     const end = document.createComment(`end each`)
     node.parentNode.insertBefore(begin, node)
     node.parentNode.insertBefore(end, node.nextSibling)
 
-    // const begin = node.previousSibling;
-    // const end = node.nextSibling;
-    loopVarName = loopVarName.replace('(', '').replace(')', '')
-
-    const storeNode = node; // .cloneNode(true)
-
-    if (!this.varBindNodeObj[loopVarName]) {
-      this.varBindNodeObj[loopVarName] = new Set<VELEMENT>();
-    }
-
-    let iter = this.__state[loopVarName];
-    let vars = [];
-    if (typeof iter === 'function') {
-      const ldn = lambda(iter.toString())
-      this.__state.startRecordExpressionVars();
-      iter = ldn.call(this.__state, this.__state) // first for `this`, second for ctx
-      iter()
-      vars = this.__state.stopRecordExpressionVars();
-    }
-
-
-
-    const forKey = {
-      begin,
-      end,
-      forNode: storeNode,
-      varKeyPath: loopVarName,
-      iter
-    }
-    vars.forEach((v: string) => {
-      if (!this.varExpressionObj[v]) {
-        this.varExpressionObj[v] = new Set<EXPRESSION_ACTION>();
+    this.cacheLoopTagDomFragment.appendChild(node)
+    if (typeof this.__state[loopVarName] !== 'function') {
+      if (!this.varBindNodeObj[loopVarName]) {
+        this.varBindNodeObj[loopVarName] = new Set<VELEMENT>();
       }
-      this.varExpressionObj[v].add(forKey);
-    });
-    this.varExpressionObj[loopVarName].add(forKey);
-    const action = ((forKeyCfg: FOR_LOOP_CONFIG) => {
-      const {
-        begin, end, forNode, varKeyPath, iter
-      } = forKeyCfg;
+      this.varBindNodeObj[loopVarName].add(node)
+    }
+    const exp: VAR_AND_EXPRESSION = {
+      expression: `${loopVarName}`,
+      vars: [loopVarName],
+      // TODO loop 里的这个应该是返回操作,例如,del => 0,1 append 4, 5, and 2, 3 no change
+      // runtimeFn: () => {}
+    }
+    // const lambdaFn = lambda(exp.expression)
+    this.bindNodeExpression(node, exp, (result: any) => {
+      // TODO use item key only change special changed item
       let start = begin.nextSibling;
+      // while(start && start != end) {
+      //   const next = start.nextSibling;
+      //   void (start as HTMLElement).remove();
+      //   start = next;
+      // }
 
-      while(start && start != end) {
-        const next = start.nextSibling;
-        console.log("rrrrrrrrrrrrrrrrrrrrrrr")
-        void (start as HTMLElement).remove();
-        start = next;
-      }
-      // let iter = this.__state[varKeyPath]
-      let arrayLike = iter;
-      if (typeof iter === 'function') {
-        arrayLike = iter();
-      }
-      (arrayLike as unknown as Array<any>).map((item: any, index: number) => {
-        const renderForNode = forNode.cloneNode(true) as HTMLElement;
-        // console.log(1,renderForNode)
-        // renderForNode.setAttribute('for-index', String(index))
-        const nodeCompileContext = this.compileContentNodeMap.get(renderForNode)
+      (result as unknown as Array<any>).forEach((item: any, index: number) => {
+        const renderForNode = node.cloneNode(true) as VELEMENT;
+        const eachItemKey = eachKey? item[eachKey] : undefined;
+        if (eachItemKey && (start as VELEMENT).___uniqueItemKey === eachItemKey ) {
+          return
+        }
+        const nodeCompileContext = this.compileContentNodeMap.get(renderForNode);
+        renderForNode.___uniqueItemKey = eachKey? item[eachKey] : '';
+
         this.compileContentNodeMap.set(renderForNode, {
           ...nodeCompileContext,
           [bindVar]: {
-            item, index
+            item, index, key: eachItemKey
           },
         });
 
-        end.parentNode.insertBefore(renderForNode, end);
+        if (start && start != end) {  // 有就替换
+          const next = start.nextSibling;
+          start.replaceWith(renderForNode)
+          start = next;
+        } else {  // 没有就插入
+          end.parentNode.insertBefore(renderForNode, end);
+        }
         compileWalker(renderForNode as VELEMENT, this.compile)
       });
-    }).bind(null, forKey)
-    action();
-    if (!this.expressionNodeMap.get(forKey)) {
-      this.expressionNodeMap.set(forKey, new Set())
-    }
-    this.expressionNodeMap.get(forKey).add(action)
-
-    this.cacheLoopTagDomFragment.appendChild(storeNode)
-  }
-
-
-
-  bindTextNodeAction(strExpr: string, node: Text) {return
-    if (!node.parentElement.parentElement) {
-      return
-    }
-    const lambdaFn = lambda(strExpr);
-    const scope = this.getNodeCompileScope(node);
-    // console.log(2, node)
-    this.__state.startRecordExpressionVars();
-    // const result = lambdaFn({...this.__state, ...scope});
-    // const result = lambdaFn( Object.assign(this.__state, scope));
-    const result = lambdaFn(this.__state, scope);
-    const vars = this.__state.stopRecordExpressionVars();
-    vars.forEach((v: string) => {
-      if (!this.varExpressionObj[v]) {
-        this.varExpressionObj[v] = new Set<EXPRESSION_ACTION>();
-      }
-      this.varExpressionObj[v].add(node);
-    });
-    const action =  () => {
-      const scope = this.getNodeCompileScope(node);
-      // const result = lambdaFn({...this.__state, ...scope});
-      // const result = lambdaFn( Object.assign(this.__state, scope));
-      const result = lambdaFn( this.__state, scope);
-      node.textContent = result;
-    }
-
-    if (!this.expressionNodeMap.get(node)) {
-      this.expressionNodeMap.set(node, new Set())
-    }
-    this.expressionNodeMap.get(node).add(action)
-    action()
-  }
-
-
-  bindLoopNodeAction(node: VELEMENT, loopVarName: string, bindVar: string) {
-    const begin = node.previousSibling;
-    const end = node.nextSibling;
-    loopVarName = loopVarName.replace('(', '').replace(')', '')
-
-    node.removeAttribute(`:each-${bindVar}`)
-    const storeNode = node.cloneNode(true)
-
-    if (!this.varExpressionObj[loopVarName]) {
-      this.varExpressionObj[loopVarName] = new Set();
-    }
-
-    let iter = this.__state[loopVarName];
-    let vars = [];
-    if (typeof iter === 'function') {
-      const ldn = lambda(iter.toString())
-      this.__state.startRecordExpressionVars();
-      iter = ldn.call(this.__state, this.__state) // first for `this`, second for ctx
-      iter()
-      vars = this.__state.stopRecordExpressionVars();
-    }
-
-
-
-    const forKey = {
-      begin,
-      end,
-      forNode: storeNode,
-      varKeyPath: loopVarName,
-      iter
-    }
-    vars.forEach((v: string) => {
-      if (!this.varExpressionObj[v]) {
-        this.varExpressionObj[v] = new Set<EXPRESSION_ACTION>();
-      }
-      this.varExpressionObj[v].add(forKey);
-    });
-    this.varExpressionObj[loopVarName].add(forKey);
-    const action = ((forKeyCfg: FOR_LOOP_CONFIG) => {
-      const {
-        begin, end, forNode, varKeyPath, iter
-      } = forKeyCfg;
-      let start = begin.nextSibling;
-
-      while(start && start != end) {
+      while(start && start != end) { // 多余的删除
         const next = start.nextSibling;
-        console.log("rrrrrrrrrrrrrrrrrrrrrrr")
         void (start as HTMLElement).remove();
         start = next;
       }
-      // let iter = this.__state[varKeyPath]
-      let arrayLike = iter;
-      if (typeof iter === 'function') {
-        arrayLike = iter();
-      }
-      (arrayLike as unknown as Array<any>).map((item: any, index: number) => {
-        const renderForNode = forNode.cloneNode(true) as HTMLElement;
-        // console.log(1,renderForNode)
-        // renderForNode.setAttribute('for-index', String(index))
-        const nodeCompileContext = this.compileContentNodeMap.get(renderForNode)
-        this.compileContentNodeMap.set(renderForNode, {
-          ...nodeCompileContext,
-          [bindVar]: {
-            item, index
-          },
-        });
+    })
+    return
 
-        end.parentNode.insertBefore(renderForNode, end);
-        compileWalker(renderForNode as VELEMENT, this.compile)
-      });
-    }).bind(null, forKey)
-    action();
-    if (!this.expressionNodeMap.get(forKey)) {
-      this.expressionNodeMap.set(forKey, new Set())
-    }
-    this.expressionNodeMap.get(forKey).add(action)
 
-    this.cacheLoopTagDomFragment.appendChild(storeNode)
+
+
+
+
+
   }
+
+
 
 
 
@@ -1117,7 +1014,7 @@ class EzWidget extends HTMLElement {
         attrName = isShorthand[1];
         if (attrName.trim().startsWith('...')) {
           const propsName = attrName.trim().replace('...', '');
-          const propsObj = this.sourceRef[propsName];debugger
+          const propsObj = this.sourceRef[propsName];
           if (this.sourceRef[propsName]) {
             const propsKeys =Object.keys(propsObj)
             for (let j = 0; j < propsKeys.length; j++) {
@@ -1138,7 +1035,7 @@ class EzWidget extends HTMLElement {
   isTrigger(attrName: string) {
     return attrName.startsWith('@')
   }
-  compile = (node: VELEMENT) => {
+  compile = (node: VELEMENT): LOOP_CONDITION_STATEMENT => {
     if (node.nodeName == 'SCRIPT') {
       return;
     }
@@ -1200,27 +1097,51 @@ class EzWidget extends HTMLElement {
 
       }
       // text node stop here
-      return;
+      return LOOP_CONDITION_STATEMENT.CONTINUE;
     }
 
     this.expandShorthandAttributes(node);
     const attrs = node.getAttributeNames()
-    /* const eachVarName = attrs.find((attr) => {
+    const eachVarName = attrs.find((attr) => {
        return attr.startsWith(':each-')
      });
-     const ifVarName = attrs.find((attr) => {
-       return attr.startsWith(':if-')
-     });
 
-     const isIfNode = Boolean(ifVarName);
-     /*const isLoopNode = Boolean(eachVarName);
+     const isLoopNode = Boolean(eachVarName);
 
 
      if (isLoopNode) {
-       const loopVar = node.getAttribute(eachVarName)
-       const bindVar = eachVarName.replace(':each-', '')
-       this.bindLoopNodeAction(node, loopVar, bindVar)
-     }*/
+       if (eachVarName.startsWith(':each-')) { // each expression
+         const keyAttr = node.getAttribute(':key')
+
+         const attrValue = node.getAttribute(eachVarName)
+         console.log('[each]', eachVarName, attrValue);
+         let loopVar = toCamel(eachVarName.replace(':each-', '')  )
+         let bindVar = attrValue
+         // const eachPlaceHolder = document.createComment(`each ${attrValue } of ${loopVar}`) as unknown as VELEMENT
+         // node.parentNode.insertBefore(eachPlaceHolder, node.nextSibling)
+         node.removeAttribute(eachVarName)
+         const loopItemVars = extractVarsV2(loopVar)
+         if (loopItemVars[0]) {
+           const { varName } = loopItemVars[0];
+           loopVar = varName
+           console.log('[each] [loopVar]', loopVar)
+         }
+         const eachItemVars = extractVarsV2(attrValue)
+         if (eachItemVars[0]) {
+           const { varName } = eachItemVars[0];
+           bindVar = varName
+           console.log('[each] [bindVar]', bindVar)
+         }
+         let loopExpression = loopVar;
+         debugger
+         if (typeof this.__state[loopVar] === 'function') { // 是方法的话应该按attribute原样显示
+           loopExpression = `${loopVar}()`
+         }
+         this.bindNodeLoop(node, loopVar, bindVar, keyAttr);
+         return LOOP_CONDITION_STATEMENT.CONTINUE;
+       }
+
+     }
 
     console.log('attrs', node, attrs);
     for (let i = 0; i < attrs.length; i++) {
@@ -1255,39 +1176,6 @@ class EzWidget extends HTMLElement {
         continue
       }
 
-      if (attrName.startsWith(':each-')) { // each expression
-        console.log('[each]', attrName, attrValue);
-        let loopVar = toCamel(attrName.replace(':each-', '')  )
-        let bindVar = attrValue
-        // const eachPlaceHolder = document.createComment(`each ${attrValue } of ${loopVar}`) as unknown as VELEMENT
-        // node.parentNode.insertBefore(eachPlaceHolder, node.nextSibling)
-        node.removeAttribute(attrName)
-        const loopItemVars = extractVarsV2(loopVar)
-        if (loopItemVars[0]) {
-          const { varName } = loopItemVars[0];
-          loopVar = varName
-          console.log('[each] [loopVar]', loopVar)
-        }
-        const eachItemVars = extractVarsV2(attrValue)
-        if (eachItemVars[0]) {
-          const { varName } = eachItemVars[0];
-          bindVar = varName
-          console.log('[each] [bindVar]', bindVar)
-        }
-        let loopExpression = loopVar;
-        debugger
-        if (typeof this.__state[loopVar] === 'function') {
-          loopExpression = `${loopVar}()`
-        }
-        this.bindNodeExpression(node, {
-          expression: loopExpression,
-          vars: [loopVar]
-        }, (result: IteratorResult<any>) => {
-          console.log('[loop]', result);
-        })
-        // this.bindNodeLoop(node, loopVar, bindVar);
-        continue
-      }
 
 
       const attrVars = this.isTrigger(attrName) ? [] : extractVarsV2(attrValue);
@@ -1299,8 +1187,10 @@ class EzWidget extends HTMLElement {
           console.log(v)
           let varName = v.expName;
           vars.push(v.varName)
-          if (typeof this.__state[v.varName] === 'function') {
-            varName = `{${v.varName}()}`
+          const attrVar = this.__state[v.varName]
+          if (typeof attrVar === 'function' || typeof attrVar === 'undefined') {
+            // varName = `{${v.varName}()}` // 属性内方法不执行了
+            varName = `{'${v.varName}'}` // 方法名
           }
           attrStr = attrStr.replaceAll(v.expName, "$" + varName + "");
         })

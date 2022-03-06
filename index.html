@@ -133,7 +133,7 @@ p {
 <!--  <button :if-false={user.loggedIn} @click={toggle}>-->
 <!--    Log in-->
 <!--  </button>-->
-  <p :each-things="{thing}" :key="id" {...user}>{thing.index}|{thing.item.id}|{thing.item.name}</p>
+  <p :each-things="{thing}" :each-key="id" {...user}>{thing.index}|{thing.item.id}|{thing.item.name}</p>
 
 <!--  <input type="text" .value="aaa">-->
 
@@ -159,6 +159,7 @@ https://svelte.dev/tutorial/adding-data
     //   e.stopPropagation();
     //   e.preventDefault();
     // });
+
     testTextW1.addEventListener('created', (e) => {
       // console.log(e.target, e.detail, e.target == e.detail);
       console.log(111111)

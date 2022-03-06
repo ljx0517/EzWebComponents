@@ -9,6 +9,7 @@ const randomLocalsScopeName = `___$locals$___${Date.now()}`
 const IS_PROXY = Symbol("IS_PROXY")
 const PARENT_PATH = Symbol("PARENT_PATH")
 
+// https://gist.github.com/seanlinsley/bc10378fd311d75cf6b5e80394be813d
 class ___IterableWeakSet<T> extends Set {
   add(el: any) {
     for (const ref of super.values()) {
@@ -116,7 +117,9 @@ type VELEMENT  = (HTMLElement ) & {
   ___bind_meta?: any;
   ___uniqueItemKey?:string|symbol;
   ___ez_compiled: boolean;
-  compileContext: iterableObj<any>}
+  compileContext: iterableObj<any>} & {
+  [propName: string]: any;
+}
 type EXPRESSION_ACTION = (...args: any) => void;
 
 class DirtyableValue  {
@@ -398,7 +401,13 @@ function extractVarsV2(template: string, openChar = "{", closeChar = "}") {
 
   return data;
 }
-
+function extractVarsFromObject(obj: any, str: string) {
+  const ks = Object.keys(obj).filter(k => {
+    return typeof obj[k] != 'function' && typeof obj[k] != 'object'
+  })
+  const re = new RegExp(`\\b(?:${ks.join('|')})\\b`.replaceAll('.', `\\.`), 'g')
+  return str.match(re) || []
+}
 
 
 
@@ -827,7 +836,7 @@ class EzWidget extends HTMLElement {
     }
     this.nodeBindVarObj.get(node).add(varName)
   }
-  bindAttrNodeAction(node: VELEMENT, attrName: string, attrValue: string) {
+  bindNodePropAction(node: VELEMENT, attrName: string, attrValue: string) {
     if (!node.parentElement) {
       return
     }
@@ -901,6 +910,8 @@ class EzWidget extends HTMLElement {
     const actor: ACTOR =  ((result :string) => {
       if (!result) {
         const scope = this.getNodeCompileScope(node);
+        // const fnStr = lambdaFn.toString().slice(275)
+        // console.log(fnStr)
         result = lambdaFn( this.__state, scope)
       }
       action(result)
@@ -961,7 +972,7 @@ class EzWidget extends HTMLElement {
         if (!block) { // 新node, create it
           // block = create_each_block(key, child_ctx);
           // block.c();
-          console.log('create', key);
+          // console.log('create', key);
           block = node.cloneNode(true) as VELEMENT;
           block.___uniqueItemKey = key;
           block['detach'] = () => {
@@ -1001,7 +1012,7 @@ class EzWidget extends HTMLElement {
       }
       const insert = (block: VELEMENT) => {
 
-        console.log('insert', next? 'prev' : 'append', block)
+        // console.log('insert', next? 'prev' : 'append', block)
         lookup.set(block.___uniqueItemKey, block);
         if (next) {
           end.parentNode.insertBefore(block, next);
@@ -1065,7 +1076,7 @@ class EzWidget extends HTMLElement {
 
     this.bindNodeExpression(node, exp, (result: any) => {
       let originResult = node.___bind_meta;console.log(exp)
-      debugger
+
       if (!originResult||!Array.isArray(originResult)) {
         originResult = [];
       }
@@ -1132,6 +1143,37 @@ class EzWidget extends HTMLElement {
 
   }
 
+  bindNodeProp(node: VELEMENT, propName: string, valueExp: string) {
+    const prop = propName.substring(1)
+    node.removeAttribute(propName);
+    node.addEventListener('input', (e) => {
+      // this.__state[valueExp] = node[prop]
+      const paths = valueExp.split('.')
+      let target = this.sourceRef;
+      const final = paths.pop();
+      while(paths.length) {
+        const p = paths.shift()
+        target = target[p]
+      }
+      const nodeType = node.type;
+      const asType = nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
+      let valProp = `${prop}As${asType}`;
+      if(typeof node[valProp] == 'undefined') {
+        valProp = prop
+      }
+      target[final] = node[valProp]
+    });
+    this.bindNodeExpression(node, {
+      expression: valueExp,
+      vars: [valueExp]
+    }, (result: string) => {
+      // const asType = result.charAt(0).toUpperCase() + result.slice(1);
+      // if (prop == 'value') {
+      //   const testProp = `valueAs${asType}`;
+      // }
+      node[prop] = result
+    });
+  }
 
 
 
@@ -1213,7 +1255,8 @@ class EzWidget extends HTMLElement {
           while(vars.length) {
             const {varName, expName, start, end} = vars.shift();
             let t = expressionStr.substring(s, start);
-            // console.log(expName, start, end);
+            console.log(expName, start, end);
+            const vv = extractVarsFromObject(this.__state, expName)
             textNodes.push(document.createTextNode(t) );
             t = expName
             if (typeof this.__state[varName] === 'function') {
@@ -1236,7 +1279,7 @@ class EzWidget extends HTMLElement {
 
             this.bindNodeExpression(tn as unknown as VELEMENT, {
               expression: "`$" + t + "`",
-              vars:[varName]
+              vars:[varName, ...vv]
             } , (result: any) => {
               if (isHtmlNode) {
                 tn.previousSibling.replaceWith(document.createRange().createContextualFragment(result));
@@ -1296,7 +1339,6 @@ class EzWidget extends HTMLElement {
            // console.log('[each] [bindVar]', bindVar)
          }
          let loopExpression = loopVar;
-         debugger
          if (typeof this.__state[loopVar] === 'function') { // 是方法的话应该按attribute原样显示
            loopExpression = `${loopVar}()`
          }
@@ -1321,13 +1363,17 @@ class EzWidget extends HTMLElement {
         const vars = extractVarsV2(attrValue)
         if (vars[0]) { // should only one
           let { varName } = vars[0];
+          let vv: string[] = [];
           if (typeof this.__state[varName] === 'function') {
             varName = `${varName}()`
+          } else {
+            vv = extractVarsFromObject(this.__state, varName)
           }
           const conditionExpr = `${attrName.substring(4)} === ${varName}`
+
           this.bindNodeExpression(node as unknown as VELEMENT, {
             expression: conditionExpr,
-            vars:[]
+            vars: vv
           } , (result: any) => {
             if (!result) {
               this.removeNode(node);
@@ -1339,6 +1385,14 @@ class EzWidget extends HTMLElement {
         continue
       }
 
+      if (attrName.startsWith('.')) {
+        console.log('[prop]', attrName, attrValue);
+        const vars = extractVarsV2(attrValue)
+        if (vars[0]) { // should only one
+          this.bindNodeProp(node, attrName, vars[0].varName );
+        }
+        continue
+      }
 
 
       const attrVars = this.isTrigger(attrName) ? [] : extractVarsV2(attrValue);
@@ -1367,12 +1421,6 @@ class EzWidget extends HTMLElement {
         });
       }
 
-
-
-      if (attrName.startsWith('.')) {
-        console.log('[prop]', attrName, attrValue);
-        this.bindAttrNodeAction(node, attrName, attrValue );
-      }
       if (attrName.startsWith('@')) {
         node.removeAttribute(attrName)
         const eventName = attrName.substring(1);

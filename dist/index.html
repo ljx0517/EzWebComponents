@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>EzWebcomponents</title><script defer="defer" src="ez-tabs-list.js"></script><script defer="defer" src="ez-pop-wrapper.js"></script><script defer="defer" src="ez-t-renderer.js"></script></head><body><style>.tab{
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>EzWebcomponents</title><script defer="defer" src="ez-manager.js"></script><script defer="defer" src="httpclient.js"></script><script defer="defer" src="ez-tabs-list.js"></script><script defer="defer" src="ez-pop-wrapper.js"></script><script defer="defer" src="ez-widget.js"></script></head><body><style>.tab{
     cursor: pointer;
   color: red;
 }
@@ -7,36 +7,103 @@
 }
 .p12{
   padding: 12px;
-}</style><div style="display: none;height: 60px"><ez-tab-list id="qwe" style="--tab-width: auto;--tab-padding: 0 24px 0 12px;--label-font-size: 16px;--tab-bg-color:#666;--active-tab-bg-color: #ccc;" custom="false" closeable="true" active-index="0" active-class="active"><div class="tab">John Smith 111111</div><div class="tab">John Smith 222222</div><div class="tab">John Smith 33333</div><div class="tab">John Smith 444</div><div class="tab">John Smith 5</div><div class="tab">John Smith 6</div><div class="tab">John Smith 7</div><div class="tab">John Smith 8</div><div class="tab">John Smith 9</div><div class="tab">John Smith 10</div><div class="tab">John Smith 000</div></ez-tab-list><br><br><br><br></div><div style="display: none;width: 200px;height: 100px;overflow: hidden;"><ez-tab-list id="qweCol" custom="true" mode="col" custom="true" closeable="true" active-index="0" active-class="active"><div class="tab">John Smith 111111</div><div class="tab">John Smith 222222</div><div class="tab">John Smith 33333</div><div class="tab">John Smith 444</div><div class="tab">John Smith 5</div><div class="tab">John Smith 6</div><div class="tab">John Smith 7</div><div class="tab">John Smith 8</div><div class="tab">John Smith 9</div><div class="tab">John Smith 10</div><div class="tab">John Smith 000</div></ez-tab-list><br><br><br><br></div><div style="display: none;"><ez-pop-wrapper id="pp"><div slot="title">aaaa</div><div slot="pop" class="p12"><details><summary>Details</summary><p>Something small enough to escape casual notice.</p><details><summary>Details</summary>Something small enough to escape casual notice.</details></details></div></ez-pop-wrapper><br><br><br><br></div><div><ez-t-render id="etr" style="display: block;height: 30px;width: 100%;"><div :name="name + '_www'" :style="'color:'+color+';'">{{aaaa}} {{name}}</div><select name="" id=""><option :each-dog="listItem" name="aaaa" :value="dog.item">{{dog.index}}</option></select></ez-t-render></div><script>const qwe = document.querySelector('#qwe')
-    const qwe2 = document.querySelector('#qweCol')
-    const pp = document.querySelector('#pp')
+}
+p {
+  margin-top: 4px;
+  margin-bottom: 4px;
+  color: purple;
+  font-family: 'Comic Sans MS', cursive;
+  /*font-size: 2em;*/
+}</style><div style="display: none;height: 60px"><ez-tab-list id="qwe" style="--tab-width: auto;--tab-padding: 0 24px 0 12px;--label-font-size: 16px;--tab-bg-color:#666;--active-tab-bg-color: #ccc;" custom="false" closeable="true" active-index="0" active-class="active"><div class="tab">John Smith 111111</div><div class="tab">John Smith 222222</div><div class="tab">John Smith 33333</div><div class="tab">John Smith 444</div><div class="tab">John Smith 5</div><div class="tab">John Smith 6</div><div class="tab">John Smith 7</div><div class="tab">John Smith 8</div><div class="tab">John Smith 9</div><div class="tab">John Smith 10</div><div class="tab">John Smith 000</div></ez-tab-list><br><br><br><br></div><div style="display: none;width: 200px;height: 100px;overflow: hidden;"><ez-tab-list id="qweCol" custom="true" mode="col" custom="true" closeable="true" active-index="0" active-class="active"><div class="tab">John Smith 111111</div><div class="tab">John Smith 222222</div><div class="tab">John Smith 33333</div><div class="tab">John Smith 444</div><div class="tab">John Smith 5</div><div class="tab">John Smith 6</div><div class="tab">John Smith 7</div><div class="tab">John Smith 8</div><div class="tab">John Smith 9</div><div class="tab">John Smith 10</div><div class="tab">John Smith 000</div></ez-tab-list><br><br><br><br></div><div style="display: none;"><ez-pop-wrapper id="pp"><div slot="title">aaaa</div><div slot="pop" class="p12"><details><summary>Details</summary><p>Something small enough to escape casual notice.</p><details><summary>Details</summary>Something small enough to escape casual notice.</details></details></div></ez-pop-wrapper><br><br><br><br></div><div style="display: none"><ez-widget-wwww id="etr" style="display: block;height: 30px;width: 100%;"><div :name="name + '_www'" :style="'color:'+fn3()+';'">{{aaaa}} {{name}}</div><div :if-true="a > b">1</div><div :if-false="a > b">2</div><select name=""><option :each-dog="filterItem()" name="aaaa" :item-index="dog.index" :value="dog.item">{{dog.item}}</option></select> <select name=""><option :each-dog="listItem" name="aaaa" :item-index="dog.index" :value="dog.item">{{dog.item}}</option></select><div>{{html}}</div></ez-widget-wwww></div><h1>test text</h1><ez-widget id="testTextW1" style=""><button :if-true="{user.isLogin}" @click="{toggle}">Log out</button> <button :if-false="{user.loggedIn}" @click="{toggle}">Log in</button><p :each-things="{thing}" :each-key="id" {...user}>{thing.index}|{thing.item.id}|{thing.item.name}</p><input .value="{user.name}"><h1>Hello {user.name}!</h1><label style="display: flex"><input type="number" .value="{a}" min="0" max="10"> <input type="range" .value="{a}" min="0" max="10"></label> <label style="display: flex"><input type="number" .value="{b}" min="0" max="10"> <input type="range" .value="{b}" min="0" max="10"></label><p>{a} + {b} = {a + b}</p></ez-widget>svelte https://svelte.dev/tutorial/adding-data<script>// const qwe = document.querySelector('#qwe')
+    // const qwe2 = document.querySelector('#qweCol')
+    // const pp = document.querySelector('#pp')
+    //
+    // qwe.addEventListener("close-tab", (e) => {
+    //     console.log('close', e.detail)
+    // })
+    // qwe.addEventListener("active-tab", (e) => {
+    //     console.log('active', e.detail)
+    //   e.stopPropagation();
+    //   e.preventDefault();
+    // });
 
-    qwe.addEventListener("close-tab", (e) => {
-        console.log('close', e.detail)
-    })
-    qwe.addEventListener("active-tab", (e) => {
-        console.log('active', e.detail)
-      e.stopPropagation();
-      e.preventDefault();
-    });
-    etr.addEventListener('created', (e) => {
+    document.addEventListener('created', (e) => {
       // console.log(e.target, e.detail, e.target == e.detail);
       console.log(111111)
       window.obj = {
+        a:1,
+        b:2 ,
+        m: { x: 0, y: 0 },
+        handleMousemove(event) {
+          this.m.x = event.clientX;
+          this.m.y = event.clientY;
+        },
+        things : [
+          { id: 1, name: 'apple' },
+          { id: 2, name: 'banana' },
+          { id: 3, name: 'carrot' },
+          { id: 4, name: 'doughnut' },
+          { id: 5, name: 'egg' },
+        ],
+        user: {
+          loggedIn: false,
+          name: 'Joe',
+          isLogin(){
+            console.log(this.loggedIn)
+            return this.loggedIn
+          }
+        },
+        count: 0,
+        doubled () {
+          if (this.numbers.length==2) {
+            return this.count * 3
+          } else {
+            return this.count * 2
+          }
+        },
+        numbers: [1, 2, 3, 4],
+        getNumbers: () => ['a', 'b', 'c'],
+        sum(){
+          return this.numbers.reduce((t, n) => t + n, 0)
+        } ,
+        addNumber() {
+          this.numbers = [...this.numbers, this.numbers.length + 1];
+        },
         aaaa: "123",
+        bbbb: "<b>boldHtml</b>",
+        src: 'src-src-src',
+        alt: 'alt-alt-alt',
         name: 'hah',
         color: 'red',
-        a: 2,
-        b: 1,
-        listItem: [1, 2, 3, 4],
+        color2: 'green',
+        fontSize: 16,
+        filterCondition: 1,
+        filterItem: () => {
+          return this.numbers.filter((i) => {
+            return (i % 2) === this.filterCondition;
+          });
+        },
+        incrementCount() {
+          this.count += 1;
+        },
         fn1: (e) =>{
           console.log('fn1',e, this);
         },
-        fn2: (e) => {
-          console.log('fn2',e, this);
+        fn2() {
+          if (this.count == 0) {
+
+          } else {
+            return `${this.fontSize}px`
+          }
+
+        },
+        fn3() {
+          return this.color2
+        },
+        toggle() {
+          this.user.loggedIn = !this.user.loggedIn;
         }
       }
       e.target.setState(window.obj);
-      debugger
-      window.obj.aaaa = 'ddd'
+      // window.obj.aaaa = 'ddd'
     })</script></body></html>

@@ -1,11 +1,25 @@
-const { merge } = require('webpack-merge');
-const common = require('./webpack.config.js');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const path = require('path');
+// const { merge } = require('webpack-merge');
+// const common = require('./webpack.config.js');
+// const HtmlWebpackPlugin = require('html-webpack-plugin');
+// const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+// const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+// const path = require('path');
 
-module.exports = merge(common, {
+
+import { merge } from 'webpack-merge';
+import { common } from './webpack.config.js';
+import HtmlWebpackPlugin  from 'html-webpack-plugin';
+import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import path from 'path'
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+
+export default merge(common, {
   mode: 'development',
   plugins: [
 

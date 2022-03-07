@@ -1,6 +1,8 @@
 import * as style from "./style.less"
-import * as fastdom from './fastdom';
-import {VERSION} from "ts-node";
+// import * as fastdom from './fastdom';
+const fastdom = require('./fastdom')
+// import  './fastdom';
+
 const ELEMENT_NODE = 1;
 const DOCUMENT_FRAGMENT_NODE = 11;
 const TEXT_NODE = 3;
@@ -405,7 +407,8 @@ function extractVarsFromObject(obj: any, str: string) {
   const ks = Object.keys(obj).filter(k => {
     return typeof obj[k] != 'function' && typeof obj[k] != 'object'
   })
-  const re = new RegExp(`\\b(?:${ks.join('|')})\\b`.replaceAll('.', `\\.`), 'g')
+  // const re = new RegExp(`\\b(?:${ks.join('|')})\\b`.replaceAll('.', `\\.`), 'g')
+  const re = new RegExp(`\\b(?:${ks.join('|')})\\b`.replace(/\./, `\\.`), 'g')
   return str.match(re) || []
 }
 
@@ -614,7 +617,7 @@ const loopNestedObj = (obj: any) => {
 };
 
 
-class EzWidget extends HTMLElement {
+export class EzWidget extends HTMLElement {
 
   private __state: Record<string, any> = new StateProxy<Record<string, any>>({});
 
@@ -638,6 +641,7 @@ class EzWidget extends HTMLElement {
 
   constructor() {
     super();
+    console.log('constructor')
     // element created
     const shadow = this.attachShadow({ mode: 'open' });
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -662,7 +666,7 @@ class EzWidget extends HTMLElement {
     if (stylesheet.cssRules.length == 0) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      stylesheet.replaceSync(style.toString());
+      //   stylesheet.replaceSync(style.toString());
     }
 
 
@@ -689,7 +693,7 @@ class EzWidget extends HTMLElement {
     //   this.originalDomFragment.appendChild(n.cloneNode(true))
     //   // this.calcDomFragment.appendChild(n);
     }*/
-    this.dispatchEvent(new CustomEvent('created', {detail: this}));
+    this.dispatchEvent(new CustomEvent('created', {bubbles: true,detail: this}));
     console.log(22222)
     // walk(this.originalChildNodes.childNodes, (node) => {
     //   this.rendererNodeMap.set(node, node.cloneNode())
@@ -764,7 +768,7 @@ class EzWidget extends HTMLElement {
             console.log(999, node)
             const actors = self.nodeActorsMap.get(node);
             actors.forEach((act: CallableFunction) => {
-              console.log(998, act)
+              console.log(998, act);
               fastdom.mutate(() => {
                 act();
               })
@@ -772,7 +776,6 @@ class EzWidget extends HTMLElement {
           });
         }
       });
-
     }
   }
 
@@ -1185,11 +1188,11 @@ class EzWidget extends HTMLElement {
   }
   bindNodeActor(node: VELEMENT|Text, actor: ACTOR, compileVar: CallableFunction) {
     if (!this.nodeActorsMap.get(node)) {
-      this.nodeActorsMap.set(node, new Set())
+      this.nodeActorsMap.set(node, new Set<ACTOR>())
       // this.nodeActorsMap.set(node, new IterableWeakSet<ACTOR>())
     }
     this.gcRegistry.register(actor, "gc actor fn");
-    this.nodeActorsMap.get(node).add(actor)
+    this.nodeActorsMap.get(node).add(actor);
     fastdom.measure(() => {
       const result = compileVar()
       fastdom.mutate(() => {
@@ -1409,7 +1412,9 @@ class EzWidget extends HTMLElement {
             // varName = `{${v.varName}()}` // 属性内方法不执行了
             varName = `{'${v.varName}'}` // 方法名
           }
-          attrStr = attrStr.replaceAll(v.expName, "$" + varName + "");
+          const re = new RegExp(v.expName, 'g')
+          attrStr = attrStr.replace(re, "$" + varName + "");
+          // attrStr = attrStr.replaceAll(v.expName, "$" + varName + "");
         })
         // console.log(attrStr)
         this.bindNodeExpression(node as unknown as VELEMENT, {
@@ -1473,4 +1478,5 @@ class EzWidget extends HTMLElement {
 
   // there can be other element methods and properties
 }
+
 customElements.define("ez-widget", EzWidget);

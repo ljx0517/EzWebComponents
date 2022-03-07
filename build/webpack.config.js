@@ -1,9 +1,18 @@
-const path = require('path');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin')
-const resolve = dir => path.join(__dirname, '..', dir);
+// const path = require('path');
+// const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+// const HtmlWebpackPlugin = require('html-webpack-plugin')
+// const resolve = dir => path.join(__dirname, '..', dir);
 
-module.exports = {
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+import path, { dirname } from 'path';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import HtmlWebpackPlugin from 'html-webpack-plugin'
+const resolve = dir => path.join(__dirname, '..', dir)
+
+export const common = {
   watch: true,
   target: "web",
   // entry: () => new Promise((resolve) => resolve([
@@ -41,6 +50,7 @@ module.exports = {
           loader: 'babel-loader',
           options: {
             presets: ['@babel/preset-env'],
+
           }
         },
         include: [resolve('src'), resolve('test')],
@@ -116,10 +126,10 @@ module.exports = {
           // 'extract-loader',
 
 
-          {
-            loader: path.resolve(__dirname, 'style_file_loader.js'),
-            options: {/* ... */}
-          },
+          // {
+          //   loader: path.resolve(__dirname, 'style_file_loader.js'),
+          //   options: {/* ... */}
+          // },
 
           { loader: 'css-loader', options: {
               // modules: true,
@@ -127,7 +137,7 @@ module.exports = {
               // localsConvention: 'asIs',
               // sourceMap: true,
               // onlyLocals: true,
-              modules: true,
+              // modules: true,
               esModule: false,
               importLoaders: 1,
               // esModule: true,

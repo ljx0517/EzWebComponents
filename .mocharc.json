@@ -1,0 +1,7 @@
+{
+  "extension": ["ts", "js"],
+  "timeout": 5000,
+  "exit": true,
+  "loader": "ts-node/esm",
+  "require": "ts-node/register"
+}

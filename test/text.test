@@ -1,0 +1,44 @@
+import { assert } from 'chai';
+import { JSDOM } from 'jsdom';
+// import { EzWidget } from '../dist/ez-widget'
+// declare global {
+//   namespace NodeJS {
+//     interface Global {
+//       document: Document;
+//       window: Window;
+//       navigator: Navigator;
+//     }
+//   }
+// }
+//
+// const { window } = new JSDOM('<!doctype html><html><body></body></html>');
+// global.document = window.document;
+// global.window = global.document.defaultView;
+
+describe('test text node', () => {
+  const { window: win } = new JSDOM(`
+<script src="./dist/ez-widget.js"></script>
+<ez-widget id="testTextW1"  style="">
+ <p>this is aaaa : {aaaa}} {{  src} {{!bbbb}}} }} </p>
+</ez-widget><script>
+console.log('js dom run')
+const el = document.querySelector('#testTextW1')
+console.log(el)
+console.log(customElements.get("ez-widget"))
+window.obj = {
+  aaaa: "aaaa",
+  src: 'is src',
+  bbbb: \`<span>ssss</span>\`
+}
+testTextW1.addEventListener('created', () => {
+   console.log(11111)
+   e.target.setState(window.obj);
+})
+</script>`, { url: "file:///Users/admin/workspace/github/EzWebComponents/dist", runScripts: "dangerously", resources: "usable"  });
+  const document = win.document;
+  const window = document.defaultView
+  it('text changes', () => {
+    console.log(window.document.body.querySelector('p').innerHTML)
+  });
+
+});

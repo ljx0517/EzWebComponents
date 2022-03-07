@@ -1,6 +1,6 @@
-const path = require('path');
-
-module.exports = function customCssModuleLoader(source) {
+// const path = require('path');
+import path, { dirname } from 'path'
+export default function customCssModuleLoader(source) {
   // return source;
   // console.log(module.i);
   source = source.replace('module.exports = ___CSS_LOADER_EXPORT___;', '')

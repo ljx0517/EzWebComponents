@@ -1,13 +1,28 @@
-const path = require('path');
-const {merge} = require('webpack-merge');
-const common = require('./webpack.config.js');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-// https://stackoverflow.com/questions/50260262/how-to-run-webpack-bundle-analyzer
-const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+// const path = require('path');
+// const {merge} = require('webpack-merge');
+// const common = require('./webpack.config.js');
+// const HtmlWebpackPlugin = require('html-webpack-plugin');
+// const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+// const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+// // https://stackoverflow.com/questions/50260262/how-to-run-webpack-bundle-analyzer
+// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
-module.exports = merge(common, {
+
+import path, { dirname } from 'path';
+import {merge} from 'webpack-merge';
+import { common}  from './webpack.config.js';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import { CleanWebpackPlugin} from 'clean-webpack-plugin';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+// https://stackoverflow.com/questions/50260262/how-to-run-webpack-bundle-analyzer
+import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer'; // ).BundleAnalyzerPlugin
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename)
+
+
+export default merge(common, {
   mode: 'production',
   devtool: 'source-map',
   plugins: [
@@ -34,3 +49,6 @@ module.exports = merge(common, {
     path: path.resolve(__dirname, '../dist'),
   },
 });
+
+
+

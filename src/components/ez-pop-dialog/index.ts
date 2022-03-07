@@ -1,4 +1,4 @@
-import * as style from "./style.less"
+import style from "./style.less"
 const stylesheet = new CSSStyleSheet();
 
 

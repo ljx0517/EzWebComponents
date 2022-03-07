@@ -1,6 +1,6 @@
-import * as style from "./style.less"
-// import * as fastdom from './fastdom';
-const fastdom = require('./fastdom')
+import style from "./style.less"
+import fastdom from './fastdom';
+// const fastdom = require('./fastdom')
 // import  './fastdom';
 
 const ELEMENT_NODE = 1;
@@ -89,7 +89,7 @@ class IterableWeakSet<T> {
 
 type VAR_AND_EXPRESSION = {
   expression: string;
-  vars: string[];
+  vars: Set<string>;
   monitState?: boolean,
   runtimeFn?: CallableFunction
 }
@@ -630,6 +630,7 @@ export class EzWidget extends HTMLElement {
   public nodeActorsMap = new WeakMap<VELEMENT|Text, Set<ACTOR>>()
   public varBindNodeObj: {[key: string]:  IterableWeakSet<any>} = {};
   public nodeBindVarObj = new WeakMap<VELEMENT|Text, Set<string>>();
+  public varToActorsMap: {[key: string]:  Set<ACTOR>} = {};
 
 
   private cacheIfTagDomFragment: DocumentFragment;
@@ -666,7 +667,7 @@ export class EzWidget extends HTMLElement {
     if (stylesheet.cssRules.length == 0) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      //   stylesheet.replaceSync(style.toString());
+        stylesheet.replaceSync(style.toString());
     }
 
 
@@ -762,6 +763,15 @@ export class EzWidget extends HTMLElement {
             return
           }
           state[internalKey] = value // new DirtyableValue(value, internalKey);
+
+          // const actors = self.varToActorsMap[internalKey];
+          // actors.forEach((act: CallableFunction) => {
+          //   console.log(998, act);
+          //   fastdom.mutate(() => {
+          //     act();
+          //   })
+          // });
+
 
           const nodes = self.varBindNodeObj[internalKey];
           nodes && nodes.forEach((node: any, ref: WeakRef<any>) => {
@@ -882,6 +892,7 @@ export class EzWidget extends HTMLElement {
     }
 
 
+
     exp.vars.forEach((v: string) => {
       if (!Object.prototype.hasOwnProperty.call(this.__state, v)) {
         return;
@@ -910,6 +921,7 @@ export class EzWidget extends HTMLElement {
 
       return result
     }
+
     const actor: ACTOR =  ((result :string) => {
       if (!result) {
         const scope = this.getNodeCompileScope(node);
@@ -921,7 +933,30 @@ export class EzWidget extends HTMLElement {
       // node.textContent = result;
     });
 
+    // exp.vars.forEach((v: string) => {
+    //   if (!Object.prototype.hasOwnProperty.call(this.__state, v)) {
+    //     return;
+    //   }
+    //   if (typeof this.__state[v] == 'function') {
+    //     return
+    //   }
+    //   this.doBindVarToActor(v, actor)
+    // });
+    // // fastdom.measure(() => {
+    //   fastdom.mutate(() => {
+    //     actor()
+    //   })
+    // // })
+
     this.bindNodeActor(node, actor, compileVar);
+  }
+
+  doBindVarToActor(varName: string, actor: ACTOR) {
+    if (!this.varToActorsMap[varName]) {
+      this.varToActorsMap[varName] = new Set<ACTOR>();
+    }
+    this.varToActorsMap[varName].add(actor)
+
   }
 
   bindNodeLoop(node: VELEMENT, loopVarName: string, bindVar: string, eachKey = '') {
@@ -937,7 +972,7 @@ export class EzWidget extends HTMLElement {
     }
     const exp: VAR_AND_EXPRESSION = {
       expression: `${loopVarName}`,
-      vars: [loopVarName],
+      vars: new Set([loopVarName]),
       // TODO loop 里的这个应该是返回操作,例如,del => 0,1 append 4, 5, and 2, 3 no change
       // runtimeFn: () => {}
     }
@@ -1007,7 +1042,6 @@ export class EzWidget extends HTMLElement {
       const destroy = (block: VELEMENT, lookup: Map<any, any>) => {
         // const nodeCompileContext = this.compileContentNodeMap.get(block);
         // const k = nodeCompileContext[bindVar]['item'][keyName]
-        console.log(this.varBindNodeObj)
         lookup.delete(block.___uniqueItemKey);
         block.remove()
         block.detach()
@@ -1168,7 +1202,7 @@ export class EzWidget extends HTMLElement {
     });
     this.bindNodeExpression(node, {
       expression: valueExp,
-      vars: [valueExp]
+      vars: new Set([valueExp])
     }, (result: string) => {
       // const asType = result.charAt(0).toUpperCase() + result.slice(1);
       // if (prop == 'value') {
@@ -1282,7 +1316,7 @@ export class EzWidget extends HTMLElement {
 
             this.bindNodeExpression(tn as unknown as VELEMENT, {
               expression: "`$" + t + "`",
-              vars:[varName, ...vv]
+              vars: new Set([varName, ...vv])
             } , (result: any) => {
               if (isHtmlNode) {
                 tn.previousSibling.replaceWith(document.createRange().createContextualFragment(result));
@@ -1376,7 +1410,7 @@ export class EzWidget extends HTMLElement {
 
           this.bindNodeExpression(node as unknown as VELEMENT, {
             expression: conditionExpr,
-            vars: vv
+            vars: new Set(vv)
           } , (result: any) => {
             if (!result) {
               this.removeNode(node);
@@ -1400,30 +1434,35 @@ export class EzWidget extends HTMLElement {
 
       const attrVars = this.isTrigger(attrName) ? [] : extractVarsV2(attrValue);
       if (attrVars.length) {
-        const vars: string[] = [];
+        const vars: Set<string> = new Set([]);
         // console.log('attrValue', attrValue)
         let attrStr = attrValue;
         attrVars.forEach((v) => {
           // console.log(v)
           let varName = v.expName;
-          vars.push(v.varName)
           const attrVar = this.__state[v.varName]
           if (typeof attrVar === 'function' || typeof attrVar === 'undefined') {
             // varName = `{${v.varName}()}` // 属性内方法不执行了
             varName = `{'${v.varName}'}` // 方法名
+            node.removeAttribute(attrName)
+            return
           }
           const re = new RegExp(v.expName, 'g')
           attrStr = attrStr.replace(re, "$" + varName + "");
           // attrStr = attrStr.replaceAll(v.expName, "$" + varName + "");
+          vars.add(v.varName)
         })
         // console.log(attrStr)
-        this.bindNodeExpression(node as unknown as VELEMENT, {
-          expression: "`" + attrStr + "`",
-          vars
-        }, (result: any) => {
-          // console.log(node, attrName, result)
-          node.setAttribute(attrName, result);
-        });
+        if (vars.size) {
+          this.bindNodeExpression(node as unknown as VELEMENT, {
+            expression: "`" + attrStr + "`",
+            vars
+          }, (result: any) => {
+            // console.log(node, attrName, result)
+            node.setAttribute(attrName, result);
+          });
+        }
+
       }
 
       if (attrName.startsWith('@')) {

@@ -1,5 +1,5 @@
-!(function(win) {
-
+// !(function(win) {
+const win = ( typeof window !== 'undefined' ? window : this)
   /**
    * FastDom
    *
@@ -36,7 +36,7 @@
    *
    * @constructor
    */
-  function FastDom() {
+  function FastDom() {console.log('create FastDom')
     var self = this;
     self.reads = [];
     self.writes = [];
@@ -235,10 +235,12 @@
 
 // There should never be more than
 // one instance of `FastDom` in an app
+
   const exports = win.fastdom = (win.fastdom || new FastDom()); // jshint ignore:line
   // export const fd = win.fastdom = (win.fastdom || new FastDom()); // jshint ignore:line
+  export default exports
 // Expose to CJS & AMD
   if ((typeof define) == 'function') define(function() { return exports; });
   else if ((typeof module) == 'object') module.exports = exports;
 
-})( typeof window !== 'undefined' ? window : this);
+// })( typeof window !== 'undefined' ? window : this);

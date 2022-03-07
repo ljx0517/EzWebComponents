@@ -1,4 +1,5 @@
-import style from "./style.less"
+import style from "./style.less";
+// console.log('style', typeof style.toString())
 import fastdom from './fastdom';
 // const fastdom = require('./fastdom')
 // import  './fastdom';
@@ -99,7 +100,7 @@ enum LOOP_CONDITION_STATEMENT {
   RETURN,
   NOTHING
 }
-const EXPRESSION_REGEX = /{([^{}]+?)}/g
+const EXPRESSION_REGEX = /{([^{}]+?)}/g;
 
 enum DOM_RENDER_ACTION_TYPE {
   REPLACE,
@@ -109,11 +110,13 @@ enum DOM_RENDER_ACTION_TYPE {
 }
 
 type ACTOR = (...args: any) => void|CallableFunction;
-type iterableObj<T>= {
-  [key: string]: T,
+
+type iterableObj<T> = {
+  [key: string]: T
   // [Symbol.iterator]: T
   // [Symbol.iterator]() : IterableIterator<any>;
-}
+};
+
 type VELEMENT  = (HTMLElement ) & {
   detach: () => void;
   ___bind_meta?: any;
@@ -642,7 +645,7 @@ export class EzWidget extends HTMLElement {
 
   constructor() {
     super();
-    console.log('constructor')
+    // console.log('constructor')
     // element created
     const shadow = this.attachShadow({ mode: 'open' });
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -667,7 +670,7 @@ export class EzWidget extends HTMLElement {
     if (stylesheet.cssRules.length == 0) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-        stylesheet.replaceSync(style.toString());
+      //   stylesheet.replaceSync(style.toString());
     }
 
 
@@ -695,7 +698,7 @@ export class EzWidget extends HTMLElement {
     //   // this.calcDomFragment.appendChild(n);
     }*/
     this.dispatchEvent(new CustomEvent('created', {bubbles: true,detail: this}));
-    console.log(22222)
+    // console.log(22222)
     // walk(this.originalChildNodes.childNodes, (node) => {
     //   this.rendererNodeMap.set(node, node.cloneNode())
     //   this.calcChildNodes.appendChild(node)
@@ -1292,7 +1295,7 @@ export class EzWidget extends HTMLElement {
           while(vars.length) {
             const {varName, expName, start, end} = vars.shift();
             let t = expressionStr.substring(s, start);
-            console.log(expName, start, end);
+            // console.log(expName, start, end);
             const vv = extractVarsFromObject(this.__state, expName)
             textNodes.push(document.createTextNode(t) );
             t = expName

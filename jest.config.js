@@ -1,14 +1,17 @@
 // import type {Config} from '@jest/types';
-const aa = {
+
+export default {
   verbose: true,
   preset: 'ts-jest',
   "moduleNameMapper": {
-    "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/__mocks__/fileMock.js",
+    "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/jest/fileTransformer.js",
     "\\.(css|less)$": "identity-obj-proxy"
   },
-  // "transform": {
-  //   "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/fileTransformer.js"
-  // },
+  "transform": {
+    "^.+\\.[t|j]sx?$": "babel-jest"
+    // "^.+\\.(js|jsx|ts|tsx)$": "<rootDir>/jest/babelTransformImportExport.js",
+    // "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/fileTransformer.js"
+  },
   // moduleFileExtensions: [...defaults.moduleFileExtensions, 'ts', 'tsx'],
   testEnvironment: 'jsdom',
   testEnvironmentOptions: {
@@ -30,4 +33,3 @@ const aa = {
     "<rootDir>/test/**/?(*.)(spec|test).{js, mjs,jsx,ts,tsx}"
   ],
 };
-export default  aa;

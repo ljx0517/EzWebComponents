@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="1" failures="0" errors="0" time="2.881">
-  <testsuite name="text node function" errors="0" failures="0" skipped="0" timestamp="2022-03-07T16:17:37" time="1.921" tests="1">
-    <testcase classname="text node function test text display" name="text node function test text display" time="1.064">
+<testsuites name="jest tests" tests="5" failures="0" errors="0" time="6.634">
+  <testsuite name="test expressions" errors="0" failures="0" skipped="1" timestamp="2022-03-08T05:26:26" time="5.716" tests="5">
+    <testcase classname="test expressions text expressions display" name="test expressions text expressions display" time="1.077">
+    </testcase>
+    <testcase classname="test expressions node attr expressions" name="test expressions node attr expressions" time="1.008">
+    </testcase>
+    <testcase classname="test expressions spread attrs expressions" name="test expressions spread attrs expressions" time="1.016">
+    </testcase>
+    <testcase classname="test expressions bind function handle" name="test expressions bind function handle" time="1.504">
+    </testcase>
+    <testcase classname="test expressions text node display function" name="test expressions text node display function" time="0">
+      <skipped/>
     </testcase>
   </testsuite>
 </testsuites>

@@ -1,20 +1,15 @@
-// const state = {
-//   a: 1,
-//   b: 2,
-//   user: {
-//     name: 'username',
-//     age: 'userage'
-//   },
-//   'user.name': 'username',
-//   'user.age': 'userage',
-//
-// }
-// const exp = `{ a + b + user.name + abc}`
-// const ks = Object.keys(state).filter(k => {
-//   return typeof state[k] != 'function' && typeof state[k] != 'object'
-// })
-// const aa = new RegExp(`\\b(?:${ks.join('|')})\\b`.replaceAll('.', `\\.`), 'g')
-// console.log(aa)
-// console.log(exp)
-// const res =exp.match(aa)
-// console.log(1, res)
+function extractVarsFromObject(obj, str) {
+  const ks = Object.keys(obj).filter(k => {
+    // return typeof obj[k] != 'function' && typeof obj[k] != 'object'
+    return obj[k].constructor.name != 'Object';
+  })
+  // const re = new RegExp(`\\b(?:${ks.join('|')})\\b`.replaceAll('.', `\\.`), 'g')
+  console.log(`\\b(?:${ks.join('|')})\\b`.replace(/\./, `\\.`));
+  const re = new RegExp(`\\b(?:${ks.join('|')})\\b`.replace(/\./, `\\.`), 'g')
+  return str.match(re) || []
+}
+const res = extractVarsFromObject({
+  numbers: [1,2]
+}, "{numbers.join(' + ')}")
+console.log(res);
+

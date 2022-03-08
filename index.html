@@ -108,7 +108,7 @@ p {
 <h1>test text</h1>
 <ez-widget id="testTextW1"  style="">
 
-  <p>this is aaaa : {aaaa}} {{  src} {{!bbbb}}} }} </p>
+<!--  <p>this is aaaa : {aaaa}} {{  src} {{!bbbb}}} }} </p>-->
 <!--  <img src={src} {alt} {...user}><br>-->
 <!--  <img {...user}><br>-->
 <!--  <div>{user.name}</div>-->
@@ -117,11 +117,19 @@ p {
 <!--  <button @click="incrementCount">-->
 <!--    Clicked {count} {count === 1 ? 'time' : 'times'}-->
 <!--  </button>-->
+<!--  <button @click="incrementCount"> + </button>-->
 <!--  <p>{count} doubled is {count * 2} | {doubled}| {doubled()}</p>-->
-<!--  <p>{numbers.join(' + ')} = {sum}</p>-->
-<!--  <button @click="{addNumber  }">-->
-<!--    Add a number-->
-<!--  </button>-->
+<!--  <button id="addNumber" @click="{addNumber  }">+</button>-->
+<!--  <p id="sum">{numbers.join(' + ')} = {sum}</p>-->
+
+<!--  <button id="incrementFont" @click="incrementFont">+</button>-->
+<!--  <div id="attrNode" {name}-->
+<!--       title="{name}!!!"-->
+<!--       style="color:{getColor()};font-size: {fontSize}px">{color} {fontSize}</div>-->
+
+  <div id="user_{user.id}" {...user}></div>
+
+
 <!--  <div {name}-->
 <!--       title="{name}!!!"-->
 <!--       style="color:{fn3()};font-size: {fn2()}">{{color}} {{name}}</div>-->
@@ -192,11 +200,13 @@ https://svelte.dev/tutorial/adding-data
           { id: 5, name: 'egg' },
         ],
         user: {
+          id: 'uid',
+          name: 'John',
+          age: 18,
           loggedIn: false,
-          name: 'Joe',
-          isLogin(){
-            console.log(this.loggedIn)
-            return this.loggedIn
+          login(){
+            console.log(123, this);
+            // this.loggedIn = !this.loggedIn
           }
         },
         count: 0,
@@ -214,6 +224,18 @@ https://svelte.dev/tutorial/adding-data
         } ,
         addNumber() {
           this.numbers = [...this.numbers, this.numbers.length + 1];
+        },
+        incrementFont(){
+          this.fontSize += 1;
+        },
+        getColor() {
+          if (this.fontSize % 2) {
+            this.color = 'red'
+            return 'red'
+          } else {
+            this.color = 'green'
+            return 'green'
+          }
         },
         aaaa: "123",
         bbbb: "<b>boldHtml</b>",

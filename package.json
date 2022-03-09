@@ -63,5 +63,8 @@
     "webpack-dev-server": "^4.4.0",
     "webpack-merge": "^5.7.3"
   },
-  "dependencies": {}
+  "dependencies": {
+    "iterable-weak-map": "^1.0.0",
+    "iterable-weak-set": "^1.0.4"
+  }
 }

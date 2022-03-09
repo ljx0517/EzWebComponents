@@ -20,3 +20,4 @@ declare module '*.css'
   const toString: () => string;
   export { locals, toString };
 }
+

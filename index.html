@@ -204,9 +204,9 @@ https://svelte.dev/tutorial/adding-data
           name: 'John',
           age: 18,
           loggedIn: false,
-          login(){
+          login(){ debugger
             console.log(123, this);
-            // this.loggedIn = !this.loggedIn
+            this.loggedIn = !this.loggedIn
           }
         },
         count: 0,

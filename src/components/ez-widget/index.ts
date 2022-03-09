@@ -1,56 +1,22 @@
 import style from "./style.less";
 // console.log('style', typeof style.toString())
-import fastdom from './fastdom';
-// const fastdom = require('./fastdom')
-// import  './fastdom';
+// import fastdom from './fastdom';
+import {Scheduler} from './scheduler';
+import {
+  ACTOR, COMMENT_NODE,
+  DOCUMENT_FRAGMENT_NODE,
+  ELEMENT_NODE, EXPRESSION_ACTION, EXPRESSION_REGEX,
+  IS_PROXY,
+  LOOP_CONDITION_STATEMENT,
+  PARENT_PATH, TEXT_NODE, VAR_AND_EXPRESSION,
+  VELEMENT
+} from './types';
+import { IterableWeakSet } from 'iterable-weak-set';
+// import { TaskRefRunCounter } from './actor-ref-run-counter';
+const fastdom = new Scheduler({limit: 100});
 
-const ELEMENT_NODE = 1;
-const DOCUMENT_FRAGMENT_NODE = 11;
-const TEXT_NODE = 3;
-const COMMENT_NODE = 8;
 const randomLocalsScopeName = `___$locals$___${Date.now()}`
 const randomSourceScopeName = `___$source$___${Date.now()}`
-const IS_PROXY = Symbol("IS_PROXY")
-const PARENT_PATH = Symbol("PARENT_PATH")
-type VAR_AND_EXPRESSION = {
-  expression: string;
-  vars: Set<string>;
-  monitState?: boolean,
-  runtimeFn?: CallableFunction
-}
-enum LOOP_CONDITION_STATEMENT {
-  CONTINUE,
-  BREAK,
-  RETURN,
-  NOTHING
-}
-const EXPRESSION_REGEX = /{([^{}]+?)}/g;
-
-enum DOM_RENDER_ACTION_TYPE {
-  REPLACE,
-  REORDER,
-  ATTRS,
-  TEXT
-}
-
-type ACTOR = (...args: any) => void|CallableFunction;
-
-type iterableObj<T> = {
-  [key: string]: T
-  // [Symbol.iterator]: T
-  // [Symbol.iterator]() : IterableIterator<any>;
-};
-
-type VELEMENT  = (HTMLElement ) & {
-  detach: () => void;
-  ___bind_meta?: any;
-  ___uniqueItemKey?:string|symbol;
-  ___ez_compiled: boolean;
-  compileContext: iterableObj<any>} & {
-  [propName: string]: any;
-}
-type EXPRESSION_ACTION = (...args: any) => void;
-
 // https://gist.github.com/seanlinsley/bc10378fd311d75cf6b5e80394be813d
 class ___IterableWeakSet<T> extends Set {
   add(el: any) {
@@ -80,112 +46,7 @@ class ___IterableWeakSet<T> extends Set {
     }
   }
 }
-class IterableWeakSet<T> {
-  private __set: Set<any>;
-  constructor() {
-    this.__set = new Set();
-  }
-  deleteByValue(el: any) {
-    for (const ref of this.__set.values()) {
-      const value = ref.deref()
-      if (value == el) {
-        this.__set.delete(ref)
-      }
-    }
-  }
-  deleteByRef(ref: WeakRef<any>) {
-    this.__set.delete(ref)
-  }
-  add(el: any) {
-    for (const ref of this.__set.values()) {
-      const value = ref.deref()
-      if (value == el) {
-        return ref
-      }
-    }
-    const ref = new WeakRef(el);
-    this.__set.add(ref)
-    return ref
-  }
 
-  forEach(fn: CallableFunction) {
-    this.__set.forEach((ref) => {
-      const value = ref.deref()
-      if (value) {
-        fn(value, ref)
-      } else {
-        this.__set.delete(ref)
-      }
-    })
-  }
-  *[Symbol.iterator]() {
-    for (const ref of this.__set.values()) {
-      const value = ref.deref()
-      if (value) yield value
-    }
-  }
-}
-class IterableWeakMap<K extends object, V> {
-  private keysSet: IterableWeakSet<K>;
-  private valueStore: WeakMap<K, V>;
-  constructor() {
-    this.keysSet = new IterableWeakSet<object>();
-    this.valueStore = new WeakMap<K, V>();
-  }
-  forEach(fn: CallableFunction) {
-    this.keysSet.forEach((k: K) => {
-      const v = this.valueStore.get(k);
-      fn(v)
-    })
-  }
-  *[Symbol.iterator]() {
-    for (const k of this.keysSet) {
-      yield [k, this.valueStore.get(k)]
-    }
-  }
-  clear(){
-    this.keysSet.forEach((item: K) => {
-      this.valueStore.delete(item);
-    })
-  }
-  delete(key: K){
-    this.keysSet.deleteByValue(key);
-    return this.valueStore.delete(key);
-  }
-  get(key: K){
-    return this.valueStore.get(key);
-  }
-  has(key: K){
-    return this.valueStore.has(key);
-  }
-  set(key: K, value: V){
-    return this.valueStore.set(key, value);
-  }
-
-}
-
-class ActorRefRunCounter {
-  private __actorRunCounter: IterableWeakMap<object, number>;
-  constructor() {
-    this.__actorRunCounter = new IterableWeakMap();
-  }
-  add(act: ACTOR){
-    const val = this.__actorRunCounter.get(act);
-    if (val > 100) {
-      // copy from vue
-      throw new Error(`Maximum recursive updates exceeded in component. This means you have a reactive effect that is mutating its own dependencies and thus recursively triggering itself. Possible sources include component template, render function, updated hook or watcher source function.`)
-    }
-    if (!val) {
-      this.__actorRunCounter.set(act, 1)
-    } else {
-      this.__actorRunCounter.set(act, val + 1)
-    }
-
-  }
-  reset() {
-    this.__actorRunCounter.clear()
-  }
-}
 
 
 class DirtyableValue  {
@@ -247,26 +108,26 @@ const toCamel = (s: string) => {
 
 // https://stackoverflow.com/questions/543533/restricting-eval-to-a-narrow-scope
 // https://stackoverflow.com/questions/61552/are-there-legitimate-uses-for-javascripts-with-statement
-function ___lambda(exp: string,ctx={}, node:any=null) {
-  if (node) {
-    ctx = new Proxy(ctx,{
-      has:()=>true,
-      get: (target: any, prop: string, receiver) => {
-        console.log( prop, prop in target)
-        return Reflect.get(target, prop, receiver);
-      },
-    })
-  }
-
-  // execute script in private context
-  const func = (new Function( `with(this) {
-   try {
-    return ${exp};
-   } catch(e) {
-   }
-  }`));
-  return func.call(ctx);
-}
+// function ___lambda(exp: string,ctx={}, node:any=null) {
+//   if (node) {
+//     ctx = new Proxy(ctx,{
+//       has:()=>true,
+//       get: (target: any, prop: string, receiver) => {
+//         console.log( prop, prop in target)
+//         return Reflect.get(target, prop, receiver);
+//       },
+//     })
+//   }
+//
+//   // execute script in private context
+//   const func = (new Function( `with(this) {
+//    try {
+//     return ${exp};
+//    } catch(e) {
+//    }
+//   }`));
+//   return func.call(ctx);
+// }
 
 const lambda: CallableFunction = (function(){
   const cache: {[key: string]: CallableFunction} = {};
@@ -286,11 +147,11 @@ const lambda: CallableFunction = (function(){
         };
         with(ctx) {
           with(${randomSourceScopeName}) {
-            with(${randomLocalsScopeName}) { 
+            with(${randomLocalsScopeName}) {
               return  ${exp};
             }
           }
-          
+
         }`))
       } catch (e) {
         throw new Error(`[Template Compile Error] SyntaxError:${e.message}`)
@@ -483,7 +344,7 @@ function replaceAllWithoutRegex(s: string, oldStr: string, newStr: string) {
   const output = [];
   let pos = 0;
   for (;;) {
-    let matchPos = s.indexOf(oldStr, pos);
+    const matchPos = s.indexOf(oldStr, pos);
     if (matchPos === -1) {
       // output += s.slice(pos);
       output.push(s.slice(pos))
@@ -735,7 +596,6 @@ export class EzWidget extends HTMLElement {
   // weakmap cannot loop
   public nodeBindActorsMap = new WeakMap<VELEMENT|Text, Set<ACTOR>>();
   public fnNodesSet = new  IterableWeakSet<VELEMENT|Text>();
-  private actorRefCounter = new ActorRefRunCounter();
 
   private cacheIfTagDomFragment: DocumentFragment;
   private cacheLoopTagDomFragment: DocumentFragment;
@@ -870,10 +730,14 @@ export class EzWidget extends HTMLElement {
           console.log(1000, internalKey)
           const actors = self.varBindActorsMap[internalKey];
           actors && self.runActors(actors);
-          self.fnNodesSet.forEach((el: any) => {
+          for (const el of self.fnNodesSet) {
             const actors = self.nodeBindActorsMap.get(el);
             actors && self.runActors(actors);
-          });
+          }
+          // self.fnNodesSet.forEach((el: any) => {
+          //   const actors = self.nodeBindActorsMap.get(el);
+          //   actors && self.runActors(actors);
+          // });
 
 
 
@@ -897,13 +761,15 @@ export class EzWidget extends HTMLElement {
     }
   }
   runActors(actors: Set<ACTOR>) {
-    actors.forEach((act: ACTOR) => {
-      this.actorRefCounter.add(act);
+    for (const act of actors) {
       console.log('run actor')
-      fastdom.mutate(() => {
-        act();
-      })
-    });
+      fastdom.mutate(act)
+    }
+    // actors.forEach((act: ACTOR) => {
+    //   // this.actorRefCounter.add(act);
+    //   console.log('run actor')
+    //   fastdom.mutate(act)
+    // });
   }
   setState(source: any) {
     this.sourceRef = source;
@@ -1000,7 +866,7 @@ export class EzWidget extends HTMLElement {
 
 
   bindNodeExpression(node: VELEMENT, exp: VAR_AND_EXPRESSION, action: CallableFunction) {
-    let lambdaFn: CallableFunction = () => {}
+    let lambdaFn: CallableFunction;
     if (exp.runtimeFn) {
       lambdaFn = exp.runtimeFn
     } else {
@@ -1019,6 +885,8 @@ export class EzWidget extends HTMLElement {
       this.bindVarToNode(v, node)
     });
     const compileVar = () => {
+      // 应该是不需要了，不需要运行时采集变量了
+      return
       if (!node.parentNode) {
         return
       }
@@ -1048,6 +916,8 @@ export class EzWidget extends HTMLElement {
       action(result)
       // node.textContent = result;
     });
+    // @ts-ignore
+    actor.stack = new Error()
 
     exp.vars.forEach((v: string) => {
       if (!Object.prototype.hasOwnProperty.call(this.__state, v)) {
@@ -1067,9 +937,7 @@ export class EzWidget extends HTMLElement {
       this.varBindActorsMap[varName] = new Set<ACTOR>();
     }
     this.varBindActorsMap[varName].add(actor)
-    fastdom.mutate(() => {
-      actor()
-    })
+    fastdom.mutate(actor)
   }
 
   doBindNodeToActor(node: VELEMENT, actor: ACTOR) {
@@ -1078,9 +946,7 @@ export class EzWidget extends HTMLElement {
       this.nodeBindActorsMap.set(node, new Set<ACTOR>());
     }
     this.nodeBindActorsMap.get(node).add(actor)
-    fastdom.mutate(() => {
-      actor()
-    })
+    fastdom.mutate(actor)
   }
 
   bindNodeLoop(node: VELEMENT, loopVarName: string, bindVar: string, eachKey = '') {
@@ -1143,7 +1009,7 @@ export class EzWidget extends HTMLElement {
               const iterSet = this.varBindNodeObj[v]
               iterSet.forEach((el: any, ref: WeakRef<any>) => {
                 if (el === block) {
-                  iterSet.deleteByRef(ref)
+                  iterSet.delete(ref)
                 }
               })
             })
@@ -1351,12 +1217,13 @@ export class EzWidget extends HTMLElement {
     }
     this.gcRegistry.register(actor, "gc actor fn");
     this.nodeActorsMap.get(node).add(actor);
-    fastdom.measure(() => {
-      const result = compileVar()
-      fastdom.mutate(() => {
-        actor(result);
-      })
-    })
+    fastdom.mutate(actor)
+    // fastdom.measure(() => {
+    //   const result = compileVar()
+    //   fastdom.mutate(() => {
+    //     actor(result);
+    //   })
+    // })
     // this.compileVarQueue.add(compileVar)
     // if (!this.compileVarNodes.get(node)) {
     //   this.compileVarNodes.set(node, new WeakSet())

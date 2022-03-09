@@ -12,6 +12,7 @@ import {
   VELEMENT
 } from './types';
 import { IterableWeakSet } from 'iterable-weak-set';
+import {IterableWeakMap} from "iterable-weak-map";
 // import { TaskRefRunCounter } from './actor-ref-run-counter';
 const fastdom = new Scheduler({limit: 100});
 
@@ -594,8 +595,8 @@ export class EzWidget extends HTMLElement {
   public varBindActorsMap: {[key: string]:  Set<ACTOR>} = {};
 
   // weakmap cannot loop
-  public nodeBindActorsMap = new WeakMap<VELEMENT|Text, Set<ACTOR>>();
-  public fnNodesSet = new  IterableWeakSet<VELEMENT|Text>();
+  public nodeBindActorsMap = new IterableWeakMap<VELEMENT|Text, Set<ACTOR>>();
+  // public fnNodesSet = new  IterableWeakSet<VELEMENT|Text>();
 
   private cacheIfTagDomFragment: DocumentFragment;
   private cacheLoopTagDomFragment: DocumentFragment;
@@ -727,43 +728,148 @@ export class EzWidget extends HTMLElement {
             return
           }
           state[internalKey] = value // new DirtyableValue(value, internalKey);
+
+         const actsArr = [];
           console.log(1000, internalKey)
           const actors = self.varBindActorsMap[internalKey];
-          actors && self.runActors(actors);
-          for (const el of self.fnNodesSet) {
-            const actors = self.nodeBindActorsMap.get(el);
-            actors && self.runActors(actors);
+          // actors && self.runActors(actors);
+          actsArr.push(actors)
+          for (const [el, actors] of self.nodeBindActorsMap) {
+            console.log(el)
+            // const actors = self.nodeBindActorsMap.get(el);
+            // actors && self.runActors(actors);
+            actsArr.push(actors)
           }
-          // self.fnNodesSet.forEach((el: any) => {
-          //   const actors = self.nodeBindActorsMap.get(el);
-          //   actors && self.runActors(actors);
-          // });
-
-
-
-
+          self.requestUpdate(internalKey, actsArr)
           // self.varBindActorsMap
           // self.nodeBindActorsMap
-          return
-          const nodes = self.varBindNodeObj[internalKey];
-          nodes && nodes.forEach((node: any, ref: WeakRef<any>) => {
-            console.log(999, node)
-            const actors = self.nodeActorsMap.get(node);
-            actors.forEach((act: CallableFunction) => {
-              console.log(998, act);
-              fastdom.mutate(() => {
-                act();
-              })
-            });
-          });
+
         }
       });
     }
   }
+
+  private isUpdatePending = false;
+  private __updatePromise: Promise<any> = null;
+  private _$changedProperties = new Map();
+  async __enqueueUpdate() {
+    this.isUpdatePending = true;
+    try {
+      // Ensure any previous update has resolved before updating.
+      // This `await` also ensures that property changes are batched.
+      await this.__updatePromise;
+    }
+    catch (e) {
+      // Refire any previous errors async so they do not disrupt the update
+      // cycle. Errors are refired so developers have a chance to observe
+      // them, and this can be done by implementing
+      // `window.onunhandledrejection`.
+      Promise.reject(e);
+    }
+    const result = this.scheduleUpdate();
+    // If `scheduleUpdate` returns a Promise, we await it. This is done to
+    // enable coordinating updates with a scheduler. Note, the result is
+    // checked to avoid delaying an additional microtask unless we need to.
+    if (result != null) {
+      await result;
+    }
+    return !this.isUpdatePending;
+  }
+  /**
+   * Controls whether or not `update()` should be called when the element requests
+   * an update. By default, this method always returns `true`, but this can be
+   * customized to control when to update.
+   *
+   * @param _changedProperties Map of changed properties with old values
+   * @category updates
+   */
+  // shouldUpdate(_changedProperties) {
+  //   return true;
+  // }
+  // willUpdate(_changedProperties) { }
+  __markUpdated() {
+    this._$changedProperties = new Map();
+    this.isUpdatePending = false;
+  }
+  performUpdate() {
+    // var _a, _b;
+    // Abort any update if one is not pending when this is called.
+    // This can happen if `performUpdate` is called early to "flush"
+    // the update.
+    if (!this.isUpdatePending) {
+      return;
+    }
+
+    let shouldUpdate = false;
+    const changedProperties = this._$changedProperties;
+    try {
+      // shouldUpdate = this.shouldUpdate(changedProperties);
+      // if (shouldUpdate) {
+      //   this.willUpdate(changedProperties);
+      //   (_b = this.__controllers) === null || _b === void 0 ? void 0 : _b.forEach((c) => { var _a; return (_a = c.hostUpdate) === null || _a === void 0 ? void 0 : _a.call(c); });
+      //   this.update(changedProperties);
+      // }
+      // else {
+      //   this.__markUpdated();
+      // }
+      debugger
+      changedProperties.forEach((v: Set<ACTOR>[], k: string) => {
+        v.forEach((acts) => {
+          acts.forEach((act) =>{
+            act();
+          });
+        })
+      });
+
+      this.__markUpdated();
+    }
+    catch (e) {
+      // Prevent `firstUpdated` and `updated` from running when there's an
+      // update exception.
+      shouldUpdate = false;
+      // Ensure element can accept additional updates after an exception.
+      this.__markUpdated();
+      throw e;
+    }
+    // The update is no longer considered pending and further updates are now allowed.
+    // if (shouldUpdate) {
+    //   this._$didUpdate(changedProperties);
+    // }
+  }
+  scheduleUpdate() {
+    return this.performUpdate();
+  }
+  requestUpdate(name: string, actorsArray: any[][]) {
+    if (name !== undefined) {
+        if (!this._$changedProperties.has(name)) {
+          this._$changedProperties.set(name, actorsArray);
+        }
+        // Add to reflecting properties set.
+        // Note, it's important that every change has a chance to add the
+        // property to `_reflectingProperties`. This ensures setting
+        // attribute + property reflects correctly.
+        // if (options.reflect === true && this.__reflectingProperty !== name) {
+        //   if (this.__reflectingProperties === undefined) {
+        //     this.__reflectingProperties = new Map();
+        //   }
+        //   this.__reflectingProperties.set(name, options);
+        // }
+
+    }
+    if (!this.isUpdatePending) {
+      this.__updatePromise = this.__enqueueUpdate();
+    }
+    // Note, since this no longer returns a promise, in dev mode we return a
+    // thenable which warns if it's called.
+    // return DEV_MODE
+    //     ? requestUpdateThenable(this.localName)
+    //     : undefined;
+  }
   runActors(actors: Set<ACTOR>) {
     for (const act of actors) {
       console.log('run actor')
-      fastdom.mutate(act)
+      // fastdom.mutate(act)
+      act()
     }
     // actors.forEach((act: ACTOR) => {
     //   // this.actorRefCounter.add(act);
@@ -929,7 +1035,7 @@ export class EzWidget extends HTMLElement {
         this.doBindVarToActor(v, actor)
       }
     });
-    this.bindNodeActor(node, actor, compileVar);
+    // this.bindNodeActor(node, actor, compileVar);
   }
 
   doBindVarToActor(varName: string, actor: ACTOR) {
@@ -941,7 +1047,7 @@ export class EzWidget extends HTMLElement {
   }
 
   doBindNodeToActor(node: VELEMENT, actor: ACTOR) {
-    this.fnNodesSet.add(node);
+    // this.fnNodesSet.add(node);
     if (!this.nodeBindActorsMap.get(node)) {
       this.nodeBindActorsMap.set(node, new Set<ACTOR>());
     }

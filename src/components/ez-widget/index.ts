@@ -396,7 +396,7 @@ const StateHandle: ProxyHandler<any> = {
     // if (prop === 'ctx') {
     //   return receiver;
     // }
-
+    /*
     if (prop === 'startRecordExpressionVars') {
       this.recordExpressionVars = new WeakSet()
       return () => {
@@ -419,10 +419,11 @@ const StateHandle: ProxyHandler<any> = {
 
 
     }
-
+    */
     // let value = target[prop];
     // return (typeof value === 'function') ? value.bind(target) : value; // (*)
 
+    /*
     if (typeof prop != 'symbol' && Object.prototype.hasOwnProperty.call(target, prop)) {
       if (this.recordExpressionVars) {
         // const parent = Object.getOwnPropertyDescriptor(receiver, PARENT_PATH);
@@ -443,7 +444,7 @@ const StateHandle: ProxyHandler<any> = {
         // }
       // }
 
-    }
+    }*/
     /*if (prop != Symbol.unscopables && String(prop).includes('.')) {
       const props = String(prop).split('.');
       const final = props.pop();
@@ -621,6 +622,7 @@ export class EzWidget extends HTMLElement {
 
     this.gcRegistry = new FinalizationRegistry(heldValue => {
       console.log('gcRegistry', heldValue)
+      debugger
       // ....
     });
   }
@@ -1037,9 +1039,9 @@ export class EzWidget extends HTMLElement {
 
 
     exp.vars.forEach((v: string) => {
-      if (!Object.prototype.hasOwnProperty.call(this.__state, v)) {
-        return;
-      }
+      // if (!Object.prototype.hasOwnProperty.call(this.__state, v)) {
+      //   return;
+      // }
       if (typeof this.__state[v] == 'function') {
         this.doBindNodeToActor(node, actor)
       } else {
@@ -1058,6 +1060,7 @@ export class EzWidget extends HTMLElement {
     }
     this.varBindActorsMap[varName].add(actor)
     fastdom.mutate(actor)
+    // actor()
   }
 
   doBindNodeToActor(node: VELEMENT, actor: ACTOR) {
@@ -1067,6 +1070,7 @@ export class EzWidget extends HTMLElement {
     }
     this.nodeBindActorsMap.get(node).add(actor)
     fastdom.mutate(actor)
+    // actor()
   }
 
   bindNodeLoop(node: VELEMENT, loopVarName: string, bindVar: string, eachKey = '') {
@@ -1074,12 +1078,11 @@ export class EzWidget extends HTMLElement {
     const end = document.createComment(`end each`)
     node.parentNode.insertBefore(begin, node)
     node.parentNode.insertBefore(end, node.nextSibling)
-
+    debugger
     this.cacheLoopTagDomFragment.appendChild(node)
-    if (typeof this.__state[loopVarName] !== 'function') {
-
-      this.bindVarToNode(loopVarName, node)
-    }
+    // if (typeof this.__state[loopVarName] !== 'function') {
+    //   this.bindVarToNode(loopVarName, node)
+    // }
     const exp: VAR_AND_EXPRESSION = {
       expression: `${loopVarName}`,
       vars: new Set([loopVarName]),
@@ -1122,10 +1125,19 @@ export class EzWidget extends HTMLElement {
           // block.c();
           // console.log('create', key);
           block = node.cloneNode(true) as VELEMENT;
+
+          // const nodeCompileContext = this.compileContentNodeMap.get(block);
+          // this.compileContentNodeMap.set(block, {
+          //   // ...nodeCompileContext,
+          //   [bindVar]: {
+          //     item: list[i], index: i, key
+          //   },
+          // })
+
           block.___uniqueItemKey = key;
           block['detach'] = () => {
             const varNames = this.nodeBindVarObj.get(block)
-            varNames.forEach(v => {
+            varNames && varNames.forEach(v => {
               const iterSet = this.varBindNodeObj[v]
               iterSet.forEach((el: any, ref: WeakRef<any>) => {
                 if (el === block) {
@@ -1155,6 +1167,7 @@ export class EzWidget extends HTMLElement {
         lookup.delete(block.___uniqueItemKey);
         block.remove()
         block.detach()
+        this.gcRegistry.register(block, `block-${String(block.___uniqueItemKey)}`);
         console.log('destory', block, lookup )
       }
       const insert = (block: VELEMENT) => {
@@ -1183,8 +1196,10 @@ export class EzWidget extends HTMLElement {
       while (o && n) {
         const new_block = new_blocks[n - 1];
         const old_block = old_blocks[o - 1];
-        const new_key = new_block.id;
-        const old_key = old_block.key;
+        // const new_key = new_block.id;
+        // const old_key = old_block.key;
+        const new_key = new_block.___uniqueItemKey;
+        const old_key = old_block.___uniqueItemKey;
         if (new_block === old_block) {
           next = new_block.first;
           o--;
@@ -1222,11 +1237,10 @@ export class EzWidget extends HTMLElement {
 
 
     this.bindNodeExpression(node, exp, (result: any) => {
-      let originResult = node.___bind_meta;console.log(exp)
-
-      if (!originResult||!Array.isArray(originResult)) {
-        originResult = [];
-      }
+      // let originResult = node.___bind_meta;console.log(exp)
+      // if (!originResult||!Array.isArray(originResult)) {
+      //   originResult = [];
+      // }
       const old_list = [];
       let start = begin.nextSibling;
       while(start && start != end) {
@@ -1238,56 +1252,8 @@ export class EzWidget extends HTMLElement {
         start = next;
       }
       patchItems(old_list, result, eachKey, bindVar);
-      node.___bind_meta = result;
-      return
-      // TODO use item key only change special changed item
-      start = begin.nextSibling;
-      // while(start && start != end) {
-      //   const next = start.nextSibling;
-      //   void (start as HTMLElement).remove();
-      //   start = next;
-      // }
-
-      (result as unknown as Array<any>).forEach((item: any, index: number) => {
-        const renderForNode = node.cloneNode(true) as VELEMENT;
-        this.gcRegistry.register(renderForNode, `renderForNode-${item.id}-${index}`);
-        const eachItemKey = eachKey? item[eachKey] : undefined;
-        if (eachItemKey && (start as VELEMENT).___uniqueItemKey === eachItemKey ) {
-          return
-        }
-        const nodeCompileContext = this.compileContentNodeMap.get(renderForNode);
-        renderForNode.___uniqueItemKey = eachKey? item[eachKey] : '';
-
-        this.compileContentNodeMap.set(renderForNode, {
-          ...nodeCompileContext,
-          [bindVar]: {
-            item, index, key: eachItemKey
-          },
-        });
-
-        if (start && start != end) {  // 有就替换
-          const next = start.nextSibling;
-          start.replaceWith(renderForNode)
-          start = next;
-        } else {  // 没有就插入
-          end.parentNode.insertBefore(renderForNode, end);
-        }
-        compileWalker(renderForNode as VELEMENT, this.compile)
-      });
-      while(start && start != end) { // 多余的删除
-        const next = start.nextSibling;
-        void (start as HTMLElement).remove();
-        start = next;
-      }
+      // node.___bind_meta = result;
     })
-    return
-
-
-
-
-
-
-
   }
 
   bindNodeProp(node: VELEMENT, propName: string, valueExp: string) {
@@ -1302,7 +1268,10 @@ export class EzWidget extends HTMLElement {
         const p = paths.shift()
         target = target[p]
       }
-      const nodeType = node.type;
+      let nodeType = node.type;
+      if (nodeType === 'range') {
+        nodeType = 'number'
+      }
       const asType = nodeType.charAt(0).toUpperCase() + nodeType.slice(1);
       let valProp = `${prop}As${asType}`;
       if(typeof node[valProp] == 'undefined') {
@@ -1322,7 +1291,23 @@ export class EzWidget extends HTMLElement {
     });
   }
 
-
+  getSourcePropByName = (dotName: string) => {
+    const props = String(dotName).split('.');
+    const final = props.pop();
+    let layer = this.sourceRef;
+    let p = null;
+    for (let i = 0; i < props.length; i++) {
+      p = props[i];
+      if (typeof layer[p] === 'undefined') {
+        return undefined
+      }
+      layer = layer[p]
+    }
+    if ( typeof layer[final] === 'function') {
+      return layer[final].bind(layer)
+    }
+    return layer[final]
+  }
 
 
   bindStateFunction(fn: () => void) {
@@ -1410,11 +1395,13 @@ export class EzWidget extends HTMLElement {
             const vv = extractVarsFromObject(this.__state, expName)
             textNodes.push(document.createTextNode(t) );
             t = expName
+
             if (typeof this.__state[varName] === 'function') {
               // const p1 = varName.indexOf('{')
               // const p2 =varName.lastIndexOf('}')
               // varName = varName.substring(p1 + 1, p2)
-              t = `{${varName}()}`
+              // debugger
+              // t = `{${varName}()}`
             }
             let tn: any = null;
             let isHtmlNode = false;
@@ -1562,12 +1549,10 @@ export class EzWidget extends HTMLElement {
             if (typeof attrVar === 'undefined') {
               return
             }
-
             if (typeof attrVar === 'function') {
-              varName = `${ev}()`
-            //   // varName = `{'${v.varName}'}` // 方法名
-            //   // node.removeAttribute(attrName)
-            //   return
+              // varName = `${ev}()`  // 方法名, 不能执行，删除方法属性
+              node.removeAttribute(attrName)
+              return
             }
             // const re = new RegExp(v.expName, 'g')
             // attrStr = attrStr.replace(re, "${" + varName + "}");
@@ -1603,14 +1588,16 @@ export class EzWidget extends HTMLElement {
             if (cb && cb.varName) {
               cbName = cb.varName
             }
-            if (this.sourceRef[cbName] ) {
+            if (this.__state[cbName] ) {
               callback = cbName
             }
           }
         }
         console.log('callback', callback)
         node.addEventListener(eventName, (evt) => {
-          this.sourceRef[callback](evt)
+          // this.getSourcePropByName(callback).call(this.sourceRef, evt)
+          this.getSourcePropByName(callback)(evt)
+          // this.sourceRef['user']['toggle'](evt)
           // fastdom.mutate(() => {
           //   this.sourceRef[callback](evt)
           // })

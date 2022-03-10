@@ -108,18 +108,19 @@ p {
 <h1>test text</h1>
 <ez-widget id="testTextW1"  style="">
 
-<!--  <p>this is aaaa : {aaaa}} {{  src} {{!bbbb}}} }} </p>-->
-  <div id="attrNode"
-       style="color:{getColor()};font-size: {fontSize}px">{getColor()} {fontSize}</div>
+<!--  <p>this is aaaa : {aaaa}} {{  src} {{!bbbb}}} }} {getColor (  )} </p>-->
+
+<!--  <div id="attrNode"-->
+<!--       style="color:{getColor()};font-size: {fontSize}px">{getColor()} {fontSize}</div>-->
 
   <!--  <img src={src} {alt} {...user}><br>-->
 <!--  <img {...user}><br>-->
 <!--  <div>{user.name}</div>-->
 <!--  <img {...user}  title="{user.name}"><br>-->
 <!--  {!bbbb}-->
-  <button @click="incrementCount">
-    Clicked {count} {count === 1 ? 'time' : 'times'}
-  </button>
+<!--  <button @click="incrementCount">-->
+<!--    Clicked {count} {count === 1 ? 'time' : 'times'}-->
+<!--  </button>-->
 <!--  <button @click="incrementCount"> + </button>-->
 <!--  <p>{count} doubled is {count * 2} | {doubled}| {doubled()}</p>-->
 <!--  <button id="addNumber" @click="{addNumber  }">+</button>-->
@@ -142,13 +143,17 @@ p {
 <!--       style="color:{fn3()};font-size: {fn2()}">{{color}} {{name}}</div>-->
 <!--  <div style="color:{color2};font-size: {fontSize}px">2222</div>-->
   <!-- // 不支持方法,只能是表达式,因为方法内部变量无法监听变化,还可能不同分支, 使用不同变量 -->
-<!--  <button :if-true={user.isLogin} @click={toggle}>-->
-<!--    Log out-->
+<!--  <button :if-true={user.isLogin()} @click={user.toggle}>-->
+<!--    cccc-->
 <!--  </button>-->
 
-<!--  <button :if-false={user.loggedIn} @click={toggle}>-->
+<!--  <button :if-true={user.loggedIn} @click={user.toggle}>-->
+<!--    Log out-->
+<!--  </button>-->
+<!--  <button :if-false={user.loggedIn} @click={user.toggle}>-->
 <!--    Log in-->
 <!--  </button>-->
+<!--  <p :each-things="{thing}" :each-key="id">{thing.index}|{thing.item.id}|{thing.item.name}</p>-->
 <!--  <p :each-things="{thing}" :each-key="id" {...user}>{thing.index}|{thing.item.id}|{thing.item.name}</p>-->
 <!--  <div @mousemove={handleMousemove} style="border:1px solid red; width: 500px; height: 100px;">-->
 <!--    The mouse position is {m.x} x {m.y}-->
@@ -156,17 +161,17 @@ p {
 <!--  <input type="text"  .value="{user.name}">-->
 <!--  <h1>Hello {user.name}!</h1>-->
 
-<!--  <label style="display: flex">-->
-<!--    <input type=number .value={a} min=0 max=10>-->
-<!--    <input type=range .value={a} min=0 max=10>-->
-<!--  </label>-->
+  <label style="display: flex">
+    <input type=number .value={a} min=0 max=10>
+    <input type=range .value={a} min=0 max=10>
+  </label>
 
-<!--  <label style="display: flex">-->
-<!--    <input type=number .value={b} min=0 max=10>-->
-<!--    <input type=range .value={b} min=0 max=10>-->
-<!--  </label>-->
+  <label style="display: flex">
+    <input type=number .value={b} min=0 max=10>
+    <input type=range .value={b} min=0 max=10>
+  </label>
 
-<!--  <p>{a} + {b} = {a + b}</p>-->
+  <p>{a} + {b} = {a + b}</p>
 </ez-widget>
 
 
@@ -211,10 +216,12 @@ https://svelte.dev/tutorial/adding-data
           name: 'John',
           age: 18,
           loggedIn: false,
-          login(){ debugger
-            console.log(123, this);
-            this.loggedIn = !this.loggedIn
-          }
+          toggle() {
+            this.loggedIn = !this.loggedIn;
+          },
+          isLogin() {
+            return this.loggedIn
+          },
         },
         count: 0,
         doubled () {
@@ -261,7 +268,6 @@ https://svelte.dev/tutorial/adding-data
         incrementCount() {
           this.count += 1;
         },
-        a: 'aaaa',
         fn1(){
           return this.a
         },
@@ -276,9 +282,7 @@ https://svelte.dev/tutorial/adding-data
         fn3() {
           return this.color2
         },
-        toggle() {
-          this.user.loggedIn = !this.user.loggedIn;
-        }
+
       }
       e.target.setState(window.obj);
       // window.obj.aaaa = 'ddd'

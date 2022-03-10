@@ -26,7 +26,10 @@ export enum DOM_RENDER_ACTION_TYPE {
   TEXT
 }
 
-export type ACTOR = (...args: any) => void|CallableFunction;
+export type ACTOR = ((...args: any) => void|CallableFunction) & {
+  stack?: any,
+  node?: any
+};
 
 export type iterableObj<T> = {
   [key: string]: T

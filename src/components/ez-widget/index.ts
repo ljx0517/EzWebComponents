@@ -462,7 +462,7 @@ const StateHandle: ProxyHandler<any> = {
     return Reflect.get(target, prop, receiver);
   },
   set(target: any, prop: string|symbol, val, receiver) { // to intercept property writing
-    console.log('[internal][state][SET]', prop)
+    console.log('[internal][state][SET]', prop, val)
     if (Object.prototype.hasOwnProperty.call(target, prop)) {
       // return true;
       // throw new Error(`property ${String(prop)} has already been set`);
@@ -735,9 +735,9 @@ export class EzWidget extends HTMLElement {
           // actors && self.runActors(actors);
           actsArr.push(actors)
           for (const [el, actors] of self.nodeBindActorsMap) {
-            console.log(el)
-            // const actors = self.nodeBindActorsMap.get(el);
-            // actors && self.runActors(actors);
+          //   console.log(el)
+          //   // const actors = self.nodeBindActorsMap.get(el);
+          //   // actors && self.runActors(actors);
             actsArr.push(actors)
           }
           self.requestUpdate(internalKey, actsArr)
@@ -750,11 +750,13 @@ export class EzWidget extends HTMLElement {
   }
 
   private isUpdatePending = false;
-  private __updatePromise: Promise<any> = null;
+  private enableUpdating:  (...args: any) => void = null;
+  private __updatePromise: Promise<any> = null;//new Promise((res) => (this.enableUpdating = res));
   private _$changedProperties = new Map();
   async __enqueueUpdate() {
     this.isUpdatePending = true;
     try {
+      // this.__updatePromise = new Promise((res) => (this.enableUpdating = res));
       // Ensure any previous update has resolved before updating.
       // This `await` also ensures that property changes are batched.
       await this.__updatePromise;
@@ -790,6 +792,14 @@ export class EzWidget extends HTMLElement {
   __markUpdated() {
     this._$changedProperties = new Map();
     this.isUpdatePending = false;
+    console.log('this.updateComplete', this.updateComplete)
+    // if (this.enableUpdating) {
+    //   this.enableUpdating(true)
+    //   this.enableUpdating = null;
+    // }
+    // this.updateComplete.then(() => {
+    //   console.log(55555, this.updateComplete)
+    // })
   }
   performUpdate() {
     // var _a, _b;
@@ -812,15 +822,13 @@ export class EzWidget extends HTMLElement {
       // else {
       //   this.__markUpdated();
       // }
-      debugger
-      changedProperties.forEach((v: Set<ACTOR>[], k: string) => {
-        v.forEach((acts) => {
-          acts.forEach((act) =>{
+      changedProperties.forEach((v: Set<ACTOR>[], k: string) => {console.log('changedProperties', k)
+        v && v.forEach((acts) => {
+          acts && acts.forEach((act) => {
             act();
-          });
+          })
         })
       });
-
       this.__markUpdated();
     }
     catch (e) {
@@ -839,7 +847,10 @@ export class EzWidget extends HTMLElement {
   scheduleUpdate() {
     return this.performUpdate();
   }
-  requestUpdate(name: string, actorsArray: any[][]) {
+  get updateComplete() {
+    return this.__updatePromise;
+  }
+  requestUpdate(name: string, actorsArray:Set<ACTOR>[]) {
     if (name !== undefined) {
         if (!this._$changedProperties.has(name)) {
           this._$changedProperties.set(name, actorsArray);
@@ -881,6 +892,7 @@ export class EzWidget extends HTMLElement {
     this.sourceRef = source;
     this.makeStateReflectable(this.__state, source);
     this.render();
+    // this.dispatchEvent(new CustomEvent('ready', {bubbles: true,detail: this}));
   }
   removeNode(node: VELEMENT) {
     // const index = Array.from(node.parentNode.children).indexOf(node);
@@ -981,7 +993,7 @@ export class EzWidget extends HTMLElement {
 
 
 
-    exp.vars.forEach((v: string) => {
+    exp.vars.forEach((v: string) => {return
       if (!Object.prototype.hasOwnProperty.call(this.__state, v)) {
         return;
       }
@@ -1022,8 +1034,7 @@ export class EzWidget extends HTMLElement {
       action(result)
       // node.textContent = result;
     });
-    // @ts-ignore
-    actor.stack = new Error()
+
 
     exp.vars.forEach((v: string) => {
       if (!Object.prototype.hasOwnProperty.call(this.__state, v)) {
@@ -1035,6 +1046,9 @@ export class EzWidget extends HTMLElement {
         this.doBindVarToActor(v, actor)
       }
     });
+    // actor.stack = new Error();
+    // actor.node = node;
+    // actor();
     // this.bindNodeActor(node, actor, compileVar);
   }
 
@@ -1370,6 +1384,9 @@ export class EzWidget extends HTMLElement {
   isTrigger(attrName: string) {
     return attrName.startsWith('@')
   }
+  isValidExpression(expStr: string) {
+    return !!expStr.replace(/{/g, '').replace(/}/g, '').trim().length
+  }
   compile = (node: VELEMENT): LOOP_CONDITION_STATEMENT => {
     if (node.nodeName == 'SCRIPT') {
       return;
@@ -1410,7 +1427,9 @@ export class EzWidget extends HTMLElement {
             } else {
               tn = document.createTextNode(t)
             }
-
+            if(!this.isValidExpression(t)) {
+              continue
+            }
             this.bindNodeExpression(tn as unknown as VELEMENT, {
               expression: "`$" + t + "`",
               vars: new Set([varName, ...vv])
@@ -1591,10 +1610,10 @@ export class EzWidget extends HTMLElement {
         }
         console.log('callback', callback)
         node.addEventListener(eventName, (evt) => {
-          // this.__state[attrValue](evt)
-          fastdom.mutate(() => {
-            this.sourceRef[callback](evt)
-          })
+          this.sourceRef[callback](evt)
+          // fastdom.mutate(() => {
+          //   this.sourceRef[callback](evt)
+          // })
         })
       }
     }

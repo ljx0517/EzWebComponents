@@ -109,14 +109,17 @@ p {
 <ez-widget id="testTextW1"  style="">
 
 <!--  <p>this is aaaa : {aaaa}} {{  src} {{!bbbb}}} }} </p>-->
-<!--  <img src={src} {alt} {...user}><br>-->
+  <div id="attrNode"
+       style="color:{getColor()};font-size: {fontSize}px">{getColor()} {fontSize}</div>
+
+  <!--  <img src={src} {alt} {...user}><br>-->
 <!--  <img {...user}><br>-->
 <!--  <div>{user.name}</div>-->
 <!--  <img {...user}  title="{user.name}"><br>-->
 <!--  {!bbbb}-->
-<!--  <button @click="incrementCount">-->
-<!--    Clicked {count} {count === 1 ? 'time' : 'times'}-->
-<!--  </button>-->
+  <button @click="incrementCount">
+    Clicked {count} {count === 1 ? 'time' : 'times'}
+  </button>
 <!--  <button @click="incrementCount"> + </button>-->
 <!--  <p>{count} doubled is {count * 2} | {doubled}| {doubled()}</p>-->
 <!--  <button id="addNumber" @click="{addNumber  }">+</button>-->
@@ -127,7 +130,11 @@ p {
 <!--       title="{name}!!!"-->
 <!--       style="color:{getColor()};font-size: {fontSize}px">{color} {fontSize}</div>-->
 
-  <div id="user_{user.id}" {...user}></div>
+<!--  <button id="incrementFont" @click="incrementFont">+</button>-->
+<!--  <div id="attrNode" {name}-->
+<!--       title="{name}!!!"-->
+<!--       fontSize="{fontSize}"-->
+<!--       style="color:{getColor()};font-size: {fontSize}px">{getColor} {fontSize}</div>>-->
 
 
 <!--  <div {name}-->
@@ -228,7 +235,7 @@ https://svelte.dev/tutorial/adding-data
         incrementFont(){
           this.fontSize += 1;
         },
-        getColor() {
+        getColor() {console.log('getColor');
           if (this.fontSize % 2) {
             this.color = 'red'
             return 'red'
@@ -254,8 +261,9 @@ https://svelte.dev/tutorial/adding-data
         incrementCount() {
           this.count += 1;
         },
-        fn1: (e) =>{
-          console.log('fn1',e, this);
+        a: 'aaaa',
+        fn1(){
+          return this.a
         },
         fn2() {
           if (this.count == 0) {

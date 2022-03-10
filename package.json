@@ -6,9 +6,7 @@
   "description": "**Edit a file, create a new file, and clone from Bitbucket in under 2 minutes**",
   "main": "src/main.ts",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha --experimental-specifier-resolution=node --require @babel/register test/*",
-    "test2": "./node_modules/mocha/bin/mocha  --experimental-specifier-resolution=node --require ts-node/register 'test/*'",
-    "test3": "jest ",
+    "test": "jest ",
     "build": "webpack --config build/webpack.prod.js",
     "build:dev": "webpack --config build/webpack.dev.js",
     "dev": "webpack serve --config ./build/webpack.dev.js --progress --profile ",

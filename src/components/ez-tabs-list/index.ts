@@ -1,4 +1,8 @@
-import style from "./style.less"
+import css from "./style.less";
+const style = css.locals;
+
+
+
 const stylesheet = new CSSStyleSheet();
 // TODO support column mode
 export interface IClientRect {
@@ -60,7 +64,7 @@ class EzTabList extends HTMLElement {
     if (stylesheet.cssRules.length == 0) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      stylesheet.replaceSync(style.toString());
+      stylesheet.replaceSync(css.toString());
     }
 
     // this.shadowRoot.innerHTML = `
@@ -78,6 +82,7 @@ class EzTabList extends HTMLElement {
     // this.closeable = false;
     // this.activeIndex = 0
     // this.activeClass = 'ez-tabs-list__active';
+    console.log('style.scrollArea', style.scrollArea)
     this.scrollArea = this.shadowRoot.querySelector(`.${style.scrollArea}`);
     if(this.shadowRoot.host.hasAttribute('mode') &&
       this.shadowRoot.host.getAttribute('mode').trim().toLocaleLowerCase() === 'col'){

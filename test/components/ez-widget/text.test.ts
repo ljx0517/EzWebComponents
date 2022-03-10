@@ -17,7 +17,7 @@ function prepare(html, obj, callback) {
     await e.target.updateComplete
     setTimeout(() => {
       callback(e)
-    })
+    }, 100)
   }
   // const ready = async (e) => {
   //   await callback(e)
@@ -98,7 +98,7 @@ describe("test expressions", () => {
       expect(p1.innerHTML.trim()).toBe(obj.a);
       obj.a = '12345678'
       await testTextW1.updateComplete
-      expect(p2.innerHTML.trim()).toBe('12345678');
+      expect(p1.innerHTML.trim()).toBe('12345678');
       done()
     });
   });

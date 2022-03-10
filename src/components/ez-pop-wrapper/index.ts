@@ -1,4 +1,8 @@
-import style from "./style.less"
+// import style from "./style.less";
+import css from "./style.less";
+const style = css.locals;
+
+
 const stylesheet = new CSSStyleSheet();
 
 

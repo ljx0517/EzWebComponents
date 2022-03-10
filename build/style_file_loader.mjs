@@ -2,7 +2,7 @@
 import path, { dirname } from 'path'
 export default function customCssModuleLoader(source) {
   // return source;
-  // console.log(module.i);
+  console.log(module.i);
   source = source.replace('module.exports = ___CSS_LOADER_EXPORT___;', '')
   source = source + '// if(!module.i || !module.i.endsWith(".module.less")){\n' +
     '   // return module.exports = exports;\n' +

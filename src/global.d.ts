@@ -7,7 +7,10 @@ type Css<T> = IStringable<T> & {
 
 declare module '*.less'{
   interface IClassNames {
-    [className: string]: string;
+    locals: {
+      [className: string]: string;
+    };
+    // [className: string]: string;
   }
   const classNames: IClassNames;
   export = classNames;

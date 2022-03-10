@@ -10,7 +10,7 @@ function prepare(html, obj, callback) {
     await e.target.updateComplete
     setTimeout(() => {
       callback(e)
-    }, 100)
+    }, 200)
   }
   // const ready = async (e) => {
   //   await callback(e)
@@ -158,7 +158,7 @@ describe("test expressions", () => {
     };
     const html = `<ez-widget id="testComp"  style="">
       <button id="addNumber" @click="{addNumber  }"></button>
-      <p id="sum">{numbers.join(' + ')} = {sum}</p>
+      <p id="sum">{numbers.join(' + ')} = {sum()}</p>
     </ez-widget>`
 
     clearCallback = prepare(html, obj, async () => {

@@ -127,8 +127,10 @@ export const common = {
 
 
           // {
-          //   loader: path.resolve(__dirname, 'style_file_loader.js'),
-          //   options: {/* ... */}
+          //   loader: path.resolve(__dirname, 'style_file_loader.mjs'),
+          //   options: {/* ... */
+          //     modules: true,
+          //   }
           // },
 
           { loader: 'css-loader', options: {
@@ -147,8 +149,9 @@ export const common = {
               modules: {
                 // auto: /\.module\.less$/,
                 exportLocalsConvention: 'camelCase',
+                // namedExport: true,
                 exportOnlyLocals: false,
-                // mode: 'local'
+                // mode: 'local',
                 // exportGlobals: true,
                 // localIdentName: '[path][name]__[local]--[hash:base64:5]',
                 localIdentName: '[name]__[local]',

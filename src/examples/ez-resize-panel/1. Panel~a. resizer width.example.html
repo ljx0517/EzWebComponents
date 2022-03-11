@@ -8,10 +8,26 @@
 <body>
 <style>
 
-
+.panel1{
+  width: 500px;
+  height: 300px;
+  display: block;
+  border: 1px solid red;
+}
+.panel2{
+  width: 300px;
+  height: 500px;
+  display: block;
+  border: 1px solid blue;
+}
 </style>
 <div id="app">
-  <ez-resize-panel dimension="width">
+  <ez-resize-panel dimension="width" class="panel1" >
+    <div slot="A">aaa</div>
+    <div slot="B">bbb</div>
+  </ez-resize-panel>
+  <hr>
+  <ez-resize-panel dimension="height" class="panel2" >
     <div slot="A">aaa</div>
     <div slot="B">bbb</div>
   </ez-resize-panel>

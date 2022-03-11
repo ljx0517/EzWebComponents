@@ -51,7 +51,8 @@ describe("test for expressions", () => {
       ]
     }
     const html =`<ez-widget id="testComp"  style="">
-       <p :each-things="{thing}" :each-key="id" {...user}>{thing.index}|{thing.item.id}|{thing.item.name}</p>
+         <input type="text"  .value="{user.name}">
+        <h1>Hello {user.name}!</h1>
     </ez-widget>`;
     clearCallback = prepare(html, obj, async () => {
       // console.log(document.body.innerHTML)

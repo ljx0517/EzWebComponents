@@ -1,8 +1,6 @@
-// const path = require('path');
-import path, { dirname } from 'path'
-export default function customCssModuleLoader(source) {
+module.exports = function customCssModuleLoader(source, map, meta) {
   // return source;
-  console.log(module.i);
+  // console.log(module.i);
   source = source.replace('module.exports = ___CSS_LOADER_EXPORT___;', '')
   source = source + '// if(!module.i || !module.i.endsWith(".module.less")){\n' +
     '   // return module.exports = exports;\n' +
@@ -23,6 +21,16 @@ export default function customCssModuleLoader(source) {
     '// }\n'
   return source;
 }
+
+// const pluginName = 'ConsoleLogOnBuildWebpackPlugin';
+// class ConsoleLogOnBuildWebpackPlugin {
+//   apply(compiler) {
+//     console.log(222222222222222);
+//   }
+// }
+// export default  ConsoleLogOnBuildWebpackPlugin;
+
+
 /*
 module.exports = require('babel-loader').custom(babel => {
   return {

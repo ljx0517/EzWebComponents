@@ -19,15 +19,21 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 
-export default merge(common, {
+const devConfig = merge(common, {
   mode: 'development',
+  entry: {
+    // main: './src/main.ts',
+    // httpclient: './src/common/httpclient.ts',
+    // './src/components/ez-tabs-list/index.ts',
+    // './src/components/ez-pop-wrapper/index.ts',
+    // './src/components/ez-widget/index.ts',
+  },
   plugins: [
 
-    new CleanWebpackPlugin(),
     //  you should know that the HtmlWebpackPlugin by default will generate its own index.html
-    new HtmlWebpackPlugin({
-      template: './index.html',
-    }),
+    // new HtmlWebpackPlugin({
+    //   template: './index.html',
+    // }),
     new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output
       // both options are optional
@@ -54,3 +60,5 @@ export default merge(common, {
     }
   },
 });
+// console.log(devConfig)
+export default devConfig

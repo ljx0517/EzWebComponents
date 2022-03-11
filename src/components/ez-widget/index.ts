@@ -1,4 +1,4 @@
-import style from "./style.less";
+import style from "./style.module.less";
 // console.log('style', typeof style.toString())
 // import fastdom from './fastdom';
 import {Scheduler} from './scheduler';

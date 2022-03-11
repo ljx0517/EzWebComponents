@@ -4,22 +4,33 @@ interface IStringable<T> {
 type Css<T> = IStringable<T> & {
   [className: string]: string;
 }
-
-declare module '*.less'{
-  interface IClassNames {
-    locals: {
-      [className: string]: string;
-    };
-    // [className: string]: string;
-  }
-  const classNames: IClassNames;
-  export = classNames;
-  // export = Css;
+interface ILocals {
+    [className: string]: string;
 }
-declare module '*.css'
+declare module '*module.less'{
+  interface IStyle {
+    // locals: ILocals;
+    [className: string]: string;
+  }
+  const classNames: IStyle
+  export = classNames;
+  // export default IStyle;
+}
+// declare module '*.module.less'{
+//   interface IClassNames {
+//     [className: string]: string;
+//   }
+//   const classNames: IClassNames;
+//   export = classNames;
+//   // export = Css;
+// }
+
+
+declare module '*module.css'
 {
   // const classes: { [className: string]: string };
-  const locals: { [className: string]: string };
+  // const locals: { [className: string]: string };
+  const locals: ILocals;
   const toString: () => string;
   export { locals, toString };
 }

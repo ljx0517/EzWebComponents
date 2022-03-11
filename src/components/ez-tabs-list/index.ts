@@ -1,6 +1,4 @@
-import css from "./style.less";
-const style = css.locals;
-
+import style from "./style.module.less";
 
 
 const stylesheet = new CSSStyleSheet();
@@ -64,7 +62,7 @@ class EzTabList extends HTMLElement {
     if (stylesheet.cssRules.length == 0) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
-      stylesheet.replaceSync(css.toString());
+      stylesheet.replaceSync(style.toString());
     }
 
     // this.shadowRoot.innerHTML = `

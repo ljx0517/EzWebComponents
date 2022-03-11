@@ -17,12 +17,13 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 // https://stackoverflow.com/questions/50260262/how-to-run-webpack-bundle-analyzer
 import {BundleAnalyzerPlugin} from 'webpack-bundle-analyzer'; // ).BundleAnalyzerPlugin
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename)
 
 
-export default merge(common, {
+const config = merge(common, {
   mode: 'production',
   devtool: 'source-map',
   plugins: [
@@ -31,18 +32,43 @@ export default merge(common, {
       generateStatsFile: true,
       statsOptions: { source: false }
     }),
-    new CleanWebpackPlugin(),
+
     //  you should know that the HtmlWebpackPlugin by default will generate its own index.html
-    new HtmlWebpackPlugin({
-      template: './index.html',
-      title: 'EzWebcomponents',
-    }),
+    // new HtmlWebpackPlugin({
+    //   template: './index.html',
+    //   title: 'EzWebcomponents',
+    // }),
+    // new HtmlWebpackPlugin({
+    //   template: './index.html',
+    // }),
     new MiniCssExtractPlugin({
       // Options similar to the same options in webpackOptions.output
       // both options are optional
       filename: '[name].css',
       // chunkFilename: devMode ? '[id].[hash].css' : '[id].css',
     }),
+    {
+      apply: (compiler) => {
+        compiler.hooks.done.tap('DonePlugin', (stats) => {
+          console.log('Compile is done !')
+          if (stats.compilation.errors && stats.compilation.errors.length) {
+            console.error(stats.compilation.errors)
+          }
+          setTimeout(() => {
+            process.exit(0)
+          })
+        });
+        // compiler.hooks.failed.tap('ErrorPlugin', (error) => {
+        //   console.log('Compile is error !')
+        //   console.error(error)
+        // }),
+        // compiler.hooks.invalid.tap('InvalidPlugin', (fileName, changeTime) => {
+        //   console.log('Compile is InvalidPlugin !')
+        //   console.error(fileName, changeTime)
+        // })
+
+      }
+    }
   ],
   output: {
     filename: '[name].js',
@@ -50,5 +76,7 @@ export default merge(common, {
   },
 });
 
+
+export default config
 
 

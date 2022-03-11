@@ -1,16 +1,15 @@
-import style from "./style.module.less"
+import style from "./style.module.less";
+
+
+
+
 const stylesheet = new CSSStyleSheet();
 
 
-class EzPopDialog extends HTMLElement {
-  private closeable = true;
-  private activeIndex = 0;
-  private activeClass = 'ez-tabs-list__active';
 
-  private beforeCloseHooks:(() => boolean)[] = [];
-  private afterCloseHooks: (() => void)[] = [];
-  private beforeOpenHooks:(() => boolean)[] = [];
-  private afterOpenHooks: (() => void)[] = [];
+class EzResizePanel extends HTMLElement {
+  private dimension: string;
+
 
   constructor() {
     super();
@@ -19,9 +18,10 @@ class EzPopDialog extends HTMLElement {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     shadow.adoptedStyleSheets = [stylesheet];
-    shadow.innerHTML = `<div>
-      <slot name=""></slot>
-      <slot></slot>
+    shadow.innerHTML = `<div class="${style.resizePanel}">
+      <slot name="A"></slot>
+      <div class="resizer"></div>
+      <slot name="B"></slot>
     </div>
     `.replace(/[\s\n]*\n[\s\n]*/g, '');
   }
@@ -36,6 +36,7 @@ class EzPopDialog extends HTMLElement {
       // @ts-ignore
       stylesheet.replaceSync(style.toString());
     }
+    this.dimension = this.getAttribute('dimension')
 
     // this.shadowRoot.innerHTML = `
     // <style>
@@ -47,12 +48,6 @@ class EzPopDialog extends HTMLElement {
     //     </slot>
     //   </div>
     // </div>`;
-
-
-
-
-
-
   }
 
 
@@ -83,4 +78,4 @@ class EzPopDialog extends HTMLElement {
 
   // there can be other element methods and properties
 }
-customElements.define("ez-pop-dialog", EzPopDialog);
+customElements.define("ez-resize-panel", EzResizePanel);

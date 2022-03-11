@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title><%= htmlWebpackPlugin.options.title %></title>
+</head>
+<body>
+<style>
+.tab{
+    cursor: pointer;
+  color: red;
+}
+.tab.active{
+    background: #ddd;
+}
+.p12{
+  padding: 12px;
+}
+p {
+  margin-top: 4px;
+  margin-bottom: 4px;
+  color: purple;
+  font-family: 'Comic Sans MS', cursive;
+  /*font-size: 2em;*/
+}
+</style>
+<div style="display: none;height: 60px">
+<ez-tab-list id="qwe"
+             style="--tab-width: auto;--tab-padding: 0 24px 0 12px;--label-font-size: 16px;--tab-bg-color:#666;--active-tab-bg-color: #ccc;"
+             custom="false" closeable="true" active-index="0" active-class="active">
+    <div class="tab">John Smith 111111 </div>
+    <div class="tab">John Smith 222222 </div>
+    <div class="tab">John Smith 33333 </div>
+    <div class="tab">John Smith 444 </div>
+    <div class="tab">John Smith 5 </div>
+    <div class="tab">John Smith 6 </div>
+    <div class="tab">John Smith 7 </div>
+    <div class="tab">John Smith 8 </div>
+
+    <div class="tab">John Smith 9 </div>
+    <div class="tab">John Smith 10 </div>
+    <div class="tab">John Smith 000 </div>
+  </ez-tab-list><br><br><br><br>
+</div>
+
+<div style="display: none;width: 200px;height: 100px;overflow: hidden;">
+  <ez-tab-list id="qweCol" custom="true" mode="col" custom="true" closeable="true" active-index="0" active-class="active">
+    <div class="tab">John Smith 111111 </div>
+    <div class="tab">John Smith 222222 </div>
+    <div class="tab">John Smith 33333 </div>
+    <div class="tab">John Smith 444 </div>
+    <div class="tab">John Smith 5 </div>
+    <div class="tab">John Smith 6 </div>
+    <div class="tab">John Smith 7 </div>
+    <div class="tab">John Smith 8 </div>
+
+    <div class="tab">John Smith 9 </div>
+    <div class="tab">John Smith 10 </div>
+    <div class="tab">John Smith 000 </div>
+  </ez-tab-list>
+  <br><br><br><br>
+</div>
+
+<div style="display: none;">
+  <ez-pop-wrapper id="pp">
+    <div slot="title">aaaa</div>
+    <div slot="pop" class="p12">
+      <details>
+        <summary>Details</summary>
+        <p>Something small enough to escape casual notice.</p>
+        <details>
+          <summary>Details</summary>
+          Something small enough to escape casual notice.
+        </details>
+      </details>
+    </div>
+  </ez-pop-wrapper>
+  <br><br><br><br>
+</div>
+
+<div style="display: none">
+  <ez-widget-wwww id="etr"  style="display: block;height: 30px;width: 100%;">
+<!--    <template>-->
+    <div :name="name + '_www'" :style="'color:'+fn3()+';'">{{aaaa}} {{name}}</div>
+    <div :if-true="a > b">1</div>
+    <div :if-false="a > b">2</div>
+    <select name="" >
+      <option :each-dog="filterItem()" name="aaaa" :item-index="dog.index" :value="dog.item">{{dog.item}}</option>
+    </select>
+    <select name="" >
+      <option :each-dog="listItem" name="aaaa" :item-index="dog.index" :value="dog.item">{{dog.item}}</option>
+    </select>
+    <div>{{html}}</div>
+<!--    <div :if-false="(a > b)">-->
+<!--      <p @click="fn2">if false</p>-->
+<!--    </div>-->
+<!--    <if :true="a > b">-->
+<!--      <select name="" id="">-->
+<!--        <option :each-dog="listItem" name="aaaa" :value="dog.item">{{dog.index}}</option>-->
+<!--      </select>-->
+<!--    </if>-->
+
+<!--    </template>-->
+  </ez-widget-wwww>
+</div>
+
+<h1>test text</h1>
+<ez-widget id="testTextW1"  style="">
+
+<!--  <p>this is aaaa : {aaaa}} {{  src} {{!bbbb}}} }} {getColor (  )} </p>-->
+
+<!--  <div id="attrNode"-->
+<!--       style="color:{getColor()};font-size: {fontSize}px">{getColor()} {fontSize}</div>-->
+
+  <!--  <img src={src} {alt} {...user}><br>-->
+<!--  <img {...user}><br>-->
+<!--  <div>{user.name}</div>-->
+<!--  <img {...user}  title="{user.name}"><br>-->
+<!--  {!bbbb}-->
+<!--  <button @click="incrementCount">-->
+<!--    Clicked {count} {count === 1 ? 'time' : 'times'}-->
+<!--  </button>-->
+<!--  <button @click="incrementCount"> + </button>-->
+<!--  <p>{count} doubled is {count * 2} | {doubled}| {doubled()}</p>-->
+  <button id="addNumber" @click="{addNumber  }">+</button>
+  <p id="sum">{numbers.join(' + ')} = {sum()}</p>
+
+<!--  <button id="incrementFont" @click="incrementFont">+</button>-->
+<!--  <div id="attrNode" {name}-->
+<!--       title="{name}!!!"-->
+<!--       style="color:{getColor()};font-size: {fontSize}px">{color} {fontSize}</div>-->
+
+<!--  <button id="incrementFont" @click="incrementFont">+</button>-->
+<!--  <div id="attrNode" {name}-->
+<!--       title="{name}!!!"-->
+<!--       fontSize="{fontSize}"-->
+<!--       style="color:{getColor()};font-size: {fontSize}px">{getColor} {fontSize}</div>>-->
+
+
+<!--  <div {name}-->
+<!--       title="{name}!!!"-->
+<!--       style="color:{fn3()};font-size: {fn2()}">{{color}} {{name}}</div>-->
+<!--  <div style="color:{color2};font-size: {fontSize}px">2222</div>-->
+  <!-- // 不支持方法,只能是表达式,因为方法内部变量无法监听变化,还可能不同分支, 使用不同变量 -->
+<!--  <button :if-true={user.isLogin()} @click={user.toggle}>-->
+<!--    cccc-->
+<!--  </button>-->
+
+<!--  <button :if-true={user.loggedIn} @click={user.toggle}>-->
+<!--    Log out-->
+<!--  </button>-->
+<!--  <button :if-false={user.loggedIn} @click={user.toggle}>-->
+<!--    Log in-->
+<!--  </button>-->
+<!--  <p :each-things="{thing}" :each-key="id">{thing.index}|{thing.item.id}|{thing.item.name}</p>-->
+<!--  <p :each-things="{thing}" :each-key="id" {...user}>{thing.index}|{thing.item.id}|{thing.item.name}</p>-->
+<!--  <div @mousemove={handleMousemove} style="border:1px solid red; width: 500px; height: 100px;">-->
+<!--    The mouse position is {m.x} x {m.y}-->
+<!--  </div>-->
+<!--  <input type="text"  .value="{user.name}">-->
+<!--  <h1>Hello {user.name}!</h1>-->
+
+  <label style="display: flex">
+    <input type=number .value={a} min=0 max=10>
+    <input type=range .value={a} min=0 max=10>
+  </label>
+
+  <label style="display: flex">
+    <input type=number .value={b} min=0 max=10>
+    <input type=range .value={b} min=0 max=10>
+  </label>
+
+  <p>{a} + {b} = {a + b}</p>
+</ez-widget>
+
+
+
+
+svelte
+https://svelte.dev/tutorial/adding-data
+<script>
+    // const qwe = document.querySelector('#qwe')
+    // const qwe2 = document.querySelector('#qweCol')
+    // const pp = document.querySelector('#pp')
+    //
+    // qwe.addEventListener("close-tab", (e) => {
+    //     console.log('close', e.detail)
+    // })
+    // qwe.addEventListener("active-tab", (e) => {
+    //     console.log('active', e.detail)
+    //   e.stopPropagation();
+    //   e.preventDefault();
+    // });
+
+    document.addEventListener('created', (e) => {
+      // console.log(e.target, e.detail, e.target == e.detail);
+      console.log(111111)
+      window.obj = {
+        a:1,
+        b:2 ,
+        m: { x: 0, y: 0 },
+        handleMousemove(event) {
+          this.m.x = event.clientX;
+          this.m.y = event.clientY;
+        },
+        things : [
+          { id: 1, name: 'apple' },
+          { id: 2, name: 'banana' },
+          { id: 3, name: 'carrot' },
+          { id: 4, name: 'doughnut' },
+          { id: 5, name: 'egg' },
+        ],
+        user: {
+          id: 'uid',
+          name: 'John',
+          age: 18,
+          loggedIn: false,
+          toggle() {
+            this.loggedIn = !this.loggedIn;
+          },
+          isLogin() {
+            return this.loggedIn
+          },
+        },
+        count: 0,
+        doubled () {
+          if (this.numbers.length==2) {
+            return this.count * 3
+          } else {
+            return this.count * 2
+          }
+        },
+        numbers: [1, 2, 3, 4],
+        getNumbers: () => ['a', 'b', 'c'],
+        sum(){
+          return this.numbers.reduce((t, n) => t + n, 0)
+        } ,
+        addNumber() {
+          this.numbers = [...this.numbers, this.numbers.length + 1];
+        },
+        incrementFont(){
+          this.fontSize += 1;
+        },
+        getColor() {console.log('getColor');
+          if (this.fontSize % 2) {
+            this.color = 'red'
+            return 'red'
+          } else {
+            this.color = 'green'
+            return 'green'
+          }
+        },
+        aaaa: "123",
+        bbbb: "<b>boldHtml</b>",
+        src: 'src-src-src',
+        alt: 'alt-alt-alt',
+        name: 'hah',
+        color: 'red',
+        color2: 'green',
+        fontSize: 16,
+        filterCondition: 1,
+        filterItem: () => {
+          return this.numbers.filter((i) => {
+            return (i % 2) === this.filterCondition;
+          });
+        },
+        incrementCount() {
+          this.count += 1;
+        },
+        fn1(){
+          return this.a
+        },
+        fn2() {
+          if (this.count == 0) {
+
+          } else {
+            return `${this.fontSize}px`
+          }
+
+        },
+        fn3() {
+          return this.color2
+        },
+
+      }
+      e.target.setState(window.obj);
+      // window.obj.aaaa = 'ddd'
+    })
+</script>
+</body>
+</html>

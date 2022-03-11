@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width">
     <title><%= htmlWebpackPlugin.options.title %></title>
-    <script defer src="ez-tabs-list.js"></script>
 </head>
 <body>
 <style>
@@ -12,10 +11,10 @@
 
 </style>
 <div id="app">
-    <ez-tab-list>
-        <div>aaaaa</div>
-        <div>bbbb</div>
-    </ez-tab-list>
+  <ez-resize-panel dimension="width">
+    <div slot="A">aaa</div>
+    <div slot="B">bbb</div>
+  </ez-resize-panel>
 </div>
 
 

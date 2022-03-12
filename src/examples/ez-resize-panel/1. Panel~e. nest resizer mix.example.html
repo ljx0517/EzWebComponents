@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title><%= htmlWebpackPlugin.options.title %></title>
+</head>
+<body>
+<style>
+
+    .panel1{
+        width: 500px;
+        height: 300px;
+        display: block;
+        border: 1px solid red;
+    }
+    .panel2{
+        width: 100%;
+        height: 100%;
+        display: block;
+        border: 1px solid blue;
+    }
+    div {
+        height: 100%;
+    }
+</style>
+<div id="app">
+    <ez-resize-panel dimension="width" class="panel1" >
+        <div slot="A">
+            <ez-resize-panel dimension="height" class="" >
+                <div slot="A">A1</div>
+                <div slot="B">A2</div>
+            </ez-resize-panel>
+        </div>
+        <div slot="B">
+            <ez-resize-panel dimension="height" class="" >
+                <div slot="A">B1</div>
+                <div slot="B">
+                    <ez-resize-panel dimension="height" class="" >
+                        <div slot="A">B1.1</div>
+                        <div slot="B">B1.2</div>
+                    </ez-resize-panel>
+                </div>
+            </ez-resize-panel>
+        </div>
+    </ez-resize-panel>
+
+</div>
+
+
+
+
+<script type="module">
+</script>
+</body>
+</html>

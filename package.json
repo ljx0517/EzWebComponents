@@ -30,6 +30,10 @@
     "@codemirror/closebrackets": "^0.19.1",
     "@codemirror/commands": "^0.19.8",
     "@codemirror/gutter": "^0.19.9",
+    "@codemirror/lang-css": "^0.19.3",
+    "@codemirror/lang-html": "^0.19.4",
+    "@codemirror/lang-javascript": "^0.19.7",
+    "@codemirror/lang-json": "^0.19.2",
     "@codemirror/state": "^0.19.9",
     "@codemirror/text": "^0.19.6",
     "@codemirror/view": "^0.19.47",
@@ -71,6 +75,7 @@
   },
   "dependencies": {
     "iterable-weak-map": "^1.0.0",
-    "iterable-weak-set": "^1.0.4"
+    "iterable-weak-set": "^1.0.4",
+    "json-tree-view": "^0.4.12"
   }
 }

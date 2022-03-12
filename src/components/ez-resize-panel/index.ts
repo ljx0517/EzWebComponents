@@ -23,6 +23,7 @@ class EzResizePanel extends HTMLElement {
   private slotA: HTMLSlotElement;
   private slotB: HTMLSlotElement;
   private move_boundary: number[];
+  resizerHandle: any;
 
 
 
@@ -66,6 +67,8 @@ class EzResizePanel extends HTMLElement {
     this.slotB = this.shadowRoot.querySelector('[name=B]')
     this.dragRegion = this.container.getBoundingClientRect();
     this.resizer = this.shadowRoot.querySelector('.resizer');
+    this.resizerHandle = this.shadowRoot.querySelector(`.${style.resizerHandle}`);
+
 
     if (!this.style) {
       const s = document.createAttribute('style')
@@ -80,7 +83,7 @@ class EzResizePanel extends HTMLElement {
 
 
 
-    this.resizer.addEventListener('mousedown', this.resizeHandle, false);
+    this.resizerHandle.addEventListener('mousedown', this.resizeHandle, false);
 
 
 
@@ -96,6 +99,16 @@ class EzResizePanel extends HTMLElement {
     // </div>`;
   }
   dragIt = (e: MouseEvent) => {
+    document.querySelectorAll('iframe').forEach(f => {
+      // let s = f.getAttributeNode('style');
+      // if (!s) {
+      //   s = document.createAttribute('style')
+      //   f.setAttributeNode(s);
+      // }
+      f.style.setProperty('pointer-events', 'none')
+    })
+    e.preventDefault();
+    e.stopPropagation();
     let x = this.initX + e.pageX - this.firstX;
     let y = this.initY + e.pageY - this.firstY;
 
@@ -106,11 +119,12 @@ class EzResizePanel extends HTMLElement {
       val = y;
     }
 
-    let attrStyle = this.container.style;
+    let attrStyle = this.style;
     if (!attrStyle) {
       this.container.setAttribute('style', ``);
-      attrStyle = this.container.style;
+      attrStyle = this.style;
     }
+    console.log(val, e.target)
     attrStyle.setProperty('--part-a-size', `${val}px`)
   }
   resizeHandle = (e: MouseEvent) => {
@@ -153,6 +167,10 @@ class EzResizePanel extends HTMLElement {
     window.addEventListener('mousemove', this.dragIt, false);
 
     window.addEventListener('mouseup', () => {
+      console.log('remove mousemove')
+      document.querySelectorAll('iframe').forEach(f => {
+        f.style.setProperty('pointer-events', '')
+      })
       window.removeEventListener('mousemove', this.dragIt, false);
     }, false);
   }
@@ -163,8 +181,12 @@ class EzResizePanel extends HTMLElement {
     }
     let size = parseInt(s, 10);
     if(s.includes('%')) {
-      const p = parseInt(s, 10) / 100;
-      size = (this.dragRegion.width - this.resizer.offsetWidth) * p;
+      const p = parseInt(s.trim(), 10) / 100;
+      if (this.dimension == 'height') {
+        size = (this.dragRegion.height - this.resizer.offsetHeight) * p;
+      } else {
+        size = (this.dragRegion.width - this.resizer.offsetWidth) * p;
+      }
     }
     this.style.setProperty('--part-a-size', `${size}px`)
   }

@@ -34,4 +34,7 @@ declare module '*module.css'
   const toString: () => string;
   export { locals, toString };
 }
-
+// declare module 'json-tree-view';{
+//   declare class JSONTreeView {}
+//   export default JSONTreeView;
+// }

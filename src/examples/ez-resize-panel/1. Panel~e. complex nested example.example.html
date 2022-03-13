@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title><%= htmlWebpackPlugin.options.title %></title>
+</head>
+<body>
+<style>
+
+  .panel1{
+    width: 500px;
+    height: 300px;
+    display: block;
+    border: 1px solid red;
+  }
+  .panel2{
+    width: 100%;
+    height: 100%;
+    display: block;
+    border: 1px solid blue;
+  }
+  div {
+    height: 100%;
+  }
+  .pa{background: red}
+  .pb{background: green}
+  .pc{background: blue}
+  .pd{background: yellow}
+  .pe{background: brown}
+  .pf{background: fuchsia}
+  .pg{background: rosybrown}
+</style>
+<div id="doc">
+  complex nest example
+</div>
+<div id="example">
+  <ez-resize-panel dimension="width" class="panel1" >
+    <div slot="A">
+      <ez-resize-panel dimension="height" class="pa" >
+        <div slot="A" class="pd">A1</div>
+        <div slot="B" class="pe">A2</div>
+      </ez-resize-panel>
+    </div>
+    <div slot="B">
+      <ez-resize-panel dimension="height" class="pb" >
+        <div slot="A" class="pf">B1</div>
+        <div slot="B">
+          <ez-resize-panel dimension="height" class="pc" >
+            <div slot="A" class="pg">B1.1</div>
+            <div slot="B">B1.2</div>
+          </ez-resize-panel>
+        </div>
+      </ez-resize-panel>
+    </div>
+  </ez-resize-panel>
+
+</div>
+
+
+
+
+<script type="module">
+</script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 Arguments: 
-  D:\repos\node\v16.10.0\node.exe D:\repos\node\v16.10.0\node_modules\yarn\bin\yarn.js add -D @codemirror/legacy-modes/mode/html
+  D:\repos\node\v16.10.0\node.exe D:\repos\node\v16.10.0\node_modules\yarn\bin\yarn.js add -D pace.js
 
 PATH: 
   C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Program Files\dotnet\;C:\Program Files\Git\cmd;C:\Program Files (x86)\NetSarang\Xshell 7\;C:\Program Files\CMake\bin;D:\repos\node\v16.10.0;D:\repos\python\Python27\Scripts;D:\repos\python\Python27;D:\repos\GOPATH\bin;D:\repos\GOROOT\bin;D:\repos\curl\curl-7.79.1-win64-mingw\bin;C:\Program Files\Java\jdk1.8.0_311\bin;C:\Program Files\Java\jdk1.8.0_311\jre\bin;D:\repos\android\Sdk\ndk-bundle;D:\soft\Redis-x64-3.2.100;D:\soft\sqlite-tools-win32-x86-3360000;D:\repos\Anaconda3;D:\repos\Anaconda3\Scripts;D:\repos\Anaconda3\Library\bin;D:\repos\android\Sdk\platform-tools;D:\repos\bazel;C:\TDM-GCC-64\bin;C:\Users\Administrator\.cargo\bin;C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps;;C:\Users\Administrator\AppData\Local\Programs\Microsoft VS Code\bin;C:\Users\Administrator\go\bin
@@ -14,7 +14,7 @@ Platform:
   win32 x64
 
 Trace: 
-  Error: https://registry.npm.taobao.org/@codemirror%2flegacy-modes/mode/html: [NOT_FOUND] @codemirror/legacy-modes@html not found
+  Error: https://registry.npm.taobao.org/pace.js: [NOT_FOUND] pace.js not found
       at Request.params.callback [as _callback] (D:\repos\node\v16.10.0\node_modules\yarn\lib\cli.js:66140:18)
       at Request.self.callback (D:\repos\node\v16.10.0\node_modules\yarn\lib\cli.js:140885:22)
       at Request.emit (node:events:390:28)
@@ -64,7 +64,6 @@ npm manifest:
       "@codemirror/lang-javascript": "^0.19.7",
       "@codemirror/lang-json": "^0.19.2",
       "@codemirror/state": "^0.19.9",
-      "@codemirror/stream-parser": "^0.19.7",
       "@codemirror/text": "^0.19.6",
       "@codemirror/view": "^0.19.47",
       "@testing-library/dom": "^8.11.3",
@@ -105,7 +104,8 @@ npm manifest:
     },
     "dependencies": {
       "iterable-weak-map": "^1.0.0",
-      "iterable-weak-set": "^1.0.4"
+      "iterable-weak-set": "^1.0.4",
+      "json-tree-view": "^0.4.12"
     }
   }
 
@@ -1480,18 +1480,6 @@ Lockfile:
     integrity sha512-psOzDolKTZkx4CgUqhBQ8T8gBc0xN5z4gzed109aF6x7D7umpDRoimacI/O6d9UGuyl4eYuDCZmDFr2Rq7aGOw==
     dependencies:
       "@codemirror/text" "^0.19.0"
-  
-  "@codemirror/stream-parser@^0.19.7":
-    version "0.19.7"
-    resolved "https://registry.npmmirror.com/@codemirror/stream-parser/-/stream-parser-0.19.7.tgz#99a9696307b90677f6e3abe29ea6d77c1c0a8db5"
-    integrity sha512-4ExcbKksmU4PIT8s11/dPESgMNLQqlMlbQzRQ1CyMcmygcuQk+58zQ84nv/X17OCUd2ephZ1DKEaHHACifzCiA==
-    dependencies:
-      "@codemirror/highlight" "^0.19.0"
-      "@codemirror/language" "^0.19.0"
-      "@codemirror/state" "^0.19.0"
-      "@codemirror/text" "^0.19.0"
-      "@lezer/common" "^0.15.0"
-      "@lezer/lr" "^0.15.0"
   
   "@codemirror/text@^0.19.0", "@codemirror/text@^0.19.2", "@codemirror/text@^0.19.4", "@codemirror/text@^0.19.6":
     version "0.19.6"
@@ -5349,6 +5337,11 @@ Lockfile:
     version "1.0.1"
     resolved "https://registry.yarnpkg.com/json-stable-stringify-without-jsonify/-/json-stable-stringify-without-jsonify-1.0.1.tgz#9db7b59496ad3f3cfef30a75142d2d930ad72651"
     integrity sha1-nbe1lJatPzz+8wp1FC0tkwrXJlE=
+  
+  json-tree-view@^0.4.12:
+    version "0.4.12"
+    resolved "https://registry.npmmirror.com/json-tree-view/-/json-tree-view-0.4.12.tgz#634307024bd9b5069bcfd15379030942f95c6a57"
+    integrity sha512-p6si1qYiJQuJdL/KUCuAXmxWllIpZqyCCbcmIBD9k2M01JZVgzyYq9hVcTxeiy1rPgTiyZRVA86U92Ymw63dUQ==
   
   json5@2.x, json5@^2.1.2:
     version "2.2.0"

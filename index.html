@@ -13,6 +13,7 @@
 <div id="app">
   <div class="left">
     <div class="top bb">
+      <button id="prevExam">&xlarr;</button>
       <select name="" id="tutorial">
         <% for (const g in navList) { %>
         <optgroup label="<%=g%>">
@@ -22,8 +23,12 @@
         </optgroup>
         <% } %>
       </select>
+      <button id="nextExam">&xrarr;</button>
     </div>
-    <div class="middle bb"></div>
+    <div class="middle bb">
+<!--      <iframe id="doc" src="home.html" frameborder="0"></iframe>-->
+      <div id="doc"></div>
+    </div>
     <div class="bottom"></div>
   </div>
   <div class="main">

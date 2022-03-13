@@ -1,3 +1,4 @@
+import '../../css/theme.css'
 import style from "./style.module.less";
 
 
@@ -22,9 +23,9 @@ enum ScrollDir{
 }
 
 class EzTabList extends HTMLElement {
-  private closeable = true;
+  private closeable = false;
   private activeIndex = 0;
-  private activeClass = 'ez-tabs-list__active';
+  private activeClass = style.active; // 'ez-tabs-list__active';
   private mode = Mode.row; // horizontal Vertical
   private scrollKey = ScrollDir.left;
   private scrollArea: HTMLElement;
@@ -38,7 +39,7 @@ class EzTabList extends HTMLElement {
   private afterActiveTabHooks: (() => void)[] = [];
 
   constructor() {
-    super();
+    super();console.log('constructor');
     // element created
     const shadow = this.attachShadow({ mode: 'open' });
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -52,9 +53,11 @@ class EzTabList extends HTMLElement {
       </div>
     </div>
     `.replace(/[\s\n]*\n[\s\n]*/g, '');
+
+
   }
 
-  connectedCallback() {
+  connectedCallback() {console.log('connectedCallback')
     // browser calls this method when the element is added to the document
     // (can be called many times if an element is repeatedly added/removed)
 
@@ -80,26 +83,30 @@ class EzTabList extends HTMLElement {
     // this.closeable = false;
     // this.activeIndex = 0
     // this.activeClass = 'ez-tabs-list__active';
-    console.log('style.scrollArea', style.scrollArea)
+    // console.log('style.scrollArea', style.scrollArea)
+
+
+
     this.scrollArea = this.shadowRoot.querySelector(`.${style.scrollArea}`);
     if(this.shadowRoot.host.hasAttribute('mode') &&
-      this.shadowRoot.host.getAttribute('mode').trim().toLocaleLowerCase() === 'col'){
+        this.shadowRoot.host.getAttribute('mode').trim().toLocaleLowerCase() === 'col'){
       this.mode = Mode.col
     }
     if(this.shadowRoot.host.hasAttribute('custom') &&
-      this.shadowRoot.host.getAttribute('custom').trim().toLocaleLowerCase() === 'true'){
+        this.shadowRoot.host.getAttribute('custom').trim().toLocaleLowerCase() === 'true'){
       this.custom = true
     }
 
     if (!this.custom) {
+
+      this.shadowRoot.querySelector(`.${style.scrollContent}`).remove()
       this.scrollContent =document.createElement('div')
       this.scrollContent.className = style.scrollContent;
       this.scrollArea.appendChild(this.scrollContent)
-      this.shadowRoot.querySelector(`.${style.scrollContent}`).remove()
-    } else {
-      // this.scrollContent = this.shadowRoot.querySelector(`.${style.scrollContent}`)
-      this.scrollContent = this.shadowRoot.host as HTMLElement; //this.shadowRoot.querySelector(`.${style.scrollContent}`)
+      // this.shadowRoot.querySelector(`.${style.scrollContent}`).replaceWith(this.scrollContent)
 
+    } else {
+      this.scrollContent = this.shadowRoot.host as HTMLElement; //this.shadowRoot.querySelector(`.${style.scrollContent}`)
     }
 
 
@@ -117,14 +124,25 @@ class EzTabList extends HTMLElement {
       }
     }
     if (this.shadowRoot.host.hasAttribute('closeable')
-    && this.shadowRoot.host.getAttribute('closeable').toLocaleLowerCase() === 'true') {
+        && this.shadowRoot.host.getAttribute('closeable').toLocaleLowerCase() === 'true') {
       this.closeable = true
     }
     if (!this.custom) {
-      Array.from(this.shadowRoot.host.children).forEach(el => {
+      Array.from(this.children).forEach((el, idx) => {
+        console.log(idx)
         this.scrollContent.appendChild(el)
       })
+      console.log(this.children)
+      // debugger
+      // for (const el of this.shadowRoot.host.children) {
+      //   this.scrollContent.appendChild(el)
+      // }
     }
+
+
+
+
+
     this.initInternalEvent();
     // console.log(this.mode, Mode.col, this.scrollContent);
 
@@ -277,12 +295,12 @@ class EzTabList extends HTMLElement {
     let endIncrement = relativeContentStart + this.EXTRA_SCROLL_AMOUNT;
     // let startIncrement = relativeContentEnd;
     // let endIncrement = relativeContentStart;
-    console.log(1, startIncrement,endIncrement , nextIndex < index);
+    // console.log(1, startIncrement,endIncrement , nextIndex < index);
     if (this.mode === Mode.col) {
       startIncrement = startIncrement - this.EXTRA_SCROLL_AMOUNT;
       endIncrement = endIncrement + this.EXTRA_SCROLL_AMOUNT;
     }
-    console.log(2, startIncrement,endIncrement );
+    // console.log(2, startIncrement,endIncrement );
 
 
     if (nextIndex < index) {
@@ -350,7 +368,7 @@ class EzTabList extends HTMLElement {
     const key = `scroll${this.scrollKey}`;
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    console.log('offsetIncrement', this.scrollArea[key], offsetIncrement)
+    // console.log('offsetIncrement', this.scrollArea[key], offsetIncrement)
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     this.scrollArea[key]  += offsetIncrement
@@ -479,7 +497,7 @@ class EzTabList extends HTMLElement {
     return 0;
   }
 
-  disconnectedCallback() {
+  disconnectedCallback() {console.log('disconnectedCallback')
     // browser calls this method when the element is removed from the document
     // (can be called many times if an element is repeatedly added/removed)
   }
@@ -499,4 +517,6 @@ class EzTabList extends HTMLElement {
 
   // there can be other element methods and properties
 }
+if (!customElements.get("ez-tab-list")) {
 customElements.define("ez-tab-list", EzTabList);
+}

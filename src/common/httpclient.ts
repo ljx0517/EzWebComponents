@@ -41,7 +41,13 @@ function cancelableFetch(url: string, requestOptions: RequestInit) {
 }
 function handleResponse(response: Response) {
     return response.text().then((text) => {
-        const data: any = text && JSON.parse(text);
+        const contentType = response.headers.get('content-type');
+        let data = null;
+        if (contentType.includes('text/')) {
+            data = text;
+        } else {
+            data = text && JSON.parse(text);
+        }
 
         if (!response.ok) {
             const error = (data && data.message) || response.statusText;
@@ -51,7 +57,7 @@ function handleResponse(response: Response) {
         return data;
     });
 }
-export default class HttpClient {
+export class HttpClient {
     static get(url: string, params?: {[key: string]: string|number}) {
         const requestOptions = {
             method: 'GET',

@@ -14,20 +14,25 @@
   display: block;
   border: 1px solid red;
 }
-.panel2{
-  width: 300px;
-  height: 500px;
-  display: block;
-  border: 1px solid blue;
+.resizer{
+  height: 100%;
+  background: red;
+  width: 8px;
 }
+
 </style>
-<div id="app">
-  <ez-resize-panel dimension="width" style="--part-a-size: 30%" class="panel1" >
-    <div slot="A">aaa</div>
-    <div slot="B">bbb</div>
-  </ez-resize-panel>
+<div id="doc">
+  horizontal split panel example
+</div>
+<div id="example">
+<ez-resize-panel dimension="width" style="--part-a-size: 30%" class="panel1" >
+  <div slot="A">aaa</div>
+  <div slot="B">bbb</div>
+</ez-resize-panel>
+
 
 </div>
+
 
 
 

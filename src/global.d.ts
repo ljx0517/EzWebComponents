@@ -34,6 +34,12 @@ declare module '*module.css'
   const toString: () => string;
   export { locals, toString };
 }
+// declare module 'pace'{
+//   class Pace {
+//     static options: any;
+//   }
+//   export default Pace;
+// }
 // declare module 'json-tree-view';{
 //   declare class JSONTreeView {}
 //   export default JSONTreeView;

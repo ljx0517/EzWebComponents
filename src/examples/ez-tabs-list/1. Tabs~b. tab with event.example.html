@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title><%= htmlWebpackPlugin.options.title %></title>
+</head>
+<body>
+<style>
+
+    .box{
+        width: 100%;
+        height: 40px;
+        border: 1px solid red;
+    }
+</style>
+<div id="doc">
+    <p>
+    use the addEventListener() method of the tab element sets up a function that will be called whenever the tab change event <code>active-tab</code>.
+    </p>
+</div>
+<div id="example">
+<div class="box">
+    <ez-tab-list id="tab"
+                 class="theme-cyan">
+        <div>aaaaa</div>
+        <div>➤bbbb</div>
+        <div>↻ccc</div>
+    </ez-tab-list>
+</div>
+<script>
+    tab.addEventListener('active-tab', (e) => {
+        console.log(e)
+    })
+</script>
+</div>
+
+
+
+
+<script type="module">
+</script>
+</body>
+</html>

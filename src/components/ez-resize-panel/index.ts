@@ -23,7 +23,7 @@ class EzResizePanel extends HTMLElement {
   private slotA: HTMLSlotElement;
   private slotB: HTMLSlotElement;
   private move_boundary: number[];
-  resizerHandle: any;
+  resizerHandleElement: any;
 
 
 
@@ -36,13 +36,15 @@ class EzResizePanel extends HTMLElement {
     shadow.adoptedStyleSheets = [stylesheet];
     shadow.innerHTML = `<div class="${style.resizePanel}">
       <slot name="A"></slot>
-      <div class="resizer">
-        <div class="${style.resizerHandle}"></div>
-      </div>
+      <slot name="handle" class="resizer">
+  <div class="${style.resizerHandle}"></div>
+      </slot>
+     
       <slot name="B"></slot>
     </div>
     `.replace(/[\s\n]*\n[\s\n]*/g, '');
   }
+
 
   connectedCallback() {
     // browser calls this method when the element is added to the document
@@ -65,27 +67,29 @@ class EzResizePanel extends HTMLElement {
 
     this.slotA = this.shadowRoot.querySelector('[name=A]')
     this.slotB = this.shadowRoot.querySelector('[name=B]')
+
     this.dragRegion = this.container.getBoundingClientRect();
     this.resizer = this.shadowRoot.querySelector('.resizer');
-    this.resizerHandle = this.shadowRoot.querySelector(`.${style.resizerHandle}`);
-
+    this.resizerHandleElement = this.shadowRoot.querySelector(`.${style.resizerHandle}`);
+    this.shadowRoot.querySelector('[name=handle]').addEventListener('slotchange', (e) => {
+      const assignedElements = (e.target as HTMLSlotElement).assignedElements()
+      if (assignedElements[0]) {
+        this.resizerHandleElement.removeEventListener('mousedown', this.resizeHandle, false);
+        this.resizerHandleElement.remove();
+        this.resizerHandleElement = assignedElements[0]
+        this.resizerHandleElement.addEventListener('mousedown', this.resizeHandle, false);
+        this.calcInitSize();
+      }
+    });
 
     if (!this.style) {
       const s = document.createAttribute('style')
       this.setAttributeNode(s)
     }
-    const aPart = this.style.getPropertyValue('--part-a-size')
-    this.calcInitSize(aPart)
-    // if (!aPart) {
-    //   const initSize = this.dragRegion.width - this.resizer.offsetWidth
-    //   this.style.setProperty('--part-a-size', "50%")
-    // }
 
 
-
-    this.resizerHandle.addEventListener('mousedown', this.resizeHandle, false);
-
-
+    this.calcInitSize()
+    this.resizerHandleElement.addEventListener('mousedown', this.resizeHandle, false);
 
     // this.shadowRoot.innerHTML = `
     // <style>
@@ -99,14 +103,7 @@ class EzResizePanel extends HTMLElement {
     // </div>`;
   }
   dragIt = (e: MouseEvent) => {
-    document.querySelectorAll('iframe').forEach(f => {
-      // let s = f.getAttributeNode('style');
-      // if (!s) {
-      //   s = document.createAttribute('style')
-      //   f.setAttributeNode(s);
-      // }
-      f.style.setProperty('pointer-events', 'none')
-    })
+
     e.preventDefault();
     e.stopPropagation();
     let x = this.initX + e.pageX - this.firstX;
@@ -124,7 +121,7 @@ class EzResizePanel extends HTMLElement {
       this.container.setAttribute('style', ``);
       attrStyle = this.style;
     }
-    console.log(val, e.target)
+    // console.log(val, e.target)
     attrStyle.setProperty('--part-a-size', `${val}px`)
   }
   resizeHandle = (e: MouseEvent) => {
@@ -162,20 +159,37 @@ class EzResizePanel extends HTMLElement {
       max = ASize + (BaseSize - baw)
     }
     this.move_boundary = [min, max];
-
+    document.querySelectorAll('iframe').forEach(f => {
+      // let s = f.getAttributeNode('style');
+      // if (!s) {
+      //   s = document.createAttribute('style')
+      //   f.setAttributeNode(s);
+      // }
+      f.style.setProperty('pointer-events', 'none')
+    })
 
     window.addEventListener('mousemove', this.dragIt, false);
 
     window.addEventListener('mouseup', () => {
-      console.log('remove mousemove')
       document.querySelectorAll('iframe').forEach(f => {
         f.style.setProperty('pointer-events', '')
       })
       window.removeEventListener('mousemove', this.dragIt, false);
     }, false);
   }
+  clearSlot(slot: HTMLSlotElement) {
+    slot.addEventListener('slotchange', function(e) {
+      console.log(slot.assignedElements());
+      slot.assignedElements().forEach((el, index) => {
+        if (index > 0) {
 
-  calcInitSize(s: string) {
+          el.remove()
+        }
+      })
+    });
+  }
+  calcInitSize() {
+    let s = this.style.getPropertyValue('--part-a-size')
     if (!s) {
       s = '50%';
     }
@@ -189,17 +203,6 @@ class EzResizePanel extends HTMLElement {
       }
     }
     this.style.setProperty('--part-a-size', `${size}px`)
-  }
-  clearSlot(slot: HTMLSlotElement) {
-    slot.addEventListener('slotchange', function(e) {
-      console.log(slot.assignedElements());
-      slot.assignedElements().forEach((el, index) => {
-        if (index > 0) {
-
-          el.remove()
-        }
-      })
-    });
   }
   getDeepestLevelContainer(slot: HTMLElement, part: 'A'|'B', dimension: DIMENSION) : EzResizePanel{
     // let deepest = slot; //  (slot.querySelector('ez-resize-panel') as EzResizePanel)
@@ -246,4 +249,6 @@ class EzResizePanel extends HTMLElement {
 
   // there can be other element methods and properties
 }
-customElements.define("ez-resize-panel", EzResizePanel);
+if (!customElements.get("ez-resize-panel")) {
+  customElements.define("ez-resize-panel", EzResizePanel);
+}

@@ -24,27 +24,29 @@
         height: 100%;
     }
 </style>
-<div id="app">
-    <ez-resize-panel dimension="width" class="panel1" >
-        <div slot="A">
-            <ez-resize-panel dimension="width" class="" >
-                <div slot="A">A1</div>
-                <div slot="B">A2</div>
-            </ez-resize-panel>
-        </div>
-        <div slot="B">
-            <ez-resize-panel dimension="width" class="" >
-                <div slot="A">B1</div>
-                <div slot="B">
-                    <ez-resize-panel dimension="width" class="" >
-                        <div slot="A">B1.1</div>
-                        <div slot="B">B1.2</div>
-                    </ez-resize-panel>
-                </div>
-            </ez-resize-panel>
-        </div>
-    </ez-resize-panel>
-
+<div id="doc">
+    nestes horizontal split panel
+</div>
+<div id="example">
+<ez-resize-panel dimension="width" class="panel1" >
+    <div slot="A">
+        <ez-resize-panel dimension="width" class="" >
+            <div slot="A">A1</div>
+            <div slot="B">A2</div>
+        </ez-resize-panel>
+    </div>
+    <div slot="B">
+        <ez-resize-panel dimension="width" class="" >
+            <div slot="A">B1</div>
+            <div slot="B">
+                <ez-resize-panel dimension="width" class="" >
+                    <div slot="A">B1.1</div>
+                    <div slot="B">B1.2</div>
+                </ez-resize-panel>
+            </div>
+        </ez-resize-panel>
+    </div>
+</ez-resize-panel>
 </div>
 
 

@@ -26,7 +26,12 @@ componentsDirs.forEach(folder => {
 });
 
 const comps = fs.readdirSync(path.resolve(__dirname, '../src/examples'));
-const navList = {}
+const navList = {'0. Home':[
+    {
+      label: '0. intro',
+      link:  'home.html'
+    }
+  ]}
 export const examples = comps.reduce((prev, folder) => {
   const exam = path.resolve(__dirname, '../src/examples', folder);
   const files = fs.readdirSync(exam);
@@ -53,6 +58,8 @@ export const examples = comps.reduce((prev, folder) => {
   })
   return prev.concat(examplePage)
 }, [])
+
+
 
 const common = {
   watch: true,
@@ -183,6 +190,13 @@ const common = {
       templateParameters: {
         navList
       }
+    }),
+    new HtmlWebpackPlugin({
+      template: './home.html',
+      filename: 'home.html',
+      title: 'home',
+      scriptLoading: 'module',
+      chunks: []
     }),
 
   ]

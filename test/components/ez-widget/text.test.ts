@@ -13,8 +13,8 @@ const await = async (tm) => {
 }
 function prepare(html, obj, callback) {
   const create = async (e) => {
-    e.target.setState(obj);
-    await e.target.updateComplete
+    e.currentTarget.setState(obj);
+    await e.currentTarget.updateComplete
     setTimeout(() => {
       callback(e)
     }, 100)

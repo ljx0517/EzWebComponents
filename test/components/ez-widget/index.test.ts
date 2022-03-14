@@ -13,7 +13,7 @@ describe("test text node expressions", () => {
         src: 'ssrrcc',
         bbbb: '<b>boldHtml</b>'
       }
-      e.target.setState(window.obj);
+      e.currentTarget.setState(window.obj);
       setTimeout(() => {
         expect(p1.innerHTML.trim()).toBe(obj.aaaa);
         expect(p2.innerHTML.trim()).toBe(obj.src);
@@ -40,7 +40,7 @@ describe("test text node expressions", () => {
           this.numbers = [...this.numbers, this.numbers.length + 1];
         }
       }
-      e.target.setState(window.obj);
+      e.currentTarget.setState(window.obj);
 
       setTimeout(() => {
         expect(sum.innerHTML.trim()).toEqual('1 + 2 = 3')
@@ -74,7 +74,7 @@ describe("test text node expressions", () => {
           return this.count * 2
         }
       }
-      e.target.setState(window.obj);
+      e.currentTarget.setState(window.obj);
       setTimeout(() => {
         userEvent.click(incrementCount)
       }, 100);

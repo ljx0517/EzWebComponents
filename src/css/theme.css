@@ -1,6 +1,7 @@
 /*https://materialui.co/colors*/
 .theme-cyan{
   --text-color: #00BCD4;
+  --second-text-color: #B2EBF2;
   --label-padding: 0 1.5rem 0 1rem;
   --label-font-size: 1rem;
   --hover-color: #E0F7FA

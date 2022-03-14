@@ -1,3 +1,4 @@
+import "../../css/theme.css";
 import style from "./style.module.less";
 
 
@@ -90,8 +91,7 @@ class EzTabList extends HTMLElement {
         this.shadowRoot.host.getAttribute('mode').trim().toLocaleLowerCase() === 'col'){
       this.mode = Mode.col
     }
-    if(this.shadowRoot.host.hasAttribute('custom') &&
-        this.shadowRoot.host.getAttribute('custom').trim().toLocaleLowerCase() === 'true'){
+    if(this.shadowRoot.host.hasAttribute('custom')){
       this.custom = true
     }
     if(this.custom && this.shadowRoot.host.hasAttribute('active-class')){
@@ -132,8 +132,8 @@ class EzTabList extends HTMLElement {
 
 
   private initInternalEvent = (e: Event) => {
-    if (!(e.target as HTMLSlotElement).parentElement) {
-      (e.target as HTMLSlotElement).removeEventListener('slotchange', this.initInternalEvent);
+    if (!(e.currentTarget as HTMLSlotElement).parentElement) {
+      (e.currentTarget as HTMLSlotElement).removeEventListener('slotchange', this.initInternalEvent);
       return
     }
     if (!this.custom) {
@@ -150,9 +150,9 @@ class EzTabList extends HTMLElement {
 
     for (let i = 0; i < this.scrollContent.children.length; i++) {
       const tab = this.scrollContent.children[i] as HTMLElement;
-      if (this.activeIndex == i) {
-        tab.classList.add(this.activeClass)
-      }
+      // if (this.activeIndex == i) {
+      //   tab.classList.add(this.activeClass)
+      // }
 
       if (this.closeable) {
         const close = document.createElement('span')
@@ -167,7 +167,7 @@ class EzTabList extends HTMLElement {
         close.addEventListener("click", (e) => {
           e.stopPropagation();
           e.preventDefault();
-          const b4event = new CustomEvent('before-close-tab', { detail: {item: e.target, index: i} });
+          const b4event = new CustomEvent('before-close-tab', { detail: {item: e.currentTarget, index: i} });
           this.dispatchEvent(b4event);
           const result = this.beforeCloseHooks.map((fn: () => boolean) => {
             return fn();
@@ -175,8 +175,8 @@ class EzTabList extends HTMLElement {
           if (!result) {
             return;
           }
-          (e.target as HTMLElement).parentElement.remove();
-          const event = new CustomEvent('close-tab', { detail: {item: e.target, index: 1} });
+          (e.currentTarget as HTMLElement).parentElement.remove();
+          const event = new CustomEvent('close-tab', { detail: {item: e.currentTarget, index: 1} });
           this.dispatchEvent(event);
           this.afterCloseHooks.map(fn => {
             return fn();
@@ -185,30 +185,51 @@ class EzTabList extends HTMLElement {
       }
 
       tab.addEventListener("click", (e) => {
-        (e.target as HTMLElement).classList.add(this.activeClass);
-        for (let j = 0; j < this.scrollContent.children.length; j++) {
-          const el = this.scrollContent.children[j] as HTMLElement;
-          if (e.target === el) {
-            continue
-          }
-          el.classList.remove(this.activeClass)
-        }
-        const idx = Array.from(this.scrollContent.children).indexOf(e.target as HTMLElement)
+        // (e.currentTarget as HTMLElement).classList.add(this.activeClass);
+        // for (let j = 0; j < this.scrollContent.children.length; j++) {
+        //   const el = this.scrollContent.children[j] as HTMLElement;
+        //   if (e.currentTarget === el) {
+        //     continue
+        //   }
+        //   el.classList.remove(this.activeClass)
+        // }
+        const idx = Array.from(this.scrollContent.children).indexOf(e.currentTarget as HTMLElement)
         const result = this.beforeActiveTabHooks.map((fn: () => boolean) => {
           return fn();
         }).every(r => r)
         if (!result) {
           return
         }
-        const event = new CustomEvent('active-tab', { detail:{item: e.target, index: idx} });
-        this.dispatchEvent(event)
+        // const event = new CustomEvent('active-tab', { detail:{item: e.currentTarget, index: idx} });
+        // this.dispatchEvent(event)
+        this.setActiveTab(idx)
         this.afterActiveTabHooks.map((fn: () => void) => {
           fn();
         })
       })
+
     }
+    this.setActiveTab(this.activeIndex)
   }
+
   // https://material.io/develop/web/supporting/tab-bar
+  /**
+   * Sets the tab at the given index to be activated.
+   * @param index
+   */
+  setActiveTab(index: number) :void {
+    const previousActiveIndex = this.getPreviousActiveTabIndex();
+    if (!this.indexIsInRange_(index) || index === previousActiveIndex) {
+      return;
+    }
+    if (previousActiveIndex !== -1) {
+      this.deactivateTabAtIndex(previousActiveIndex);
+    }
+    this.activateTabAtIndex(index);
+    this.scrollTabIntoView(index);
+    this.notifyTabActivated(index);
+  }
+
   /**
    * Activates the tab at the given index.
    * @param index
@@ -226,6 +247,7 @@ class EzTabList extends HTMLElement {
       }
       el.classList.remove(this.activeClass)
     }
+
   }
 
   /**
@@ -397,28 +419,22 @@ class EzTabList extends HTMLElement {
     return (this.scrollContent.children[index] as HTMLElement).offsetWidth
   }
 
-  /**
-   * Sets the tab at the given index to be activated.
-   * @param index
-   */
-  setActiveTab(index: number) :void {
-    const previousActiveIndex = this.getPreviousActiveTabIndex();
-    if (!this.indexIsInRange_(index) || index === previousActiveIndex) {
-      return;
+  getTabElementAtIndex(index: number) : HTMLElement{
+    let parent = this.scrollContent;
+    if (this.custom) {
+      parent = this;
     }
-    if (previousActiveIndex !== -1) {
-      this.deactivateTabAtIndex(previousActiveIndex);
-    }
-    this.activateTabAtIndex(index);
-    this.scrollTabIntoView(index);
-    this.notifyTabActivated(index);
+    return parent.children[index] as HTMLElement
   }
+
 
   /**
    * TODO shoule I send custom event in here ??
    */
   notifyTabActivated(index: number) {
-    //
+    const item = this.getTabElementAtIndex(index);
+    const event = new CustomEvent('active-tab', { detail:{item, index} });
+    this.dispatchEvent(event)
   }
   /**
    * Returns the client rect of the Tab at the given index.
@@ -434,7 +450,7 @@ class EzTabList extends HTMLElement {
   getTabListLength(): number{
     return this.scrollContent.children.length;
   }
-  activateTabAtIndex(index: number) {
+  private activateTabAtIndex(index: number) {
     const tab = this.getTabElementAtIndex(index);
     tab.classList.add(this.activeClass);
     tab.setAttribute("aria-selected", 'true');
@@ -461,9 +477,7 @@ class EzTabList extends HTMLElement {
   // private indexIsInRange(index: number) {
   //   return index >= 0 && index < this.getTabListLength();
   // }
-  getTabElementAtIndex(index: number): HTMLElement {
-    return this.scrollContent.children[index] as HTMLElement
-  }
+
   /**
    * Returns the index of the previously active Tab.
    */

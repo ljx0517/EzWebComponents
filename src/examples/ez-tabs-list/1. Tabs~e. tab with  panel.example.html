@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title><%= htmlWebpackPlugin.options.title %></title>
+</head>
+<body>
+<style>
+    .tabs-with-panel{
+        width: 500px;
+        height: 300px;
+        display: flex;
+        flex-direction: column;
+        border: 1px solid cyan;
+    }
+#tabs{
+    height: 50px;
+}
+#panels{
+    position: relative;
+}
+#panels > div {
+    position: absolute;
+    width: 100%;
+    height: auto;
+    display: none;
+}
+
+</style>
+<div id="doc">
+    tabs example with panel
+</div>
+<div id="example">
+    <div class="tabs-with-panel">
+        <ez-tab-list id="tabs" class="theme-cyan">
+            <div>one</div>
+            <div>two</div>
+            <div>three</div>
+        </ez-tab-list>
+        <div id="panels">
+            <div id="one">panel one</div>
+            <div id="two">panel two</div>
+            <div id="three">panel three</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    tabs.addEventListener('active-tab', (e) => {
+        console.log(e.detail.index)
+        Array.from(panels.children).forEach((el, index) => {
+            if (index === e.detail.index) {
+                el.style.display = 'block';
+                return
+            }
+            el.style.display = 'none';
+        })
+    })
+</script>
+
+
+<script type="module">
+</script>
+</body>
+</html>

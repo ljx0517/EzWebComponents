@@ -170,9 +170,17 @@ ready(() => {
   const docView = document.querySelector('#doc') ; //as HTMLIFrameElement;
   tutorial.addEventListener('change', (e) => {
     pace.restart()
-    const url = (e.target as  HTMLSelectElement).value;
+    const url = (e.currentTarget as  HTMLSelectElement).value;
     console.log(url)
     HttpClient.get(url).then((r: string) => {
+      r = r.replace(
+          /\t/gm,
+          function(match) { return '    '; }
+      )
+      r = r.replace(
+          /^ {4}/gm,
+          function(match) { return ''; }
+      )
       const doc = new DOMParser().parseFromString(r, 'text/html');
       const docPart = doc.querySelector('#doc')
       if (docPart) {
@@ -204,16 +212,16 @@ ready(() => {
   previewConsole.log = function(...rest: any) {
     // window.parent is the parent frame that made this window
     // Message could not be cloned. Open devtools to see it
-    // const args = rest.map((e: any) => {
-    //   // if (e.constructor.name == 'CustomEvent') {
-    //   //   const {detail} = e
-    //   //   return {detail}
-    //   // }
-    //   return e
-    // })
+    const args = rest.map((e: any) => {
+      if (e.constructor.name == 'CustomEvent') {
+        const {detail} = e
+        return {detail}
+      }
+      return e
+    })
     const line = document.createElement('div');
     line.className = 'console-line'
-    rest.forEach((item: any) => {
+    args.forEach((item: any) => {
       const info = new JSONTreeView(item);
       line.appendChild(info.dom)
     })

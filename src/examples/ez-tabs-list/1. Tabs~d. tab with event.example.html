@@ -9,9 +9,7 @@
 <style>
 
     .box{
-        width: 100%;
         height: 40px;
-        border: 1px solid red;
     }
 </style>
 <div id="doc">
@@ -21,7 +19,7 @@
 </div>
 <div id="example">
 <div class="box">
-    <ez-tab-list id="tab"
+    <ez-tab-list id="tabs"
                  class="theme-cyan">
         <div>aaaaa</div>
         <div>➤bbbb</div>
@@ -29,7 +27,7 @@
     </ez-tab-list>
 </div>
 <script>
-    tab.addEventListener('active-tab', (e) => {
+    tabs.addEventListener('active-tab', (e) => {
         console.log(e)
     })
 </script>

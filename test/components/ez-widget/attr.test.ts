@@ -6,8 +6,8 @@ import userEvent from '@testing-library/user-event';
 
 function prepare(html, obj, callback) {
   const create = async (e) => {
-    e.target.setState(obj);
-    await e.target.updateComplete
+    e.currentTarget.setState(obj);
+    await e.currentTarget.updateComplete
     setTimeout(() => {
       callback(e)
     }, 200)

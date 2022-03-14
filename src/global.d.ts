@@ -1,3 +1,4 @@
+
 interface IStringable<T> {
   toString: () => string
 }
@@ -16,31 +17,35 @@ declare module '*module.less'{
   export = classNames;
   // export default IStyle;
 }
-// declare module '*.module.less'{
-//   interface IClassNames {
-//     [className: string]: string;
-//   }
-//   const classNames: IClassNames;
-//   export = classNames;
-//   // export = Css;
-// }
+
+
 
 
 declare module '*module.css'
 {
-  // const classes: { [className: string]: string };
-  // const locals: { [className: string]: string };
   const locals: ILocals;
   const toString: () => string;
   export { locals, toString };
 }
-// declare module 'pace'{
-//   class Pace {
-//     static options: any;
-//   }
-//   export default Pace;
-// }
+declare module 'pace-js'{
+  // export default class pace {
+  //   static start: CallableFunction;
+  //   static restart: CallableFunction;
+  // }
+
+    const start: ()=> void;
+    const restart: ()=> void;
+    export {
+      start,  restart
+    }
+}
 // declare module 'json-tree-view';{
 //   declare class JSONTreeView {}
 //   export default JSONTreeView;
 // }
+
+
+type G = (Window  & typeof globalThis)
+declare type WindowType =   (Window  & typeof globalThis) & {
+  paceOptions: any;
+}

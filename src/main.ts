@@ -1,6 +1,8 @@
 import './css/theme.css'
 import './css/app.css';
 import './css/icons.css';
+import './devtools.css';
+import './pace-minimal.css';
 
 import {HttpClient} from './common/httpclient'
 import {highlightActiveLine, EditorView, keymap, Decoration, DecorationSet} from "@codemirror/view";
@@ -18,12 +20,12 @@ import { bracketMatching } from "@codemirror/matchbrackets";
 import { highlightSelectionMatches, searchKeymap } from "@codemirror/search";
 import { autocompletion, completionKeymap } from "@codemirror/autocomplete";
 import {JSONTreeView} from './debug-tree-view';
-// @ts-ignore
-import * as Pace from 'pace-js';
-import './devtools.css';
-import './pace-minimal.css'
-// @ts-ignore
-window.paceOptions  = {
+
+import pace from 'pace-js';
+
+
+
+(window as WindowType).paceOptions  = {
   restartOnRequestAfter: true,
   // ajax: false, // disabled
   // document: false, // disabled
@@ -168,10 +170,10 @@ ready(() => {
 
   const docView = document.querySelector('#doc') ; //as HTMLIFrameElement;
   tutorial.addEventListener('change', (e) => {
-    Pace.restart()
+    pace.restart()
     const url = (e.target as  HTMLSelectElement).value;
     console.log(url)
-    HttpClient.get(url).then(r => {
+    HttpClient.get(url).then((r: string) => {
       const doc = setUpPreviewEnv(r);
       const docPart = doc.querySelector('#doc')
       if (docPart) {
@@ -202,46 +204,53 @@ ready(() => {
   previewConsole.log = function(...rest: any) {
     // window.parent is the parent frame that made this window
     // Message could not be cloned. Open devtools to see it
-    const args = rest.map((e: any) => {
-      // if (e.constructor.name == 'CustomEvent') {
-      //   const {detail} = e
-      //   return {detail}
-      // }
-      return e
+    // const args = rest.map((e: any) => {
+    //   // if (e.constructor.name == 'CustomEvent') {
+    //   //   const {detail} = e
+    //   //   return {detail}
+    //   // }
+    //   return e
+    // })
+    const line = document.createElement('div');
+    line.className = 'console-line'
+    rest.forEach((item: any) => {
+      const info = new JSONTreeView(item);
+      line.appendChild(info.dom)
     })
-    try{
-      window.parent.postMessage(
-          {
-            source: 'previewIframe',
-            message: args,
-          },
-          '*'
-      );
-    } catch (e) {
-      window.parent.postMessage(
-          {
-            source: 'previewIframe',
-            message: [`[${e.name}] Message display error, Open devtools to see it`],
-          },
-          '*'
-      );
-    }
+    debugOut.appendChild(line)
+    // try{
+    //   window.parent.postMessage(
+    //       {
+    //         source: 'previewIframe',
+    //         message: args,
+    //       },
+    //       '*'
+    //   );
+    // } catch (e) {
+    //   window.parent.postMessage(
+    //       {
+    //         source: 'previewIframe',
+    //         message: [`[${e.name}] Message display error, Open devtools to see it`],
+    //       },
+    //       '*'
+    //   );
+    // }
 
     // Finally applying the console statements to saved instance earlier
     // eslint-disable-next-line prefer-rest-params
     _log.apply(console, arguments);
   };
-  window.addEventListener('message', function(response) {
-    if (response.data && response.data.source === 'previewIframe') {
-      const line = document.createElement('div');
-      line.className = 'console-line'
-      response.data.message.forEach((item: any) => {
-        const info = new JSONTreeView(item);
-        line.appendChild(info.dom)
-      })
-      debugOut.appendChild(line)
-    }
-  });
+  // window.addEventListener('message', function(response) {
+  //   if (response.data && response.data.source === 'previewIframe') {
+  //     const line = document.createElement('div');
+  //     line.className = 'console-line'
+  //     response.data.message.forEach((item: any) => {
+  //       const info = new JSONTreeView(item);
+  //       line.appendChild(info.dom)
+  //     })
+  //     debugOut.appendChild(line)
+  //   }
+  // });
   preview =  previewFrame.contentDocument ||  previewFrame.contentWindow.document;
   editorView = new EditorView({
     parent: document.querySelector('#editor'),
@@ -272,5 +281,5 @@ ready(() => {
   // });
   // editorView.setState(newState)
 
-  Pace.start()
+  pace.start()
 })

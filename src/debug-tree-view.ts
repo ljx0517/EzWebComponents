@@ -339,7 +339,12 @@ export class JSONTreeView extends EventTarget{
         break;
       case 'object':
         len = Object.keys(newValue).length;
-        str = this._showCount ? 'Object[' + len + ']' : (len < 1 ? '{}' : '');
+        // str = this._showCount ? `Object[${len}]` : (len < 1 ? '{}' : '');
+        let displayName = `${newValue.constructor.name}`
+        if (typeof newValue.length !== 'undefined' || newValue.constructor.name == 'Object') {
+          displayName = `${newValue.constructor.name}[${len}]`
+        }
+        str = this._showCount ? `${displayName}` : (len < 1 ? '{}' : '');
         break;
 
       case 'array':

@@ -218,6 +218,7 @@ ready(() => {
       line.appendChild(info.dom)
     })
     debugOut.appendChild(line)
+    document.body.children
     // try{
     //   window.parent.postMessage(
     //       {

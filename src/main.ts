@@ -41,9 +41,9 @@ const updateCallback = EditorView.updateListener.of((update) => update.docChange
 let delay: NodeJS.Timeout = null
 let preview: Document = null;
 let editorView: EditorView = null;
-let headScripts = '';
+// let headScripts = '';
 let headStyles = '';
-let headLinks = '';
+// let headLinks = '';
 function processScript(doc: Document) {
   const scripts: string[] = [];
   doc.querySelectorAll('script').forEach((el: HTMLScriptElement) => {
@@ -52,44 +52,43 @@ function processScript(doc: Document) {
       return
     }
     src = src.replace('../../', '')
-    scripts.push(`<script defer src="${src}"></script>`)
+    scripts.push(`<script defer src="${src}" onload="this.remove()"></script>`)
   })
-  headScripts = scripts.join('');
+  return scripts.join('');
 }
 function processStyle(doc: Document) {
   const styles: string[] = [];
   doc.querySelectorAll('style').forEach((el: HTMLStyleElement) => {
     styles.push(`<style>${el.textContent}</style>`)
   })
-  headStyles = styles.join('').replace(/^\s*$\n/gm, '')
+  return styles.join('').replace(/^\s*$\n/gm, '')
 }
-function processLink(doc: Document) {
-  const links: string[] = [];
-  doc.querySelectorAll('link').forEach((el: HTMLLinkElement) => {
-    let href = el.getAttribute('href');
-    if (!href) {
-      return
-    }
-    if (href.startsWith('../../')) {
-      href = href.replace('../../', '')
-    }
-    links.push(`<link rel="stylesheet" href="${href}">`)
-  })
-  headLinks = links.join('');
+// function processLink(doc: Document) {
+//   const links: string[] = [];
+//   doc.querySelectorAll('link').forEach((el: HTMLLinkElement) => {
+//     let href = el.getAttribute('href');
+//     if (!href) {
+//       return
+//     }
+//     if (href.startsWith('../../')) {
+//       href = href.replace('../../', '')
+//     }
+//     links.push(`<link rel="stylesheet" href="${href}">`)
+//   })
+//   headLinks = links.join('');
+//
+// }
 
-}
-function setUpPreviewEnv(s: string): Document {
-  const doc = new DOMParser().parseFromString(s, 'text/html');
-  processScript(doc)
-  processStyle(doc)
-  processLink(doc)
-  return doc
+function setUpPreviewEnv() {
+  headStyles = processStyle(document);
+  return  processScript(document);
+
 }
 const onChange = (src: string) => {
   clearTimeout(delay);
   delay = setTimeout(() => {
-    updateIframe(preview, `<head>${headLinks}${headScripts}</head><body>${src}</body>`)
-    // preview.body.innerHTML = src;
+    // updateIframe(preview, `<head>${headLinks}${headScripts}</head><body>${src}</body>`)
+    updateIframe(preview, `<head>${headStyles}</head><body>${src}</body>`)
   }, 300);
 }
 const updateIframe = (frame: Document, src: string) => {
@@ -174,18 +173,19 @@ ready(() => {
     const url = (e.target as  HTMLSelectElement).value;
     console.log(url)
     HttpClient.get(url).then((r: string) => {
-      const doc = setUpPreviewEnv(r);
+      const doc = new DOMParser().parseFromString(r, 'text/html');
       const docPart = doc.querySelector('#doc')
       if (docPart) {
         // updateIframe(docView.contentDocument, docPart.innerHTML);
         docView.innerHTML = docPart.innerHTML
       }
+      const styles = processStyle(doc);
       const example = doc.querySelector('#example')
       editorView.dispatch({
         changes: {
           from: 0,
           to: editorView.state.doc.length,
-          insert: example ? `${example.innerHTML} \n\n\n ${headStyles.trim()}` : ''
+          insert: example ? `${example.innerHTML} \n\n\n ${styles.trim()}` : ''
         }
       })
     })
@@ -253,6 +253,8 @@ ready(() => {
   //   }
   // });
   preview =  previewFrame.contentDocument ||  previewFrame.contentWindow.document;
+  const envScripts = setUpPreviewEnv();
+  updateIframe(preview, envScripts)
   editorView = new EditorView({
     parent: document.querySelector('#editor'),
     state: EditorState.create({

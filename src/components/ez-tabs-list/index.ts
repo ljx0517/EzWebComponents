@@ -26,6 +26,7 @@ class EzTabList extends HTMLElement {
   private closeable = false;
   private activeIndex = 0;
   private activeClass = style.active; // 'ez-tabs-list__active';
+  private fixed = false;
   private mode = Mode.row; // horizontal Vertical
   private scrollKey = ScrollDir.left;
   private scrollArea: HTMLElement;
@@ -110,6 +111,9 @@ class EzTabList extends HTMLElement {
         this.activeIndex = parseInt(ai)
       }
     }
+    if(this.shadowRoot.host.hasAttribute('fixed')){
+      this.fixed = true;
+    }
     if (this.mode === Mode.col) {
       const container = this.shadowRoot.querySelector(`.${style.scrollContent}`) as HTMLElement
       container.classList.add(style.col);
@@ -146,6 +150,9 @@ class EzTabList extends HTMLElement {
       })
     } else {
       this.scrollContent = this.shadowRoot.host as HTMLElement; //this.shadowRoot.querySelector(`.${style.scrollContent}`)
+    }
+    if (this.fixed) {
+      this.scrollContent.classList.add(style.fixed)
     }
 
     for (let i = 0; i < this.scrollContent.children.length; i++) {

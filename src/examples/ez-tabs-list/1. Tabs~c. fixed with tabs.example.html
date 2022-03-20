@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title><%= htmlWebpackPlugin.options.title %></title>
+</head>
+<body>
+<style>
+
+    .box{
+        height: 40px;
+    }
+</style>
+<div id="doc">
+    <p>use tabs only create <code>ez-tab-list</code> tag,  and add your custom tag as tab content.</p>
+    <p>
+        the <code>class="theme-cyan"</code> is default style, you can simple custom you own css to override default style.
+    </p>
+</div>
+<div id="example">
+    <div class="box">
+        <ez-tab-list id="tabs" fixed
+                     class="theme-cyan">
+            <div>aaaaa</div>
+            <div>➤bbbb</div>
+            <div>↻ccc</div>
+        </ez-tab-list>
+    </div>
+</div>
+
+
+
+
+<script type="module">
+</script>
+</body>
+</html>

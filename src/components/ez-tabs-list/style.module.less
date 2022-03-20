@@ -101,8 +101,9 @@
 .scroll-content > *:hover{
   background: var(--hover-color, #eee);
 }
-
-
+.scroll-content.fixed > div {
+  flex: 1 auto;
+}
 .scroll-content > div::after {
   opacity: 0;
   transition: 0.25s ease;

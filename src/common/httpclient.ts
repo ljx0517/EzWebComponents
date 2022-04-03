@@ -1,4 +1,4 @@
-class AbortableFetch {
+export class AbortableFetch {
 
     private ctrl: AbortController
     private _native: Promise<Response>
@@ -58,7 +58,7 @@ function handleResponse(response: Response) {
     });
 }
 export class HttpClient {
-    static get(url: string, params?: {[key: string]: string|number}) {
+    static get(url: string, params?: {[key: string]: string|number}) : AbortableFetch{
         const requestOptions = {
             method: 'GET',
         };

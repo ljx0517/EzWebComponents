@@ -4,7 +4,8 @@ import './css/icons.css';
 import './devtools.css';
 import './pace-minimal.css';
 
-import {HttpClient} from './common/httpclient'
+import {AbortableFetch, HttpClient} from './common/httpclient';
+import * as MarkdownIt from 'markdown-it';
 import {highlightActiveLine, EditorView, keymap, Decoration, DecorationSet} from "@codemirror/view";
 import {basicSetup} from "@codemirror/basic-setup"
 import { closeBrackets } from '@codemirror/closebrackets'
@@ -38,6 +39,7 @@ import pace from 'pace-js';
 
 const updateCallback = EditorView.updateListener.of((update) => update.docChanged && onChange(update.state.doc.toString()))
 
+const reqMap: {[key: string]: AbortableFetch } = {};
 let delay: NodeJS.Timeout = null
 let preview: Document = null;
 let editorView: EditorView = null;
@@ -172,7 +174,10 @@ ready(() => {
     pace.restart()
     const url = (e.currentTarget as  HTMLSelectElement).value;
     console.log(url)
-    HttpClient.get(url).then((r: string) => {
+    if (reqMap[url]) {
+      reqMap[url].abort()
+    }
+    reqMap[url] = HttpClient.get(url).then((r: string) => {
       r = r.replace(
           /\t/gm,
           function(match) { return '    '; }
@@ -196,6 +201,9 @@ ready(() => {
           insert: example ? `${example.innerHTML} \n\n\n ${styles.trim()}` : ''
         }
       })
+    })
+    reqMap[url].finally(() => {
+      delete reqMap[url];
     })
   })
 

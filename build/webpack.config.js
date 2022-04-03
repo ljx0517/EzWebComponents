@@ -36,7 +36,7 @@ export const examples = comps.reduce((prev, folder) => {
   const exam = path.resolve(__dirname, '../src/examples', folder);
   const files = fs.readdirSync(exam);
   const pages = files.filter(f => {
-    return f.endsWith(`example.html`)
+    return f.endsWith(`.html`)
   })
   const examplePage = pages.map(p => {
 
@@ -45,7 +45,7 @@ export const examples = comps.reduce((prev, folder) => {
       navList[group] = []
     }
     navList[group].push({
-      label: sub.replace('.example.html', ''),
+      label: sub.replace('.html', ''),
       link:  path.join('examples', folder, p)
     })
     return new HtmlWebpackPlugin({

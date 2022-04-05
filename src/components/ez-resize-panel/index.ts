@@ -68,7 +68,7 @@ class EzResizePanel extends HTMLElement {
     this.slotA = this.shadowRoot.querySelector('[name=A]')
     this.slotB = this.shadowRoot.querySelector('[name=B]')
 
-    this.dragRegion = this.container.getBoundingClientRect();
+
     this.resizer = this.shadowRoot.querySelector('.resizer');
     this.resizerHandleElement = this.shadowRoot.querySelector(`.${style.resizerHandle}`);
     this.shadowRoot.querySelector('[name=handle]').addEventListener('slotchange', (e) => {
@@ -81,6 +81,12 @@ class EzResizePanel extends HTMLElement {
         this.calcInitSize();
       }
     });
+    this.shadowRoot.querySelector('[name=A]').addEventListener('slotchange', (e) => {
+      this.dragRegion = this.container.getBoundingClientRect();
+      this.calcInitSize();
+    });
+    // this.shadowRoot.querySelector('[name=B]').addEventListener('slotchange', (e) => {
+    // });
 
     if (!this.style) {
       const s = document.createAttribute('style')
@@ -88,7 +94,7 @@ class EzResizePanel extends HTMLElement {
     }
 
 
-    this.calcInitSize()
+
     this.resizerHandleElement.addEventListener('mousedown', this.resizeHandle, false);
 
     // this.shadowRoot.innerHTML = `
@@ -189,6 +195,7 @@ class EzResizePanel extends HTMLElement {
     });
   }
   calcInitSize() {
+    console.log('calcInitSize', this.dragRegion)
     let s = this.style.getPropertyValue('--part-a-size')
     if (!s) {
       s = '50%';

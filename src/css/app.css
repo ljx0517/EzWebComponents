@@ -156,6 +156,8 @@ grid-row: 2;
   padding: 0 12px;
   position: relative;
   flex: 0 auto;
+  border-bottom: 1px solid #dadce0;
+  padding-bottom: 4px;
 }
 .console-panel .panel-header>button{
   color: #999;
@@ -169,9 +171,10 @@ grid-row: 2;
   top: 8px;
   cursor: pointer;
 }
-.console-panel .panel-header>h3{
+.console-panel .panel-header>h4{
   display: inline-block;
   margin: 0;
+  vertical-align: middle;
 }
 .console-panel .panel-body{
   flex: 1 auto;

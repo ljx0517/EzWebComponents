@@ -5,7 +5,7 @@ import './devtools.css';
 import './pace-minimal.css';
 
 import {AbortableFetch, HttpClient} from './common/httpclient';
-import * as MarkdownIt from 'markdown-it';
+
 import {highlightActiveLine, EditorView, keymap, Decoration, DecorationSet} from "@codemirror/view";
 import {basicSetup} from "@codemirror/basic-setup"
 import { closeBrackets } from '@codemirror/closebrackets'

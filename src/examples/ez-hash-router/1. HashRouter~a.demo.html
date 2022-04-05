@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title><%= htmlWebpackPlugin.options.title %></title>
+</head>
+<body>
+<style>
+
+
+
+</style>
+<div id="doc">
+    <%= htmlWebpackPlugin.options.docContent %>
+</div>
+<div id="example">
+    <ez-hash-router id="router">
+        asdf
+        sdf
+        <p>sssss</p>
+        <p>222</p>
+    </ez-hash-router>
+    <ez-router-link to="/aaa?a=1&a=2&c=false">aaaa</ez-router-link>
+    <a href="#/">index</a>
+    <a href="#/home?a=1&a=2">home</a>
+    <a href="#/about">about</a>
+    <script>
+        router.addEventListener('created', () => {
+            router.when('/home', (e) => {
+                console.log(e.params)
+                return 'home'
+            })
+            router.when('/about', (e) => {
+                console.log(e)
+                return 'about'
+            })
+        })
+    </script>
+</div>
+
+
+
+
+
+<script type="module">
+</script>
+</body>
+</html>

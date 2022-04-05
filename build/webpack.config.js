@@ -15,6 +15,8 @@ import fs from 'fs';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 // import ConsoleLogOnBuildWebpackPlugin from './style_file_loader.js';
 const resolve = dir => path.join(__dirname, '..', dir)
+import MarkdownIt from 'markdown-it';
+const md = new MarkdownIt();
 
 const componentsDirs = fs.readdirSync(path.resolve(__dirname, '../src/components'));
 const entry = {
@@ -38,6 +40,9 @@ export const examples = comps.reduce((prev, folder) => {
   const pages = files.filter(f => {
     return f.endsWith(`.html`)
   })
+  const docs = files.filter(f => {
+    return f.endsWith(`.md`)
+  })
   const examplePage = pages.map(p => {
 
     const [group, sub] = p.split('~')
@@ -47,12 +52,20 @@ export const examples = comps.reduce((prev, folder) => {
     navList[group].push({
       label: sub.replace('.html', ''),
       link:  path.join('examples', folder, p)
-    })
+    });
+    const docFile =p.replace('.html', '.md')
+    let docContent = '';
+    const docPath = path.join(exam, docFile)
+    if (fs.existsSync(docPath)) {
+      const mdContent = fs.readFileSync(path.join(exam, docFile))
+      docContent = md.render(mdContent.toString().trim());
+    }
     return new HtmlWebpackPlugin({
       template: path.join(exam, p), // relative path to the HTML files
       filename: path.join('examples', folder, p), // output HTML files
       publicPath: '../../',
       scriptLoading: 'module',
+      docContent,
       chunks: [`${folder}`] // respective JS files
     })
   })

@@ -8,27 +8,27 @@
 <body>
 <style>
 
-.panel1{
-  width: 500px;
-  height: 300px;
-  display: block;
-  border: 1px solid red;
-}
-.resizer{
-  height: 100%;
-  background: red;
-  width: 8px;
-}
+    .panel1{
+        width: 500px;
+        height: 300px;
+        display: block;
+        border: 1px solid red;
+    }
+    .resizer{
+        height: 100%;
+        background: red;
+        width: 8px;
+    }
 
 </style>
 <div id="doc">
-  horizontal split panel example
+    <%= htmlWebpackPlugin.options.docContent %>
 </div>
 <div id="example">
-<ez-resize-panel dimension="width" style="--part-a-size: 30%" class="panel1" >
-  <div slot="A">aaa</div>
-  <div slot="B">bbb</div>
-</ez-resize-panel>
+    <ez-resize-panel dimension="width" style="--part-a-size: 30%" class="panel1" >
+        <div slot="A">aaa</div>
+        <div slot="B">bbb</div>
+    </ez-resize-panel>
 
 
 </div>

@@ -3,6 +3,8 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
+  position: relative;
+  display: block;
 }
 .resizer{
   position: relative;
@@ -49,7 +51,7 @@
 }
 slot{
   display: block;
-
+  position: relative;
   height: 100%;
   z-index: 0;
 }
@@ -64,6 +66,7 @@ slot[name=B]{
 slot[name=resizer]{
   display: block;
 }
+
 
 
 

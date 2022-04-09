@@ -15,6 +15,11 @@ type ROUTE_CONF =  {
   children?: {[key: string]: ROUTE}
   content: ROUTE_CONTENT,
 }
+type ROUTE_INFO = {
+  params?: {[key: string]: string|number}
+  query?: {[key: string]: string|number}
+  content: ROUTE_CONTENT,
+}
 type ROUTE = BASE_ROUTE & ROUTE_CONF;
 type ROUTE_CALLBACK = (args: any) => ROUTE_CONTENT;
 type ROUTE_CONTENT = string | HTMLElement | NodeListOf<ChildNode> | ROUTE_CALLBACK;
@@ -71,27 +76,38 @@ class EzHashRouter extends HTMLElement {
   has(path: string): boolean{
     return this.registeredRoute[path]
   }
-  when(path: string | ROUTE, content?: ROUTE_CONTENT | ROUTE_CALLBACK) {
+  when(path: string , content?: ROUTE_CONTENT | ROUTE_CALLBACK) {
     // let relPath = path
 
     let relPath = path;
-    let children = {};
-    let params = {};
-    if (!content && typeof path != 'string') {
-      content = (path as ROUTE).content;
-      children = (path as ROUTE).children;
-      params = (path as ROUTE).params;
-      relPath = (path as ROUTE).path as string
-      // if (relPath.startsWith('#')) {
-      //   relPath = relPath.substring(1);
-      // }
-    }
+    const children = {};
+    const params:{[key: string]: string} = {};
+    // if (!content && typeof path != 'string') {
+    //   content = (path as ROUTE).content;
+    //   children = (path as ROUTE).children;
+    //   params = (path as ROUTE).params;
+    //   relPath = (path as ROUTE).path as string
+    // }
+
+    const paramsGroups:{[key: string]: number} = {}; // { FirstName: 1, LastName: 2 };
+    const parts = (relPath as string).split('/')
+    relPath = parts.map((p,index) => {
+      if (p.startsWith(':')) {
+        const paramName = p.substring(1);
+        paramsGroups[paramName] = index + 1;
+        return '([\\w-]+)'
+      }
+      return p
+    }).join('/')
+
     // const {protocol, host, hash} = window.location;
     // const u = new URL(`${protocol}//${host}${relPath}`);
-    const u = this.currentURL(relPath as string)
+    // const u = this.currentURL(relPath as string)
 
-    this.registeredRoute[u.pathname] = {
-      path: u.pathname,
+    this.registeredRoute[relPath] = {
+      pathReg: new RegExp(relPath),
+      query: {},
+      paramsGroups,
       params,
       children,
       content
@@ -147,7 +163,41 @@ class EzHashRouter extends HTMLElement {
     if (!this.has('/404')) {
       this.when('/404', '404 content')
     }
-
+    const paramsObj: {[key: string]: string} = {};
+    const routePaths = Object.keys(this.registeredRoute);
+    for (let i = 0 ; i < routePaths.length; i++) {
+      const routePath= routePaths[i];
+      const r = this.registeredRoute[routePath]
+      const m = r.pathReg.exec(path);
+      if (m) {
+        let content = null;
+        if (m.length > 1) {
+          Object.keys(r.paramsGroups).forEach(k => {
+            paramsObj[k] = m[r.paramsGroups[k]]
+          });
+        }
+        if (r.content && typeof r.content == 'function') {
+          content = r.content({
+            params: paramsObj,
+            query: {},
+            path
+          });
+          let cacheViewNode = this.cacheFragmentContainer.getElementById(`cache_${oldPath}`)
+          if (!cacheViewNode) {
+            cacheViewNode = document.createElement('div')
+            cacheViewNode.id = `cache_${oldPath}`;
+            this.cacheFragmentContainer.appendChild(cacheViewNode);
+          }
+          cacheViewNode.append(...this.childNodes)
+          r.build = true
+          this.append(...content)
+        }
+        break
+      } else {
+        window.location.hash = '/404'
+      }
+    }
+    return
     const r = this.registeredRoute[path]
     if (r) {
       let content = r.content;
@@ -204,6 +254,7 @@ class EzHashRouter extends HTMLElement {
     window.addEventListener( 'hashchange', this._monitor);
     const path = this.getHashPath();
     if (path) {
+      // 多实例应该只发送一次
       const oldURL = new URL(window.location.href);
       oldURL.hash = '/'
       const changeEvent = new HashChangeEvent("hashchange", {oldURL: oldURL.href,  newURL: window.location.href})

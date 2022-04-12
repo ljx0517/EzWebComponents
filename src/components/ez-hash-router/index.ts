@@ -7,22 +7,23 @@ import linkStyle from "./link.module.less";
 const stylesheet = new CSSStyleSheet();
 const linkStylesheet = new CSSStyleSheet();
 type BASE_ROUTE = {
-  path: string;
+  // path: string;
+  pathReg: RegExp
   params?: {[key: string]: string|number}
 }
 type ROUTE_CONF =  {
   redirect?: BASE_ROUTE,
   children?: {[key: string]: ROUTE}
-  content: ROUTE_CONTENT,
-}
-type ROUTE_INFO = {
+  paramsGroups:{[key: string]: number}
   params?: {[key: string]: string|number}
   query?: {[key: string]: string|number}
   content: ROUTE_CONTENT,
+  build: boolean
 }
 type ROUTE = BASE_ROUTE & ROUTE_CONF;
 type ROUTE_CALLBACK = (args: any) => ROUTE_CONTENT;
 type ROUTE_CONTENT = string | HTMLElement | NodeListOf<ChildNode> | ROUTE_CALLBACK;
+
 
 class EzRouterLink extends HTMLElement{
   constructor() {
@@ -50,7 +51,7 @@ class EzRouterLink extends HTMLElement{
 }
 class EzHashRouter extends HTMLElement {
   historyStack:ROUTE[] = [];
-  registeredRoute: {[key: string]: any} = {};
+  registeredRoute: {[key: string]: ROUTE} = {};
   // indexRouter: ROUTE = {
   //   path: '/',
   //   content:null
@@ -61,6 +62,7 @@ class EzHashRouter extends HTMLElement {
   // }
   // private createdResolver: typeof Promise.resolve;
   private cacheFragmentContainer = document.createDocumentFragment()
+  private routerFallback: ROUTE_CONTENT | ROUTE_CALLBACK;
   constructor() {
     super();
     // element created
@@ -74,7 +76,10 @@ class EzHashRouter extends HTMLElement {
   }
   // api
   has(path: string): boolean{
-    return this.registeredRoute[path]
+    return Boolean(this.registeredRoute[path])
+  }
+  fallback(fallback?: ROUTE_CONTENT | ROUTE_CALLBACK) {
+    this.routerFallback = fallback
   }
   when(path: string , content?: ROUTE_CONTENT | ROUTE_CALLBACK) {
     // let relPath = path
@@ -110,7 +115,8 @@ class EzHashRouter extends HTMLElement {
       paramsGroups,
       params,
       children,
-      content
+      content,
+      build: false
     }
     return this;
   }
@@ -160,26 +166,27 @@ class EzHashRouter extends HTMLElement {
     // }
 
     // check 404 index
-    if (!this.has('/404')) {
-      this.when('/404', '404 content')
-    }
-    const paramsObj: {[key: string]: string} = {};
+    // if (!this.has('/404')) {
+    //   this.when('/404', '404 content')
+    // }
+    const params: {[key: string]: string} = {};
+    const query: {[key: string]: string} = {};
     const routePaths = Object.keys(this.registeredRoute);
     for (let i = 0 ; i < routePaths.length; i++) {
       const routePath= routePaths[i];
       const r = this.registeredRoute[routePath]
       const m = r.pathReg.exec(path);
       if (m) {
-        let content = null;
         if (m.length > 1) {
-          Object.keys(r.paramsGroups).forEach(k => {
-            paramsObj[k] = m[r.paramsGroups[k]]
+          Object.keys(r.params).forEach(k => {
+            params[k] = m[r.paramsGroups[k]]
           });
         }
+        let content = r.content
         if (r.content && typeof r.content == 'function') {
           content = r.content({
-            params: paramsObj,
-            query: {},
+            params,
+            query,
             path
           });
           let cacheViewNode = this.cacheFragmentContainer.getElementById(`cache_${oldPath}`)
@@ -190,41 +197,18 @@ class EzHashRouter extends HTMLElement {
           }
           cacheViewNode.append(...this.childNodes)
           r.build = true
-          this.append(...content)
         }
-        break
-      } else {
-        window.location.hash = '/404'
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        this.append(...content)
+        return
       }
     }
-    return
-    const r = this.registeredRoute[path]
-    if (r) {
-      let content = r.content;
-      if (r.content && typeof r.content == 'function') {
-        content = r.content({
-          ...r,
-          // params: Object.fromEntries(new URLSearchParams(newURL.search))
-          params: this.parseParams(newURL.searchParams)
-        });
-      }
+    // const content = this.getRouteViewContent ();
+    // this.append(...content)
+  }
+  getRouteViewContent(r, args: any) {
 
-
-      let cacheViewNode = this.cacheFragmentContainer.getElementById(`cache_${oldPath}`)
-      if (!cacheViewNode) {
-        cacheViewNode = document.createElement('div')
-        cacheViewNode.id = `cache_${oldPath}`;
-        this.cacheFragmentContainer.appendChild(cacheViewNode);
-      }
-      cacheViewNode.append(...this.childNodes)
-      this.append(...content)
-
-      // if (cacheViewNode.childNodes) {
-      //
-      // }
-    } else {
-      window.location.hash = '/404'
-    }
   }
   connectedCallback() {
     // browser calls this method when the element is added to the document

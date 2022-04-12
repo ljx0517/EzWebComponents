@@ -44,6 +44,9 @@
                 console.log(e)
                 return '/test/1/2'
             })
+            router.fallback(() => {
+              console.log('fallback do nothing')
+            })
         })
     </script>
 </div>

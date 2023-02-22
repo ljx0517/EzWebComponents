@@ -11,20 +11,20 @@
   z-index: 1;
   display: block;
 }
-:host([dimension="width"]) .resizer {
+:host([direction="lr"]) .resizer {
   width: var(--bar-width, 1px);
   width: 0;
   height: 100%;
   //padding: 0 8px;
   cursor: col-resize;
 }
-:host([dimension="width"]) .resizer-handle{
+:host([direction="lr"]) .resizer-handle{
   padding: 0 8px;
   height: 100%;
   position: absolute;
   left: -8px;
 }
-:host([dimension="height"]) .resizer {
+:host([direction="td"]) .resizer {
   height: var(--bar-width, 1px);
   height: 0;
   width: 100%;
@@ -32,7 +32,7 @@
   cursor: row-resize;
 
 }
-:host([dimension="height"]) .resizer-handle {
+:host([direction="td"]) .resizer-handle {
   padding: 8px 0;
   width: 100%;
   position: absolute;
@@ -46,7 +46,7 @@
   height: 100%;
   position: relative;
 }
-:host([dimension="height"]) .resize-panel {
+:host([direction="td"]) .resize-panel {
   flex-direction: column;
 }
 slot{
@@ -71,14 +71,14 @@ slot[name=resizer]{
 
 
 
-:host([dimension="width"]) .resizer-handle:after {
+:host([direction="lr"]) .resizer-handle:after {
   //top: 0;
   //left: 8px;
   height: 100%;
   width: var(--bar-width, 1px);
   //border-left: 1px solid red;
 }
-:host([dimension="height"]) .resizer-handle:after {
+:host([direction="td"]) .resizer-handle:after {
   //left: 0;
   //top: 8px;
   width: 100%;

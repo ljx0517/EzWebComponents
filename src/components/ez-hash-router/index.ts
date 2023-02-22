@@ -221,8 +221,10 @@ class EzHashRouter extends HTMLElement {
       stylesheet.replaceSync(style.toString());
     }
 
-
-    this.dispatchEvent(new CustomEvent('created', {bubbles: true,detail: this}));
+    console.log('created');
+    setTimeout(() => {
+      this.dispatchEvent(new CustomEvent('created', {bubbles: true,detail: this}));
+    });
     // this.createdResolver()
     // this.shadowRoot.innerHTML = `
     // <style>

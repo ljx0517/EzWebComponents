@@ -8,9 +8,13 @@ const stylesheet = new CSSStyleSheet();
 enum MOVE_LIMIT_PART {
   A, B
 }
-type DIMENSION =  'width'|'height'
+enum DIRECTION {
+  LR = 'lr',
+  TD = 'td'
+}
+// type DIMENSION =  'hori'|'vert'
 class EzResizePanel extends HTMLElement {
-  private dimension: DIMENSION;
+  private direction: DIRECTION;
   private resizer: HTMLElement;
   public container: HTMLElement;
   private dragRegion: DOMRect;
@@ -37,9 +41,8 @@ class EzResizePanel extends HTMLElement {
     shadow.innerHTML = `<div class="${style.resizePanel}">
       <slot name="A"></slot>
       <slot name="handle" class="resizer">
-  <div class="${style.resizerHandle}"></div>
+        <div class="${style.resizerHandle}"></div>
       </slot>
-     
       <slot name="B"></slot>
     </div>
     `.replace(/[\s\n]*\n[\s\n]*/g, '');
@@ -61,10 +64,8 @@ class EzResizePanel extends HTMLElement {
     //   this.clearSlot(s)
     // })
 
-
-    this.dimension = this.getAttribute('dimension') as DIMENSION
+    this.direction = this.getAttribute('direction').toLowerCase() as DIRECTION
     this.container = this.shadowRoot.querySelector(`.${style.resizePanel}`);
-
     this.slotA = this.shadowRoot.querySelector('[name=A]')
     this.slotB = this.shadowRoot.querySelector('[name=B]')
 
@@ -118,7 +119,7 @@ class EzResizePanel extends HTMLElement {
     x = Math.min(Math.max(this.move_boundary[0], x), this.move_boundary[1]);
     y = Math.min(Math.max(this.move_boundary[0], y), this.move_boundary[1]);
     let val = x;
-    if (this.dimension == 'height') {
+    if (this.direction == DIRECTION.TD) {
       val = y;
     }
 
@@ -140,15 +141,15 @@ class EzResizePanel extends HTMLElement {
 
 
     const slotA = this.slotA.assignedElements();
-    const childA = this.getDeepestLevelContainer(slotA[0] as HTMLElement, 'A', this.dimension); // slotA && (slotA[0].querySelector('ez-resize-panel') as EzResizePanel)
+    const childA = this.getDeepestLevelContainer(slotA[0] as HTMLElement, 'A', this.direction); // slotA && (slotA[0].querySelector('ez-resize-panel') as EzResizePanel)
     const slotB = this.slotB.assignedElements();
-    const childB = this.getDeepestLevelContainer(slotB[0] as HTMLElement, 'B', this.dimension); // slotB && (slotB[0].querySelector('ez-resize-panel') as EzResizePanel)
+    const childB = this.getDeepestLevelContainer(slotB[0] as HTMLElement, 'B', this.direction); // slotB && (slotB[0].querySelector('ez-resize-panel') as EzResizePanel)
 
     let min = 0 ;
     let max = this.dragRegion.width;
     let ASize = this.resizer.offsetLeft;
     let BaseSize = childB ? childB.getBoundingClientRect().width : 0;
-    if (this.dimension == 'height') {
+    if (this.direction == DIRECTION.TD) {
       max = this.dragRegion.height;
       ASize = this.resizer.offsetTop;
       BaseSize = childB ? childB.getBoundingClientRect().height : 0;
@@ -185,7 +186,6 @@ class EzResizePanel extends HTMLElement {
   }
   clearSlot(slot: HTMLSlotElement) {
     slot.addEventListener('slotchange', function(e) {
-      console.log(slot.assignedElements());
       slot.assignedElements().forEach((el, index) => {
         if (index > 0) {
 
@@ -195,7 +195,6 @@ class EzResizePanel extends HTMLElement {
     });
   }
   calcInitSize() {
-    console.log('calcInitSize', this.dragRegion)
     let s = this.style.getPropertyValue('--part-a-size')
     if (!s) {
       s = '50%';
@@ -203,7 +202,7 @@ class EzResizePanel extends HTMLElement {
     let size = parseInt(s, 10);
     if(s.includes('%')) {
       const p = parseInt(s.trim(), 10) / 100;
-      if (this.dimension == 'height') {
+      if (this.direction == DIRECTION.TD) {
         size = (this.dragRegion.height - this.resizer.offsetHeight) * p;
       } else {
         size = (this.dragRegion.width - this.resizer.offsetWidth) * p;
@@ -211,13 +210,13 @@ class EzResizePanel extends HTMLElement {
     }
     this.style.setProperty('--part-a-size', `${size}px`)
   }
-  getDeepestLevelContainer(slot: HTMLElement, part: 'A'|'B', dimension: DIMENSION) : EzResizePanel{
+  getDeepestLevelContainer(slot: HTMLElement, part: 'A'|'B', direction: DIRECTION) : EzResizePanel{
     // let deepest = slot; //  (slot.querySelector('ez-resize-panel') as EzResizePanel)
-    let deepest = (slot.querySelector(`ez-resize-panel[dimension=${dimension}]`) as EzResizePanel)
+    let deepest = (slot.querySelector(`ez-resize-panel[direction=${direction}]`) as EzResizePanel)
     while (deepest) {
       // const panel = (deepest.querySelector('ez-resize-panel') as EzResizePanel)
       const s = deepest.querySelector(`[slot=${part}]`) as HTMLSlotElement;
-      const p = (s.querySelector(`ez-resize-panel[dimension=${dimension}]`) as EzResizePanel);
+      const p = (s.querySelector(`ez-resize-panel[direction=${direction}]`) as EzResizePanel);
       if (p) {
         deepest = p;
       } else {

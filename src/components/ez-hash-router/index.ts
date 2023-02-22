@@ -207,9 +207,9 @@ class EzHashRouter extends HTMLElement {
     // const content = this.getRouteViewContent ();
     // this.append(...content)
   }
-  getRouteViewContent(r, args: any) {
-
-  }
+  // getRouteViewContent(r, args: any) {
+  //
+  // }
   connectedCallback() {
     // browser calls this method when the element is added to the document
     // (can be called many times if an element is repeatedly added/removed)

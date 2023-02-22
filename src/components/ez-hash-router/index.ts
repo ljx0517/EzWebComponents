@@ -220,8 +220,7 @@ class EzHashRouter extends HTMLElement {
       // @ts-ignore
       stylesheet.replaceSync(style.toString());
     }
-
-    console.log('created');
+  console.log('create')
     setTimeout(() => {
       this.dispatchEvent(new CustomEvent('created', {bubbles: true,detail: this}));
     });
@@ -247,6 +246,13 @@ class EzHashRouter extends HTMLElement {
       window.dispatchEvent(changeEvent)
     }
   }
+  // addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions) {
+  //   super.addEventListener(type, listener, options);
+  //   if (type == 'created') {
+  //     this.dispatchEvent(new CustomEvent('created', {bubbles: true,detail: this}));
+  //   }
+  // }
+
   getHashPath(hash?: string) {
     let path = window.location.hash;
     if (hash) {
